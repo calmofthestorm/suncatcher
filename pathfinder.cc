@@ -19,105 +19,66 @@ void Door::add_adjacent_component(int c) {
   }
 }
 
-std::pair<size_t, size_t> Door::get_pos() const {
+Coord Door::get_pos() const {
   return pos;
 }
 
-const char& Map::at(size_t row, size_t col) const {
-  return data[row][col];
-}
-
-char& Map::at(size_t row, size_t col) {
-  return data[row][col];
-}
-
-const char& Map::at(const std::pair<size_t, size_t>& cell) const {
-  return data[cell.first][cell.second];
-}
-
-char& Map::at(const std::pair<size_t, size_t>& cell) {
-  return data[cell.first][cell.second];
-}
-
 void Map::print_components(std::ostream& os) const {
-  for (size_t j = 0; j < size.first; ++j) {
-    for (size_t i = 0; i < size.second; ++i) {
-      if (at(j, i) == ' ') {
-        int c = component[j][i];
+  for (size_t j = 0; j < size.row; ++j) {
+    for (size_t i = 0; i < size.col; ++i) {
+      if (data.at(j, i) == ' ') {
+        int c = component.at(j, i);
         if (c == -2) {
           std::cout << ' ';
         } else if (c < 10) {
-          std::cout << component[j][i];
+          std::cout << component.at(j, i);
         } else {
           std::cout << (char)(c + 'A' - 10);
         }
       } else {
-        std::cout << at(j, i);
+        std::cout << data.at(j, i);
       }
     }
     std::cout << std::endl;
   }
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
 }
 
-std::vector<std::pair<size_t, size_t>> Map::get_adjacent(
-    const std::pair<size_t,
-    size_t>& cell
-  ) const {
-  static const std::vector<std::pair<size_t, size_t>> ADJ_DELTA{
-      {0, -1}, {0, 1}, {-1, 0}, {1, 0}
-    };
-
-  std::vector<std::pair<size_t, size_t>> neighbors;
-
-  for (const auto& delta : ADJ_DELTA) {
-    size_t n_row = delta.first + cell.first;
-    size_t n_col = delta.second + cell.second;
-    if (n_row < size.first && n_col < size.second) {
-      neighbors.push_back({n_row, n_col});
-    }
-  }
-
-  return neighbors;
+std::vector<Coord> Map::path(Coord src, Coord dst) {
 }
 
 Map::Map(std::istream& is) {
 
-  size.first = 0;
-  size.second = 0;
+  size.row = 0;
+  size.col = 0;
   std::string line;
 
   // Read in map.
   while (getline(is, line)) {
-    size.second = std::max(line.size(), size.second);
-    ++size.first;
-    data.push_back(std::vector<char>(line.begin(), line.end()));
+    size.col = std::max(line.size(), size.col);
+    ++size.row;
+    data.get_backing().push_back(std::vector<char>(line.begin(), line.end()));
   }
 
   // Make it a square if necessary.
-  for (auto& line : data) {
-    line.resize(size.first, '*');
+  for (auto& line : data.get_backing()) {
+    line.resize(size.col, '*');
   }
 
   // Create doors, validate map, and set up structures for flood fill.
-  component.resize(size.first, std::vector<int>(size.second, -2));
-  for (size_t j = 0;j < size.first; ++j) {
-    for (size_t i = 0; i < size.second; ++i) {
-      switch (at(j, i)) {
+  component.get_backing().resize(size.row, std::vector<int>(size.col, -2));
+  for (size_t j = 0;j < size.row; ++j) {
+    for (size_t i = 0; i < size.col; ++i) {
+      switch (data.at(j, i)) {
         case 'd':
           doors.push_back(Door(j, i));
-          at(j, i) = '_';
+          data.at(j, i) = '_';
           break;
 
         case ' ':
           break;
 
         case '*':
-          component[j][i] = -1;
+          component.at(j, i) = -1;
           break;
 
         default:
@@ -129,26 +90,23 @@ Map::Map(std::istream& is) {
   // Identify connected components, stopping at walls and doors.
   size_t restart_row = 0;
   int index = 0;
-  while (restart_row < size.first) {
+  while (restart_row < size.row) {
     size_t restart_col = 0;
-    while (restart_col < size.second) {
-      if (restart_row == 69 && restart_col == 64) {
-        std::cout << "here" << std::endl;
-      }
-      if (component[restart_row][restart_col] == -2 && at(restart_row, restart_col) == ' ') {
+    while (restart_col < size.col) {
+      if (component.at(restart_row, restart_col) == -2 && data.at(restart_row, restart_col) == ' ') {
         // Flood fill component.
-        std::stack<std::pair<size_t, size_t>> todo;
+        std::stack<Coord> todo;
         todo.push({restart_row, restart_col});
-        component[restart_row][restart_col] = index++;
+        component.at(restart_row, restart_col) = index++;
 
         while (!todo.empty()) {
           auto cur = todo.top();
           todo.pop();
           // Explore neighbors.
-          for (const auto& n : get_adjacent(cur)) {
-            if (at(n) == ' ' && component[n.first][n.second] == -2) {
+          for (const auto& n : data.get_adjacent(cur)) {
+            if (data.at(n) == ' ' && component.at(n.row, n.col) == -2) {
               todo.push(n);
-              component[n.first][n.second] = component[cur.first][cur.second];
+              component.at(n.row, n.col) = component.at(cur.row, cur.col);
             }
           }
         }
@@ -160,9 +118,9 @@ Map::Map(std::istream& is) {
 
   // Identify all adjacent components for doors.
   for (Door& door : doors) {
-    for (const auto& n : get_adjacent(door.get_pos())) {
-      if (component[n.first][n.second] >= 0) {
-        door.add_adjacent_component(component[n.first][n.second]);
+    for (const auto& n : data.get_adjacent(door.get_pos())) {
+      if (component.at(n.row, n.col) >= 0) {
+        door.add_adjacent_component(component.at(n.row, n.col));
       }
     }
   }
