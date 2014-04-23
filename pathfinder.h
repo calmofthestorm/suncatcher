@@ -30,6 +30,7 @@ class Door {
     void toggle_open();
     Coord get_pos() const;
     void add_adjacent_component(int c);
+    const std::vector<int>& get_adjacent_components() const;
 
   private:
     Coord pos;
@@ -95,12 +96,18 @@ class Map {
   public:
     Map(std::istream& infile);
     void print_components(std::ostream& os) const;
+    void print_equivalence_classes(std::ostream& os) const;
+    void print_map(std::ostream& os) const;
     std::vector<Coord> path(Coord src, Coord dst);
 
+    void update_equivalence(const Coord& pos, bool new_state);
+
   private:
+    size_t find_door(const Coord& c) const;
 
     Grid<char> data;
     Grid<int> component;
+    std::vector<int> equivalent_components;
     std::vector<Door> doors;
     Coord size;
 };
