@@ -1,8 +1,9 @@
 #ifndef PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a
 #define PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a
 
-// Pathfinder abstraction of the map. Supports pathfinding, efficient updates,
-// and speculative pathing/updates.
+// Pathfinder abstraction of the map. The Map class maintains a simplified
+// abstraction of the map, intended to support efficient pathfinding,
+// reachability, and updates in a dynamic world.
 
 #include <iostream>
 #include <map>
@@ -12,13 +13,6 @@
 
 namespace suncatcher {
 namespace pathfinder {
-
-// Not necessarily a door; represents any point that is expected to change
-// between passable and impassible during normal play.
-struct Door {
-  bool open;
-  std::vector<int> adjacent_components;
-};
 
 class Map {
   public:
@@ -36,7 +30,12 @@ class Map {
     const pathfinder::Coord& get_size() const { return size; }
 
   // private:
-    size_t find_door(const pathfinder::Coord& c) const;
+    // Not necessarily a door; represents any point that is expected to change
+    // between passable and impassible during normal play.
+    struct Door {
+      bool open;
+      std::vector<int> adjacent_components;
+    };
 
     suncatcher::util::Grid<char> data;
     suncatcher::util::Grid<int> component;
