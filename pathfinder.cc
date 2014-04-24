@@ -1,12 +1,45 @@
 #include "pathfinder.h"
+#include "micropather.h"
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
+#include <cmath>
 #include <fstream>
 #include <iostream>
+#include <queue>
 #include <stack>
 #include <string>
 #include <tuple>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+int timer() {
+  static auto begin = std::chrono::high_resolution_clock::now();
+  auto tmp = std::chrono::high_resolution_clock::now();
+  int rval = std::chrono::duration_cast<std::chrono::microseconds>(tmp - begin).count();
+  begin = tmp;
+  return rval;
+}
+
+using namespace micropather;
+
+namespace {
+
+int find_representative(const std::vector<int>& parents, int elem) {
+  while (elem != parents[elem]) {
+    elem = parents[elem];
+  }
+  return elem;
+}
+
+double manhattan(const Coord& a, const Coord& b) {
+  return std::abs((double)a.row - (double)b.row) + std::abs((double)a.col - (double)b.col);
+  // return pow(pow(std::abs((double)a.row - (double)b.row), 2) + pow(std::abs((double)a.col - (double)b.col), 2), 0.5);
+}
+
+}  // anonymous namespace
+
 
 Door::Door(size_t row, size_t col)
 : pos({row, col}),
@@ -63,17 +96,6 @@ void Map::print_map(std::ostream& os) const {
   }
 }
 
-namespace {
-
-int find_representative(const std::vector<int>& parents, int elem) {
-  while (elem != parents[elem]) {
-    elem = parents[elem];
-  }
-  return elem;
-}
-
-}  // anonymous namespace
-
 // TODO: evaluate if an incremental data struture (eg union find) does
 // better than eager transitive closure in practice.
 // TODO: evaluate if we can do this more efficiently.
@@ -99,7 +121,7 @@ void Map::update_equivalence(const Coord& pos, bool new_state) {
   }
 
   // Transitive closure
-  //TODO: faster
+  //TODO: faster; path compression
   for (size_t i = 0; i < equivalent_components.size(); ++i) {
     equivalent_components[i] = find_representative(equivalent_components, i);
   }
@@ -144,13 +166,97 @@ void Map::print_equivalence_classes(std::ostream& os) const {
 }
 
 std::vector<Coord> Map::path(Coord src, Coord dst) {
-  std::vector<Coord> rval;
-
-  if (src == dst || 
-      (equivalent_components[component.at(src)] !=
-       equivalent_components[component.at(dst)])) {
-    return rval;
+  Grid<int> expanded(size.row, size.col, 0);
+  Grid<Coord> previous(size.row, size.col, {(size_t)-1, (size_t)-1});
+  Grid<double> fuzz(size.row, size.col, 0);
+  int fu = 1;
+  for (auto& row : fuzz.get_backing()) {
+    for (auto& col : row) {
+      col += fu++ * 0.00001;
+    }
   }
+  size_t num_expanded = 0;
+
+  // A path exists iff they are in the same equivalence class.
+  if (equivalent_components[component.at(src)] !=
+      equivalent_components[component.at(dst)]) {
+    return std::vector<Coord>();
+  }
+
+  if (src == dst) {
+    return std::vector<Coord>{src};
+  }
+
+  Grid<double> distance(size.row, size.col, INFINITY);
+  distance.at(src) = 0;
+
+  struct Entry {
+    Coord pos;
+    double cost;
+
+    // Make pqueue work in proper order.
+    bool operator< (const Entry& e) const {
+      return cost > e.cost;
+    }
+  };
+  std::priority_queue<Entry> fringe;
+  fringe.push({src, 0});
+  fringe.push({src, 5});
+  assert(fringe.top().cost == 0);
+  fringe.pop();
+  fringe.pop();
+  fringe.push({src, manhattan(src, dst)});
+
+  while (!fringe.empty()) {
+    Entry cur = fringe.top();
+    fringe.pop();
+    expanded.at(cur.pos) = 1;
+    ++num_expanded;
+
+    if (cur.pos == dst) {
+      // size_t j = 0;
+      // for (const auto& row : expanded.get_backing()) {
+      //   size_t i = 0;
+      //   for (const auto& col : row) {
+      //     if (col == 1) {
+      //       std::cout << '.';
+      //       // std::cout << ' ' << distance.at(j, i) + manhattan(dst, {j, i})<< ' ';
+      //     } else {
+      //       std::cout << data.at(j, i);
+      //     }
+      //     ++i;
+      //   }
+      //   ++j;
+      //   std::cout << std::endl;
+      // }
+      // std::cout << num_expanded << std::endl;
+      // std::cout << std::endl;
+      // std::cout << std::endl;
+      // std::cout << std::endl;
+      // std::cout << std::endl;
+      // TODO: assumes all traversal costs are 1.
+      std::vector<Coord> rval(distance.at(dst) + 1);
+      auto cur = dst;
+      return rval;
+    }
+
+    for (const auto& next : data.get_adjacent(cur.pos)) {
+      // if (distance.at(next) > 1 + distance.at(cur.pos) && (
+      double my_dist = distance.at(cur.pos) + 1;
+      if (cur.pos.row != next.row && cur.pos.col != next.col) {
+        my_dist += 0.414;
+      }
+      if (distance.at(next) > 1 + distance.at(cur.pos) &&
+          !expanded.at(next) && (
+            data.at(next) == ' ' ||
+            data.at(next) == '_')) {
+        distance.at(next) = 1 + distance.at(cur.pos);
+        fringe.push({next, manhattan(next, dst) + distance.at(next) * 0.999});
+        previous.at(next) = cur.pos;
+      }
+    }
+  }
+  assert(0);
 }
 
 Map::Map(std::istream& is) {
@@ -236,96 +342,156 @@ Map::Map(std::istream& is) {
   equivalent_components.resize(index, 0);
 
   std::cout << "Map loaded with " << index << " components!" << std::endl;
-  while (1) {
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    print_components(std::cout);
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    print_equivalence_classes(std::cout);
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    print_map(std::cout);
-
-    char bees;
-    std::cin >> bees;
-    if (bees >= '0' && bees <= '9') {
-      Door& d = doors[bees - '0'];
-      bool state = !d.get_open();
-      d.set_open(state);
-      data.at(d.get_pos()) = state ? '_' : 'd';
-
-      update_equivalence(d.get_pos(), state);
-    }
-  }
 }
 
+class MPMap : public Graph, Map {
+  public:
+    MPMap(std::istream& is)
+    : Map(is) { }
+
+    virtual float LeastCostEstimate( void* stateStart, void* stateEnd ) const {
+      return manhattan(decode(stateStart), decode(stateEnd));
+    }
+
+    virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent ) const {
+      auto cur = decode(state);
+      for (const auto& n : data.get_adjacent(cur)) {
+        float cost = (n.row == cur.row || n.col == cur.col) ? 1 : 1.414;
+        if (data.at(n) != '*') {
+          adjacent->push_back({encode(n), cost});
+        }
+      }
+    }
+
+    virtual void PrintStateInfo( void* state ) const { }
+
+    void* encode(const Coord& c) const {
+      uintptr_t encoded = (c.row * get_size().row + c.col);
+      return (void*)encoded;
+    }
+
+    Coord decode(void* c) const {
+      uintptr_t encoded = (uintptr_t)c;
+      size_t width = get_size().row;
+      return {encoded / width, encoded % width};
+    }
+};
+
 int main(int argc, char** argv) {
-  std::ifstream is("map.txt");
-  Map my_map(is);
+  assert(argc == 4);
+  std::ifstream is(argv[1]);
+  MPMap my_map(is);
+  Map* ma = (Map*)(&my_map);
+
+  std::unique_ptr<MicroPather> mp(new MicroPather(&my_map, 4000000, 8, false));
+  while (1) {
+    MP_VECTOR<void*> pa;
+    float co = 23;
+    std::cout << "starting" << std::endl;
+    Coord start{1, 1};
+    Coord finish{atoi(argv[2]), atoi(argv[3])};
+
+    ma->path(start, finish);
+    mp->Solve((void*)(uintptr_t)(start.row * ma->get_size().row + start.col), (void*)(uintptr_t)(finish.row * ma->get_size().row + finish.col), &pa, &co);
+    mp->Reset();
+
+    timer();
+    ma->path(start, finish);
+    std::cout << timer() << std::endl;
+    mp->Solve((void*)(uintptr_t)(start.row * ma->get_size().row + start.col), (void*)(uintptr_t)(finish.row * ma->get_size().row + finish.col), &pa, &co);
+    std::cout << timer() << std::endl;
+
+    // for (const auto& it : pa) {
+    //   cout << '(' << ((it / size.row)) << ", " << ((it % size.row)) << ')' << std::endl;
+    // }
+
+    return 0;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    // print_components(std::cout);
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    // print_equivalence_classes(std::cout);
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    // print_map(std::cout);
+
+    // char bees;
+    // std::cin >> bees;
+    // if (bees >= '0' && bees <= '9') {
+    //   Door& d = doors[bees - '0'];
+    //   bool state = !d.get_open();
+    //   d.set_open(state);
+    //   data.at(d.get_pos()) = state ? '_' : 'd';
+    //
+    //   update_equivalence(d.get_pos(), state);
+    // }
+  }
+
+
   return 0;
 }

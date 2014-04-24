@@ -43,6 +43,11 @@ class Grid {
   public:
     Grid() { }
 
+    Grid(size_t r, size_t c, const T& val) {
+      backing.clear();
+      backing.resize(r, std::vector<T>(c, val));
+    }
+
     Grid(std::vector<std::vector<T>>&& backing_in)
     : backing(backing_in) { }
 
@@ -73,7 +78,8 @@ class Grid {
     std::vector<Coord> get_adjacent(const Coord& cell) const {
 
       static const std::vector<Coord> ADJ_DELTA{
-        {0, (size_t)-1}, {0, 1}, {(size_t)-1, 0}, {1, 0}
+        {0, (size_t)-1}, {0, 1}, {(size_t)-1, 0}, {1, 0},
+        {(size_t)-1, (size_t)-1}, {1, 1}, {(size_t)-1, 1}, {1, (size_t)-1},
       };
 
       std::vector<Coord> neighbors;
@@ -102,7 +108,9 @@ class Map {
 
     void update_equivalence(const Coord& pos, bool new_state);
 
-  private:
+    const Coord& get_size() const { return size; }
+
+  protected:
     size_t find_door(const Coord& c) const;
 
     Grid<char> data;
