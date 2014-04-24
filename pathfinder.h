@@ -2,7 +2,7 @@
 #include <vector>
 
 struct Coord {
-  size_t row, col;
+  uint16_t row, col;
 
   bool operator!= (const Coord& other) const {
     return row != other.row || col != other.col;
@@ -27,7 +27,7 @@ std::ostream& operator<< (std::ostream& os, const Coord& c) {
 
 class Door {
   public:
-    Door(size_t row, size_t col);
+    Door(uint16_t row, uint16_t col);
 
     bool get_open() const;
     void set_open(bool state);
@@ -47,7 +47,7 @@ class Grid {
   public:
     Grid() { }
 
-    Grid(size_t r, size_t c, const T& val) {
+    Grid(uint16_t r, uint16_t c, const T& val) {
       backing.clear();
       backing.resize(r, std::vector<T>(c, val));
     }
@@ -71,19 +71,20 @@ class Grid {
       return backing[cell.row][cell.col];
     }
 
-    const T& at(size_t row, size_t col) const {
+    const T& at(uint16_t row, uint16_t col) const {
       return backing[row][col];
     }
 
-    T& at(size_t row, size_t col) {
+    T& at(uint16_t row, uint16_t col) {
       return backing[row][col];
     }
 
     std::vector<Coord> get_adjacent(const Coord& cell) const {
 
       static const std::vector<Coord> ADJ_DELTA{
-        {0, (size_t)-1}, {0, 1}, {(size_t)-1, 0}, {1, 0},
-        {(size_t)-1, (size_t)-1}, {1, 1}, {(size_t)-1, 1}, {1, (size_t)-1},
+        {0, (uint16_t)-1}, {0, 1}, {(uint16_t)-1, 0}, {1, 0},
+        {(uint16_t)-1, (uint16_t)-1}, {1, 1},
+        {(uint16_t)-1, 1}, {1, (uint16_t)-1},
       };
 
       std::vector<Coord> neighbors;

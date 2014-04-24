@@ -33,15 +33,15 @@ int find_representative(const std::vector<int>& parents, int elem) {
   return elem;
 }
 
-double manhattan(const Coord& a, const Coord& b) {
-  // return std::abs((double)a.row - (double)b.row) + std::abs((double)a.col - (double)b.col);
-  return pow(pow(std::abs((double)a.row - (double)b.row), 2) + pow(std::abs((double)a.col - (double)b.col), 2), 0.5);
+float manhattan(const Coord& a, const Coord& b) {
+  // return std::abs((float)a.row - (float)b.row) + std::abs((float)a.col - (float)b.col);
+  return pow(pow(std::abs((float)a.row - (float)b.row), 2) + pow(std::abs((float)a.col - (float)b.col), 2), 0.5);
 }
 
 }  // anonymous namespace
 
 
-Door::Door(size_t row, size_t col)
+Door::Door(uint16_t row, uint16_t col)
 : pos({row, col}),
   open(true) { }
 
@@ -78,8 +78,8 @@ size_t Map::find_door(const Coord& c) const {
 }
 
 void Map::print_map(std::ostream& os) const {
-  for (size_t j = 0; j < size.row; ++j) {
-    for (size_t i = 0; i < size.col; ++i) {
+  for (uint16_t j = 0; j < size.row; ++j) {
+    for (uint16_t i = 0; i < size.col; ++i) {
       char cell = data.at(j, i);
       if (cell == 'd' || cell == '_') {
         auto d = doors.begin() + find_door({j, i});
@@ -128,8 +128,8 @@ void Map::update_equivalence(const Coord& pos, bool new_state) {
 }
 
 void Map::print_components(std::ostream& os) const {
-  for (size_t j = 0; j < size.row; ++j) {
-    for (size_t i = 0; i < size.col; ++i) {
+  for (uint16_t j = 0; j < size.row; ++j) {
+    for (uint16_t i = 0; i < size.col; ++i) {
       if (data.at(j, i) == ' ') {
         int c = component.at(j, i);
         if (c == -2) {
@@ -146,8 +146,8 @@ void Map::print_components(std::ostream& os) const {
 }
 
 void Map::print_equivalence_classes(std::ostream& os) const {
-  for (size_t j = 0; j < size.row; ++j) {
-    for (size_t i = 0; i < size.col; ++i) {
+  for (uint16_t j = 0; j < size.row; ++j) {
+    for (uint16_t i = 0; i < size.col; ++i) {
       if (data.at(j, i) == ' ') {
         int c = equivalent_components.at(component.at(j, i));
         if (c == -2) {
@@ -167,7 +167,7 @@ void Map::print_equivalence_classes(std::ostream& os) const {
 
 std::vector<Coord> Map::path(Coord src, Coord dst) {
   Grid<int> expanded(size.row, size.col, 0);
-  Grid<Coord> previous(size.row, size.col, {(size_t)-1, (size_t)-1});
+  Grid<Coord> previous(size.row, size.col, {(uint16_t)-1, (uint16_t)-1});
   size_t num_expanded = 0;
 
   // A path exists iff they are in the same equivalence class.
@@ -180,12 +180,12 @@ std::vector<Coord> Map::path(Coord src, Coord dst) {
     return std::vector<Coord>{src};
   }
 
-  Grid<double> distance(size.row, size.col, INFINITY);
+  Grid<float> distance(size.row, size.col, INFINITY);
   distance.at(src) = 0;
 
   struct Entry {
     Coord pos;
-    double cost;
+    float cost;
 
     // Make pqueue work in proper order.
     bool operator< (const Entry& e) const {
@@ -235,7 +235,7 @@ std::vector<Coord> Map::path(Coord src, Coord dst) {
 
     for (const auto& next : data.get_adjacent(cur.pos)) {
       // if (distance.at(next) > 1 + distance.at(cur.pos) && (
-      double my_dist = distance.at(cur.pos) + 1;
+      float my_dist = distance.at(cur.pos) + 1;
       if (cur.pos.row != next.row && cur.pos.col != next.col) {
         my_dist += 0.4142135623730951;
       }
@@ -259,7 +259,7 @@ Map::Map(std::istream& is) {
 
   // Read in map.
   while (getline(is, line)) {
-    size.col = std::max(line.size(), size.col);
+    size.col = std::max((uint16_t)line.size(), (uint16_t)size.col);
     ++size.row;
     data.get_backing().push_back(std::vector<char>(line.begin(), line.end()));
   }
@@ -271,8 +271,8 @@ Map::Map(std::istream& is) {
 
   // Create doors, validate map, and set up structures for flood fill.
   component.get_backing().resize(size.row, std::vector<int>(size.col, -2));
-  for (size_t j = 0;j < size.row; ++j) {
-    for (size_t i = 0; i < size.col; ++i) {
+  for (uint16_t j = 0;j < size.row; ++j) {
+    for (uint16_t i = 0; i < size.col; ++i) {
       switch (data.at(j, i)) {
         case 'd':
           doors.push_back(Door(j, i));
@@ -293,10 +293,10 @@ Map::Map(std::istream& is) {
   }
 
   // Identify connected components, stopping at walls and doors.
-  size_t restart_row = 0;
+  uint16_t restart_row = 0;
   int index = 0;
   while (restart_row < size.row) {
-    size_t restart_col = 0;
+    uint16_t restart_col = 0;
     while (restart_col < size.col) {
       if (component.at(restart_row, restart_col) == -2 && data.at(restart_row, restart_col) == ' ') {
         // Flood fill component.
@@ -365,13 +365,14 @@ class MPMap : public Graph, Map {
 
     Coord decode(void* c) const {
       uintptr_t encoded = (uintptr_t)c;
-      size_t width = get_size().col;
-      return {encoded / width, encoded % width};
+      uintptr_t width = get_size().col;
+      return {(uint16_t)(encoded / width),
+              (uint16_t)(encoded % width)};
     }
 };
 
 int main(int argc, char** argv) {
-  std::cout << (sizeof(double) + 2 * sizeof(size_t)) << std::endl;
+  std::cout << sizeof(Coord) << std::endl;
   assert(argc == 4);
   std::ifstream is(argv[1]);
   MPMap my_map(is);
@@ -383,7 +384,7 @@ int main(int argc, char** argv) {
     float co = 23;
     std::cout << "starting" << std::endl;
     Coord start{1, 1};
-    Coord finish{(size_t)atoi(argv[2]), (size_t)atoll(argv[3])};
+    Coord finish{(uint16_t)atoi(argv[2]), (uint16_t)atoll(argv[3])};
 
     ma->path(start, finish);
     mp->Solve(my_map.encode(start), my_map.encode(finish), &pa, &co);
