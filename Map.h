@@ -1,6 +1,9 @@
 #ifndef PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a
 #define PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a
 
+// Pathfinder abstraction of the map. Supports pathfinding, efficient updates,
+// and speculative pathing/updates.
+
 #include <iostream>
 #include <map>
 #include <vector>
@@ -17,8 +20,6 @@ struct Door {
   std::vector<int> adjacent_components;
 };
 
-// Pathfinder abstraction of the map. Supports pathfinding, efficient updates,
-// and speculative pathing/updates.
 class Map {
   public:
     explicit Map(std::istream& infile);

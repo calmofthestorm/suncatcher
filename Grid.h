@@ -43,7 +43,7 @@ class Grid {
 
 #include "Grid.tcc"
 
-}  // namespace  util
+}  // namespace util
 }  // namespace suncatcher
 
 #endif  /* GRID_d99e6d99bd454e83ab91ad5a87f993dc */
