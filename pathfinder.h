@@ -4,6 +4,10 @@
 struct Coord {
   size_t row, col;
 
+  bool operator!= (const Coord& other) const {
+    return row != other.row || col != other.col;
+  }
+
   bool operator== (const Coord& other) const {
     return row == other.row && col == other.col;
   }

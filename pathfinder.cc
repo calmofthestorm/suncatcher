@@ -34,8 +34,8 @@ int find_representative(const std::vector<int>& parents, int elem) {
 }
 
 double manhattan(const Coord& a, const Coord& b) {
-  return std::abs((double)a.row - (double)b.row) + std::abs((double)a.col - (double)b.col);
-  // return pow(pow(std::abs((double)a.row - (double)b.row), 2) + pow(std::abs((double)a.col - (double)b.col), 2), 0.5);
+  // return std::abs((double)a.row - (double)b.row) + std::abs((double)a.col - (double)b.col);
+  return pow(pow(std::abs((double)a.row - (double)b.row), 2) + pow(std::abs((double)a.col - (double)b.col), 2), 0.5);
 }
 
 }  // anonymous namespace
@@ -168,13 +168,6 @@ void Map::print_equivalence_classes(std::ostream& os) const {
 std::vector<Coord> Map::path(Coord src, Coord dst) {
   Grid<int> expanded(size.row, size.col, 0);
   Grid<Coord> previous(size.row, size.col, {(size_t)-1, (size_t)-1});
-  Grid<double> fuzz(size.row, size.col, 0);
-  int fu = 1;
-  for (auto& row : fuzz.get_backing()) {
-    for (auto& col : row) {
-      col += fu++ * 0.00001;
-    }
-  }
   size_t num_expanded = 0;
 
   // A path exists iff they are in the same equivalence class.
@@ -200,11 +193,6 @@ std::vector<Coord> Map::path(Coord src, Coord dst) {
     }
   };
   std::priority_queue<Entry> fringe;
-  fringe.push({src, 0});
-  fringe.push({src, 5});
-  assert(fringe.top().cost == 0);
-  fringe.pop();
-  fringe.pop();
   fringe.push({src, manhattan(src, dst)});
 
   while (!fringe.empty()) {
@@ -234,9 +222,14 @@ std::vector<Coord> Map::path(Coord src, Coord dst) {
       // std::cout << std::endl;
       // std::cout << std::endl;
       // std::cout << std::endl;
-      // TODO: assumes all traversal costs are 1.
-      std::vector<Coord> rval(distance.at(dst) + 1);
+      // TODO: unnecessary copy
+      std::vector<Coord> rval{dst};
+      rval.reserve((distance.at(dst) + 1));
+      while (rval.back() != src) {
+        rval.push_back(previous.at(rval.back()));
+      }
       auto cur = dst;
+      std::cout << "dist is " << distance.at(dst) << std::endl;
       return rval;
     }
 
@@ -244,14 +237,14 @@ std::vector<Coord> Map::path(Coord src, Coord dst) {
       // if (distance.at(next) > 1 + distance.at(cur.pos) && (
       double my_dist = distance.at(cur.pos) + 1;
       if (cur.pos.row != next.row && cur.pos.col != next.col) {
-        my_dist += 0.414;
+        my_dist += 0.4142135623730951;
       }
-      if (distance.at(next) > 1 + distance.at(cur.pos) &&
+      if (distance.at(next) > my_dist &&
           !expanded.at(next) && (
             data.at(next) == ' ' ||
             data.at(next) == '_')) {
-        distance.at(next) = 1 + distance.at(cur.pos);
-        fringe.push({next, manhattan(next, dst) + distance.at(next) * 0.999});
+        distance.at(next) = my_dist;
+        fringe.push({next, manhattan(next, dst) + my_dist});
         previous.at(next) = cur.pos;
       }
     }
@@ -356,7 +349,7 @@ class MPMap : public Graph, Map {
     virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent ) const {
       auto cur = decode(state);
       for (const auto& n : data.get_adjacent(cur)) {
-        float cost = (n.row == cur.row || n.col == cur.col) ? 1 : 1.414;
+        float cost = (n.row == cur.row || n.col == cur.col) ? 1 : 1.4142135623730951;
         if (data.at(n) != '*') {
           adjacent->push_back({encode(n), cost});
         }
@@ -366,18 +359,19 @@ class MPMap : public Graph, Map {
     virtual void PrintStateInfo( void* state ) const { }
 
     void* encode(const Coord& c) const {
-      uintptr_t encoded = (c.row * get_size().row + c.col);
+      uintptr_t encoded = (c.row * get_size().col + c.col);
       return (void*)encoded;
     }
 
     Coord decode(void* c) const {
       uintptr_t encoded = (uintptr_t)c;
-      size_t width = get_size().row;
+      size_t width = get_size().col;
       return {encoded / width, encoded % width};
     }
 };
 
 int main(int argc, char** argv) {
+  std::cout << (sizeof(double) + 2 * sizeof(size_t)) << std::endl;
   assert(argc == 4);
   std::ifstream is(argv[1]);
   MPMap my_map(is);
@@ -389,22 +383,29 @@ int main(int argc, char** argv) {
     float co = 23;
     std::cout << "starting" << std::endl;
     Coord start{1, 1};
-    Coord finish{atoi(argv[2]), atoi(argv[3])};
+    Coord finish{(size_t)atoi(argv[2]), (size_t)atoll(argv[3])};
 
     ma->path(start, finish);
-    mp->Solve((void*)(uintptr_t)(start.row * ma->get_size().row + start.col), (void*)(uintptr_t)(finish.row * ma->get_size().row + finish.col), &pa, &co);
+    mp->Solve(my_map.encode(start), my_map.encode(finish), &pa, &co);
     mp->Reset();
 
     timer();
-    ma->path(start, finish);
+    auto my_path = ma->path(start, finish);
     std::cout << timer() << std::endl;
-    mp->Solve((void*)(uintptr_t)(start.row * ma->get_size().row + start.col), (void*)(uintptr_t)(finish.row * ma->get_size().row + finish.col), &pa, &co);
+    mp->Solve(my_map.encode(start), my_map.encode(finish), &pa, &co);
     std::cout << timer() << std::endl;
+    std::cout << "Distance is " << co << std::endl;
 
-    // for (const auto& it : pa) {
-    //   cout << '(' << ((it / size.row)) << ", " << ((it % size.row)) << ')' << std::endl;
+    // std::cout << "*** me" << std::endl;
+    // for (const auto& it : my_path) {
+    //   std::cout << it << std::endl;
     // }
-
+    //
+    // std::cout << "*** MP" << std::endl;
+    // for (size_t i = 0; i < pa.size(); ++i) {
+    //   std::cout << my_map.decode(pa[i]) << std::endl;
+    // }
+    //
     return 0;
     std::cout << std::endl;
     std::cout << std::endl;
