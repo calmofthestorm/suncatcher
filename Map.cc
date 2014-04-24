@@ -1,5 +1,4 @@
-#include "pathfinder.h"
-#include "micropather.h"
+#include "Map.h"
 
 #include <algorithm>
 #include <cassert>
@@ -14,79 +13,28 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-int timer() {
-  static auto begin = std::chrono::high_resolution_clock::now();
-  auto tmp = std::chrono::high_resolution_clock::now();
-  int rval = std::chrono::duration_cast<std::chrono::microseconds>(tmp - begin).count();
-  begin = tmp;
-  return rval;
-}
+#include "micropather/micropather.h"
 
-using namespace micropather;
+#include "util.h"
 
-namespace {
+namespace suncatcher {
+namespace pathfinder {
 
-int find_representative(const std::vector<int>& parents, int elem) {
-  while (elem != parents[elem]) {
-    elem = parents[elem];
-  }
-  return elem;
-}
-
-float manhattan(const Coord& a, const Coord& b) {
-  // return std::abs((float)a.row - (float)b.row) + std::abs((float)a.col - (float)b.col);
-  return pow(pow(std::abs((float)a.row - (float)b.row), 2) + pow(std::abs((float)a.col - (float)b.col), 2), 0.5);
-}
-
-}  // anonymous namespace
-
-
-Door::Door(uint16_t row, uint16_t col)
-: pos({row, col}),
-  open(true) { }
-
-const std::vector<int>& Door::get_adjacent_components() const {
-  return adjacent_components;
-}
-
-void Door::add_adjacent_component(int c) {
-  if (std::find(adjacent_components.begin(), adjacent_components.end(), c) == 
-      adjacent_components.end()) {
-    adjacent_components.push_back(c);
-  }
-}
-
-Coord Door::get_pos() const {
-  return pos;
-}
-
-void Door::set_open(bool state) {
-  open = state;
-}
-
-bool Door::get_open() const {
-  return open;
-}
-
-size_t Map::find_door(const Coord& c) const {
-  auto it = std::find_if(
-      doors.begin(),
-      doors.end(),
-      [c] (const Door& d) { return d.get_pos() == c; }
-    );
-  return it == doors.end() ? -1 : it - doors.begin();
-}
+using suncatcher::util::Grid;
+using suncatcher::util::find_representative;
+using suncatcher::util::manhattan;
 
 void Map::print_map(std::ostream& os) const {
+  size_t index = 0;
   for (uint16_t j = 0; j < size.row; ++j) {
     for (uint16_t i = 0; i < size.col; ++i) {
       char cell = data.at(j, i);
       if (cell == 'd' || cell == '_') {
-        auto d = doors.begin() + find_door({j, i});
-        if (d->get_open()) {
-          std::cout << (d - doors.begin());
+        auto d = doors.at({j, i});
+        if (d.open) {
+          std::cout << index++;
         } else {
-          std::cout << "\033[1m" << (d - doors.begin()) << "\033[0m";
+          std::cout << "\033[1m" << index++ << "\033[0m";
         }
       } else {
         std::cout << cell;
@@ -100,7 +48,6 @@ void Map::print_map(std::ostream& os) const {
 // better than eager transitive closure in practice.
 // TODO: evaluate if we can do this more efficiently.
 void Map::update_equivalence(const Coord& pos, bool new_state) {
-
   // if (new_state) {
   //   auto bridged = doors[find_door(pos)].get_adjacent_components();
   //   // Slight savings available with partially-incremental update.
@@ -110,8 +57,8 @@ void Map::update_equivalence(const Coord& pos, bool new_state) {
   }
 
   for (const auto& d : doors) {
-    if (d.get_open()) {
-      auto bridged = d.get_adjacent_components();
+    if (d.second.open) {
+      auto bridged = d.second.adjacent_components;
       int class1 = find_representative(equivalent_components, bridged.front());
       for (auto it = bridged.begin() + 1; it < bridged.end(); ++it) {
         int class2 = find_representative(equivalent_components, *it);
@@ -121,7 +68,7 @@ void Map::update_equivalence(const Coord& pos, bool new_state) {
   }
 
   // Transitive closure
-  //TODO: faster; path compression
+  // TODO: faster; path compression
   for (size_t i = 0; i < equivalent_components.size(); ++i) {
     equivalent_components[i] = find_representative(equivalent_components, i);
   }
@@ -275,7 +222,7 @@ Map::Map(std::istream& is) {
     for (uint16_t i = 0; i < size.col; ++i) {
       switch (data.at(j, i)) {
         case 'd':
-          doors.push_back(Door(j, i));
+          doors[{j, i}].open = true;
           data.at(j, i) = '_';
           break;
 
@@ -298,7 +245,8 @@ Map::Map(std::istream& is) {
   while (restart_row < size.row) {
     uint16_t restart_col = 0;
     while (restart_col < size.col) {
-      if (component.at(restart_row, restart_col) == -2 && data.at(restart_row, restart_col) == ' ') {
+      if (component.at(restart_row, restart_col) == -2 &&
+          data.at(restart_row, restart_col) == ' ') {
         // Flood fill component.
         std::stack<Coord> todo;
         todo.push({restart_row, restart_col});
@@ -322,10 +270,15 @@ Map::Map(std::istream& is) {
   }
 
   // Identify all adjacent components for doors.
-  for (Door& door : doors) {
-    for (const auto& n : data.get_adjacent(door.get_pos())) {
-      if (component.at(n.row, n.col) >= 0) {
-        door.add_adjacent_component(component.at(n.row, n.col));
+  for (auto& door : doors) {
+    for (const auto& n : data.get_adjacent(door.first)) {
+      int c = component.at(n.row, n.col);
+      if (c >= 0 && std::find(
+                door.second.adjacent_components.begin(),
+                door.second.adjacent_components.end(),
+                c
+            ) == door.second.adjacent_components.end()) {
+        door.second.adjacent_components.push_back(c);
       }
     }
   }
@@ -337,163 +290,5 @@ Map::Map(std::istream& is) {
   std::cout << "Map loaded with " << index << " components!" << std::endl;
 }
 
-class MPMap : public Graph, Map {
-  public:
-    MPMap(std::istream& is)
-    : Map(is) { }
-
-    virtual float LeastCostEstimate( void* stateStart, void* stateEnd ) const {
-      return manhattan(decode(stateStart), decode(stateEnd));
-    }
-
-    virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent ) const {
-      auto cur = decode(state);
-      for (const auto& n : data.get_adjacent(cur)) {
-        float cost = (n.row == cur.row || n.col == cur.col) ? 1 : 1.4142135623730951;
-        if (data.at(n) != '*') {
-          adjacent->push_back({encode(n), cost});
-        }
-      }
-    }
-
-    virtual void PrintStateInfo( void* state ) const { }
-
-    void* encode(const Coord& c) const {
-      uintptr_t encoded = (c.row * get_size().col + c.col);
-      return (void*)encoded;
-    }
-
-    Coord decode(void* c) const {
-      uintptr_t encoded = (uintptr_t)c;
-      uintptr_t width = get_size().col;
-      return {(uint16_t)(encoded / width),
-              (uint16_t)(encoded % width)};
-    }
-};
-
-int main(int argc, char** argv) {
-  std::cout << sizeof(Coord) << std::endl;
-  assert(argc == 4);
-  std::ifstream is(argv[1]);
-  MPMap my_map(is);
-  Map* ma = (Map*)(&my_map);
-
-  std::unique_ptr<MicroPather> mp(new MicroPather(&my_map, 4000000, 8, false));
-  while (1) {
-    MP_VECTOR<void*> pa;
-    float co = 23;
-    std::cout << "starting" << std::endl;
-    Coord start{1, 1};
-    Coord finish{(uint16_t)atoi(argv[2]), (uint16_t)atoll(argv[3])};
-
-    ma->path(start, finish);
-    mp->Solve(my_map.encode(start), my_map.encode(finish), &pa, &co);
-    mp->Reset();
-
-    timer();
-    auto my_path = ma->path(start, finish);
-    std::cout << timer() << std::endl;
-    mp->Solve(my_map.encode(start), my_map.encode(finish), &pa, &co);
-    std::cout << timer() << std::endl;
-    std::cout << "Distance is " << co << std::endl;
-
-    // std::cout << "*** me" << std::endl;
-    // for (const auto& it : my_path) {
-    //   std::cout << it << std::endl;
-    // }
-    //
-    // std::cout << "*** MP" << std::endl;
-    // for (size_t i = 0; i < pa.size(); ++i) {
-    //   std::cout << my_map.decode(pa[i]) << std::endl;
-    // }
-    //
-    return 0;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    // print_components(std::cout);
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    // print_equivalence_classes(std::cout);
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    // print_map(std::cout);
-
-    // char bees;
-    // std::cin >> bees;
-    // if (bees >= '0' && bees <= '9') {
-    //   Door& d = doors[bees - '0'];
-    //   bool state = !d.get_open();
-    //   d.set_open(state);
-    //   data.at(d.get_pos()) = state ? '_' : 'd';
-    //
-    //   update_equivalence(d.get_pos(), state);
-    // }
-  }
-
-
-  return 0;
-}
+}  // namespace pathfinder
+}  // namespace suncatcher
