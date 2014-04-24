@@ -1,6 +1,8 @@
 #ifndef COORD_d0dcb74311134c19b0239c6c7238cfad
 #define COORD_d0dcb74311134c19b0239c6c7238cfad
 
+// POD class representing a position on the pathfinding map abstraction.
+// 
 #include <cstdint>
 #include <iostream>
 

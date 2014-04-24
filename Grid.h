@@ -1,6 +1,10 @@
 #ifndef GRID_d99e6d99bd454e83ab91ad5a87f993dc
 #define GRID_d99e6d99bd454e83ab91ad5a87f993dc
 
+// A multidimensional array capable of being indexed by Coords or individual
+// dimensions. Currently used primarily to represent map data for the
+// pathfinding abstraction.
+
 #include "Coord.h"
 
 #include <vector>
