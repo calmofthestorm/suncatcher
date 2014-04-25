@@ -27,12 +27,17 @@
 namespace suncatcher {
 namespace pathfinder {
 
+const uint8_t PATH_COST_INFINITE = (uint8_t)-1;
+
+class MapBuilder;
+
 class Map {
   public:
-    explicit Map(std::istream& infile);
+    Map(MapBuilder&& builder);
+
     void print_components(std::ostream& os) const;
     void print_equivalence_classes(std::ostream& os) const;
-    void print_map(std::ostream& os) const;
+    void print_map(std::ostream& os, const std::vector<Coord>& path={}) const;
 
     std::vector<pathfinder::Coord> path(
         const pathfinder::Coord& src,
@@ -42,19 +47,28 @@ class Map {
     bool same_equivalence_class(
         pathfinder::Coord src,
         pathfinder::Coord dst
-      ) const ;
+        ) const ;
 
     bool is_passable(const pathfinder::Coord& cell) const;
 
+    bool get_door(Coord cell) const;
+    void set_door(Coord cell, bool open);
+
     void update_equivalence(const pathfinder::Coord& pos, bool new_state);
 
-    const pathfinder::Coord& get_size() const { return size; }
+    void rebuild_cache();
+    void rebuild_equivalence_classes();
+
+    inline Coord size() const { return data.size(); }
 
   // private:
+    friend class MapBuilder;
     // Not necessarily a door; represents any point that is expected to change
     // between passable and impassible during normal play.
     struct Door {
       bool open;
+      uint8_t cost_open; // cost to walk through when open
+      uint8_t cost_closed; // cost to walk through when closed
       std::vector<uint_least32_t> adjacent_components;
     };
 
@@ -62,7 +76,28 @@ class Map {
     suncatcher::util::Grid<uint_least32_t> component;
     std::vector<uint_least32_t> equivalent_components;
     std::map<pathfinder::Coord, Door> doors;
-    Coord size;
+};
+
+class MapBuilder {
+  public:
+    MapBuilder();
+    MapBuilder(const Coord& size, uint8_t cost);
+
+    // Set/get the cost of the specified cell. Can't do this to a door.
+    inline const uint8_t& cost(const Coord& cell) const { return data.at(cell); }
+    inline uint8_t& cost(const Coord& cell) {
+      assert(doors.find(cell) == doors.end());
+      return data.at(cell);
+    }
+
+    // Add a door to the given cell.
+    void add_door(const Coord& cell, bool open, uint8_t cost_open,
+                  uint8_t cost_closed);
+
+  private:
+    friend class Map;
+    suncatcher::util::Grid<uint8_t> data;
+    std::map<pathfinder::Coord, Map::Door> doors;
 };
 
 }  // namespace pathfinder

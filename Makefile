@@ -1,7 +1,7 @@
 CXX=g++
 RM=rm -f
-CPPFLAGS=-std=c++11 -Wall -pedantic -Wextra -O3 # -ggdb -gstabs
-# CPPFLAGS=-std=c++11 -Wall -pedantic -Wextra -ggdb -gstabs
+# CPPFLAGS=-std=c++11 -Wall -pedantic -Wextra -O3 -DNDEBUG # -ggdb -gstabs
+CPPFLAGS=-std=c++11 -Wall -pedantic -Wextra -ggdb -gstabs
 LDFLAGS=-pthread -gstabs -g -ggdb
 LDLIBS=
 

@@ -23,7 +23,7 @@ inline uint_least32_t find_representative(
   return elem;
 }
 
-float manhattan(const pathfinder::Coord& a, const pathfinder::Coord& b) {
+inline float manhattan(const pathfinder::Coord& a, const pathfinder::Coord& b) {
   return pow(pow(std::abs((float)a.row - (float)b.row), 2) + pow(std::abs((float)a.col - (float)b.col), 2), 0.5);
 }
 
