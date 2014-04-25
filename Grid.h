@@ -5,9 +5,11 @@
 // dimensions. Currently used primarily to represent map data for the
 // pathfinding abstraction.
 
+#include <cassert>
+#include <vector>
+
 #include "Coord.h"
 
-#include <vector>
 
 namespace suncatcher {
 namespace util {
@@ -15,33 +17,80 @@ namespace util {
 template <typename T>
 class Grid {
   public:
-    Grid();
+    inline Grid()
+    : backing(),
+      size({0, 0}) { }
 
-    Grid(uint16_t r, uint16_t c, const T& val);
+    inline Grid(uint16_t r, uint16_t c, const T& val) {
+      resize(r, c, val);
+    }
 
-    explicit Grid(std::vector<std::vector<T>>&& backing_in);
+    explicit inline Grid(
+        std::vector<std::vector<T>>&& backing_in,
+        const suncatcher::pathfinder::Coord& size_in
+      )
+      : backing(backing_in),
+        size(size_in) { }
 
-    const std::vector<std::vector<T>>& get_backing() const;
+    inline void resize(uint16_t r, uint16_t c, const T& val) {
+      backing.clear();
+      backing.resize(r, std::vector<T>(c, val));
+      size = {r, c};
+    }
 
-    std::vector<std::vector<T>>& get_backing();
+    inline T& at(const suncatcher::pathfinder::Coord& cell) {
+      assert(check_bounds(cell));
+      return backing[cell.row][cell.col];
+    }
 
-    T& at(const suncatcher::pathfinder::Coord& cell);
+    inline const T& at(const suncatcher::pathfinder::Coord& cell) const {
+      assert(check_bounds(cell));
+      return backing[cell.row][cell.col];
+    }
 
-    const T& at(const suncatcher::pathfinder::Coord& cell) const;
+    inline const T& at(uint16_t row, uint16_t col) const {
+      assert(check_bounds(row, col));
+      return backing[row][col];
+    }
 
-    const T& at(uint16_t row, uint16_t col) const;
+    inline T& at(uint16_t row, uint16_t col) {
+      assert(check_bounds(row, col));
+      return backing[row][col];
+    }
 
-    T& at(uint16_t row, uint16_t col);
+    inline std::vector<suncatcher::pathfinder::Coord> get_adjacent(
+        const suncatcher::pathfinder::Coord& cell
+        ) const {
+      static const std::vector<suncatcher::pathfinder::Coord> ADJ_DELTA{
+        {0, (uint16_t)-1}, {0, 1}, {(uint16_t)-1, 0}, {1, 0},
+          {(uint16_t)-1, (uint16_t)-1}, {1, 1},
+          {(uint16_t)-1, 1}, {1, (uint16_t)-1},
+      };
 
-    std::vector<suncatcher::pathfinder::Coord> get_adjacent(
-        const suncatcher::pathfinder::Coord& cel
-      ) const;
+      std::vector<suncatcher::pathfinder::Coord> neighbors;
+
+      for (const auto& delta : ADJ_DELTA) {
+        auto n = delta + cell;
+        if (check_bounds(n)) {
+          neighbors.push_back(n);
+        }
+      }
+
+      return neighbors;
+    }
+
+    inline bool check_bounds(const suncatcher::pathfinder::Coord& cell) const {
+      return (cell.row < size.row && cell.col < size.col);
+    }
+
+    inline bool check_bounds(uint16_t row, uint16_t col) const {
+      return (row < size.row && col < size.col);
+    }
 
   private:
     std::vector<std::vector<T>> backing;
+    suncatcher::pathfinder::Coord size;
 };
-
-#include "Grid.tcc"
 
 }  // namespace util
 }  // namespace suncatcher

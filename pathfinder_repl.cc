@@ -52,7 +52,7 @@ class MicropatherGraph : public micropather::Graph {
       }
     }
 
-    virtual void PrintStateInfo(void* state) const { }
+    virtual void PrintStateInfo(void*) const { }
 
     void* encode(const suncatcher::pathfinder::Coord& c) const {
       uintptr_t encoded = (c.row * graph->get_size().col + c.col);

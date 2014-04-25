@@ -15,6 +15,10 @@
 namespace suncatcher {
 namespace pathfinder {
 
+const uint32_t COMPONENT_MULTIPLE = (uint32_t)-1;
+const uint32_t COMPONENT_UNKNOWN = (uint32_t)-2;
+const uint32_t COMPONENT_IMPASSABLE = (uint32_t)-3;
+
 using suncatcher::util::Grid;
 using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
@@ -27,22 +31,22 @@ void Map::print_map(std::ostream& os) const {
       if (cell == 'd' || cell == '_') {
         auto d = doors.at({j, i});
         if (d.open) {
-          std::cout << index++;
+          os << index++;
         } else {
-          std::cout << "\033[1m" << index++ << "\033[0m";
+          os << "\033[1m" << index++ << "\033[0m";
         }
       } else {
-        std::cout << cell;
+        os << cell;
       }
     }
-    std::cout << std::endl;
+    os << std::endl;
   }
 }
 
 // TODO: evaluate if an incremental data struture (eg union find) does
 // better than eager transitive closure in practice.
 // TODO: evaluate if we can do this more efficiently.
-void Map::update_equivalence(const Coord& pos, bool new_state) {
+void Map::update_equivalence(const Coord&, bool) {
   // if (new_state) {
   //   auto bridged = doors[find_door(pos)].get_adjacent_components();
   //   // Slight savings available with partially-incremental update.
@@ -75,15 +79,15 @@ void Map::print_components(std::ostream& os) const {
       if (data.at(j, i) == ' ') {
         int c = component.at(j, i);
         if (c == -2) {
-          std::cout << ' ';
+          os << ' ';
         } else {
-          std::cout << (char)(c + 'A');
+          os << (char)(c + 'A');
         }
       } else {
-        std::cout << data.at(j, i);
+        os << data.at(j, i);
       }
     }
-    std::cout << std::endl;
+    os << std::endl;
   }
 }
 
@@ -93,31 +97,91 @@ void Map::print_equivalence_classes(std::ostream& os) const {
       if (data.at(j, i) == ' ') {
         int c = equivalent_components.at(component.at(j, i));
         if (c == -2) {
-          std::cout << ' ';
+          os << ' ';
         } else if (c >= 0 && c < 25) {
-          std::cout << (char)(c + 'A');
+          os << (char)(c + 'A');
         } else {
-          std::cout << ' ' << c << ' ';
+          os << ' ' << c << ' ';
         }
       } else {
-        std::cout << data.at(j, i);
+        os << data.at(j, i);
       }
     }
-    std::cout << std::endl;
+    os << std::endl;
   }
 }
 
-std::vector<Coord> Map::path(Coord src, Coord dst) {
+bool Map::same_equivalence_class(Coord a, Coord b) const {
+  // If either is an open door, then we must check multiple equivalence classes.
+  uint_least32_t component_a = component.at(a);
+  uint_least32_t component_b = component.at(b);
+  assert(true);
+  assert((doors.find(a) != doors.end()) == (component_a == COMPONENT_MULTIPLE));
+  assert((doors.find(b) != doors.end()) == (component_b == COMPONENT_MULTIPLE));
+  if (component_a != COMPONENT_MULTIPLE && component_b != COMPONENT_MULTIPLE) {
+    // Fast path -- neither is a door.
+    assert(component_a != COMPONENT_UNKNOWN && component_b != COMPONENT_UNKNOWN);
+    assert(component_a < equivalent_components.size());
+    assert(component_b < equivalent_components.size());
+    return (find_representative(equivalent_components, component_a) ==
+            find_representative(equivalent_components, component_b));
+  } else {
+    // Slow path -- one or more doors.
+
+    if (component_a == COMPONENT_MULTIPLE && component_b == COMPONENT_MULTIPLE) {
+      auto door_a = doors.find(a);
+      auto door_b = doors.find(b);
+      // Both are doors.
+      for (const uint_least32_t& subcomponent_a : door_a->second.adjacent_components) {
+        for (const uint_least32_t& subcomponent_b : door_b->second.adjacent_components) {
+          if (find_representative(equivalent_components, subcomponent_a) ==
+              find_representative(equivalent_components, subcomponent_b)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    // One door one non door.
+    if (component_a == COMPONENT_MULTIPLE) {
+      assert(component_b != COMPONENT_MULTIPLE);
+      std::swap(component_a, component_b);
+      std::swap(a, b);
+    }
+
+    assert(component_b == COMPONENT_MULTIPLE);
+    assert(component_a != COMPONENT_MULTIPLE);
+
+    component_a = find_representative(equivalent_components, subcomponent_a);
+    auto door_b_adj = doors.find(b)->second.adjacent_components;
+    for (const uint_least32_t& subcomponent_b : door_b_adj) {
+      if (subcomponent_b == component_a) {
+        return true;
+      }
+    }
+  return false;
+  }
+}
+
+bool Map::is_passable(const pathfinder::Coord& cell) const {
+  bool rval = data.check_bounds(cell) && (data.at(cell) != '*');
+  assert((component.at(cell) != COMPONENT_IMPASSABLE) == rval);
+  return rval;
+}
+
+std::vector<Coord> Map::path(const Coord& src, const Coord& dst) const {
   Grid<int> expanded(size.row, size.col, 0);
   Grid<Coord> previous(size.row, size.col, {(uint16_t)-1, (uint16_t)-1});
   size_t num_expanded = 0;
 
-  // A path exists iff they are in the same equivalence class.
-  if (equivalent_components[component.at(src)] !=
-      equivalent_components[component.at(dst)]) {
+  // A path exists iff they are in the same equivalence class and both are
+  // passable squares.
+  if (!is_passable(src) || !is_passable(dst) || !same_equivalence_class(src, dst)) {
     return std::vector<Coord>();
   }
 
+  // Order intentional, if A is impassable there is no path from A to A.
   if (src == dst) {
     return std::vector<Coord>{src};
   }
@@ -170,7 +234,6 @@ std::vector<Coord> Map::path(Coord src, Coord dst) {
       while (rval.back() != src) {
         rval.push_back(previous.at(rval.back()));
       }
-      auto cur = dst;
       std::cout << "dist is " << distance.at(dst) << std::endl;
       return rval;
     }
@@ -197,39 +260,48 @@ std::vector<Coord> Map::path(Coord src, Coord dst) {
 Map::Map(std::istream& is) {
   size.row = 0;
   size.col = 0;
-  std::string line;
 
   // Read in map.
-  while (getline(is, line)) {
-    size.col = std::max((uint16_t)line.size(), (uint16_t)size.col);
-    ++size.row;
-    data.get_backing().push_back(std::vector<char>(line.begin(), line.end()));
-  }
+  {
+    std::string line;
+    std::vector<std::vector<uint_least8_t>> temp_map;
+    while (getline(is, line)) {
+      size.col = std::max((uint_least16_t)line.size(), (uint_least16_t)size.col);
+      ++size.row;
+      temp_map.push_back(std::vector<uint_least8_t>(line.begin(), line.end()));
+    }
 
-  // Make it a square if necessary.
-  for (auto& line : data.get_backing()) {
-    line.resize(size.col, '*');
+    // Make it a rectangle if necessary.
+    for (auto& line : temp_map) {
+      line.resize(size.col, '*');
+    }
+
+    Grid<uint_least8_t> bees(std::move(temp_map), size);
+    std::swap(data, bees);
   }
 
   // Create doors, validate map, and set up structures for flood fill.
-  component.get_backing().resize(size.row, std::vector<int>(size.col, -2));
-  for (uint16_t j = 0;j < size.row; ++j) {
-    for (uint16_t i = 0; i < size.col; ++i) {
-      switch (data.at(j, i)) {
-        case 'd':
-          doors[{j, i}].open = true;
-          data.at(j, i) = '_';
-          break;
+  {
+    component.resize(size.row, size.col, COMPONENT_UNKNOWN);
+    for (uint16_t j = 0;j < size.row; ++j) {
+      for (uint16_t i = 0; i < size.col; ++i) {
+        switch (data.at(j, i)) {
+          case 'd':
+            doors[{j, i}].open = true;
+            data.at(j, i) = '_';
+            component.at(j, i) = COMPONENT_MULTIPLE;
+            break;
 
-        case ' ':
-          break;
+          case ' ':
+            break;
 
-        case '*':
-          component.at(j, i) = -1;
-          break;
+          case '*':
+            component.at(j, i) = COMPONENT_IMPASSABLE;
+            break;
 
-        default:
-          assert(0);
+          default:
+            assert(0);
+        }
       }
     }
   }
@@ -240,7 +312,7 @@ Map::Map(std::istream& is) {
   while (restart_row < size.row) {
     uint16_t restart_col = 0;
     while (restart_col < size.col) {
-      if (component.at(restart_row, restart_col) == -2 &&
+      if (component.at(restart_row, restart_col) == COMPONENT_UNKNOWN &&
           data.at(restart_row, restart_col) == ' ') {
         // Flood fill component.
         std::stack<Coord> todo;
@@ -252,7 +324,7 @@ Map::Map(std::istream& is) {
           todo.pop();
           // Explore neighbors.
           for (const auto& n : data.get_adjacent(cur)) {
-            if (data.at(n) == ' ' && component.at(n.row, n.col) == -2) {
+            if (data.at(n) == ' ' && component.at(n.row, n.col) == COMPONENT_UNKNOWN) {
               todo.push(n);
               component.at(n.row, n.col) = component.at(cur.row, cur.col);
             }

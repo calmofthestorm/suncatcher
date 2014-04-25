@@ -1,10 +1,11 @@
 CXX=g++
 RM=rm -f
-CPPFLAGS=-std=c++11 -O3 # -ggdb -gstabs
-LDFLAGS=-pthread
+CPPFLAGS=-std=c++11 -Wall -pedantic -Wextra -O3 # -ggdb -gstabs
+# CPPFLAGS=-std=c++11 -Wall -pedantic -Wextra -ggdb -gstabs
+LDFLAGS=-pthread -gstabs -g -ggdb
 LDLIBS=
 
-SRCS=Map.cc util.cc micropather/micropather.cc
+SRCS=Map.cc micropather/micropather.cc
 OBJS=$(subst .cc,.o,$(SRCS))
 
 all: pathfinder_repl

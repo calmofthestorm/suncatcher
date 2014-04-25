@@ -21,7 +21,7 @@ struct Coord {
   }
 
   inline bool operator< (const Coord& other) const {
-    return (row < other.row || row == other.row && col < other.col);
+    return (row < other.row || (row == other.row && col < other.col));
   }
 
   inline Coord operator+ (const Coord& other) const {

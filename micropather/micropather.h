@@ -510,7 +510,7 @@ namespace micropather
 		unsigned frame;						// incremented with every solve, used to determine if cached data needs to be refreshed
 		PathCache* pathCache;
 	};
-};	// namespace grinliz
+}	// namespace grinliz
 
 #endif
 
