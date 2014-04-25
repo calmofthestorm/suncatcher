@@ -194,6 +194,11 @@ bool Map::same_equivalence_class(Coord a, Coord b) const {
   }
 }
 
+bool Map::is_apassable(const pathfinder::Coord& cell) const {
+  bool rval = data.check_bounds(cell) && (data.at(cell) != PATH_COST_INFINITE);
+  return rval;
+}
+
 bool Map::is_passable(const pathfinder::Coord& cell) const {
   assert(component.at(cell) != COMPONENT_UNKNOWN);
   bool rval = data.check_bounds(cell) && (data.at(cell) != PATH_COST_INFINITE);
@@ -201,11 +206,6 @@ bool Map::is_passable(const pathfinder::Coord& cell) const {
   if (component.at(cell) == COMPONENT_MULTIPLE) {
     assert(rval == doors.at(cell).open);
   } else {
-    std::cout << component.at(cell) << std::endl;
-    std::cout << COMPONENT_IMPASSABLE << std::endl;
-    std::cout << COMPONENT_MULTIPLE << std::endl;
-    std::cout << COMPONENT_UNKNOWN << std::endl;
-    std::cout << rval << std::endl;
     assert((component.at(cell) != COMPONENT_IMPASSABLE) == rval);
   }
   #endif
@@ -277,6 +277,7 @@ std::vector<Coord> Map::path(const Coord& src, const Coord& dst) const {
     }
   }
   assert(0);
+  return std::vector<Coord>();
 }
 
 Map::Map(MapBuilder&& builder)
@@ -309,7 +310,7 @@ void Map::rebuild_equivalence_classes() {
 }
 
 void Map::rebuild_cache() {
-  component.resize(size(), COMPONENT_UNKNOWN);
+  component = Grid<uint32_t>(size(), COMPONENT_UNKNOWN);
   component.fill(COMPONENT_UNKNOWN);
 
   // Mark doors as having multiple components.
@@ -325,7 +326,7 @@ void Map::rebuild_cache() {
     uint16_t restart_col = 0;
     while (restart_col < size().col) {
       if (component.at(restart_row, restart_col) == COMPONENT_UNKNOWN &&
-          is_passable({restart_row, restart_col})) {
+          is_apassable({restart_row, restart_col})) {
         // Flood fill component.
         std::stack<Coord> todo;
         todo.push({restart_row, restart_col});
@@ -336,14 +337,14 @@ void Map::rebuild_cache() {
           todo.pop();
           // Explore neighbors.
           for (const auto& n : data.get_adjacent(cur)) {
-            if (is_passable(n) && component.at(n) == COMPONENT_UNKNOWN) {
+            if (is_apassable(n) && component.at(n) == COMPONENT_UNKNOWN) {
               todo.push(n);
               component.at(n) = component.at(cur);
             }
           }
         }
       } else if (component.at({restart_row, restart_col}) != COMPONENT_MULTIPLE &&
-                 !is_passable({restart_row, restart_col})) {
+                 !is_apassable({restart_row, restart_col})) {
         component.at(restart_row, restart_col) = COMPONENT_IMPASSABLE;
       }
       ++restart_col;

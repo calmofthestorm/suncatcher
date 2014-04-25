@@ -20,60 +20,36 @@ template <typename T>
 class Grid {
   public:
     inline Grid()
-    : backing(),
-      my_size({0, 0}) { }
+    : my_size({0, 0}),
+      backing() { }
 
-    inline Grid(const suncatcher::pathfinder::Coord& size_in, const T& val) {
-      resize(size_in, val);
-    }
+    inline Grid(const suncatcher::pathfinder::Coord& size_in, const T& val)
+    : my_size(size_in),
+      backing(size_in.row * size_in.col, val) { }
 
-    inline Grid(uint16_t r, uint16_t c, const T& val) {
-      resize(r, c, val);
-    }
-
-    explicit inline Grid(
-        std::vector<std::vector<T>>&& backing_in,
-        const suncatcher::pathfinder::Coord& size_in
-      )
-      : backing(backing_in),
-        my_size(size_in) { }
+    inline Grid(uint16_t r, uint16_t c, const T& val)
+    : Grid({r, c}, val) { }
 
     inline void fill(const T& val) {
-      for (auto& row : backing) {
-        std::fill(row.begin(), row.end(), val);
-      }
-    }
-
-    inline void resize(const suncatcher::pathfinder::Coord& size_in, const T& val) {
-      my_size = size_in;
-      backing.clear();
-      backing.resize(my_size.row, std::vector<T>(my_size.col, val));
-    }
-
-    inline void resize(uint16_t r, uint16_t c, const T& val) {
-      backing.clear();
-      backing.resize(r, std::vector<T>(c, val));
-      my_size = {r, c};
+      std::fill(backing.begin(), backing.end(), val);
     }
 
     inline T& at(const suncatcher::pathfinder::Coord& cell) {
-      assert(check_bounds(cell));
-      return backing[cell.row][cell.col];
+      return at(cell.row, cell.col);
     }
 
     inline const T& at(const suncatcher::pathfinder::Coord& cell) const {
-      assert(check_bounds(cell));
-      return backing[cell.row][cell.col];
+      return at(cell.row, cell.col);
     }
 
     inline const T& at(uint16_t row, uint16_t col) const {
       assert(check_bounds(row, col));
-      return backing[row][col];
+      return backing[row * my_size.col + col];
     }
 
     inline T& at(uint16_t row, uint16_t col) {
       assert(check_bounds(row, col));
-      return backing[row][col];
+      return backing[row * my_size.col + col];
     }
 
     //TODO: evaluate cache performance of ordering.
@@ -99,7 +75,7 @@ class Grid {
     }
 
     inline bool check_bounds(const suncatcher::pathfinder::Coord& cell) const {
-      return (cell.row < my_size.row && cell.col < my_size.col);
+      return check_bounds(cell.row, cell.col);
     }
 
     inline bool check_bounds(uint16_t row, uint16_t col) const {
@@ -111,8 +87,8 @@ class Grid {
     }
 
   private:
-    std::vector<std::vector<T>> backing;
     suncatcher::pathfinder::Coord my_size;
+    std::vector<T> backing;
 };
 
 }  // namespace util

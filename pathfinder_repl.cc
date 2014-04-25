@@ -73,7 +73,7 @@ class MicropatherGraph : public micropather::Graph {
 }  // anonymous namespace
 
 int main(int argc, char** argv) {
-  assert(argc == 2);
+  assert(argc == 2 || argc == 4);
   std::ifstream is(argv[1]);
 
   std::vector<Coord> door_index_to_coords;
@@ -104,8 +104,26 @@ int main(int argc, char** argv) {
   std::unique_ptr<micropather::MicroPather> mp(new micropather::MicroPather(&mgraph, 4000000, 8, false));
   std::vector<Coord> my_path;
 
-  while (1) {
-    my_map.print_map(std::cout, my_path);
+  if (argc == 4) {
+    Coord start{1, 1};
+    Coord finish{(uint16_t)atoi(argv[2]), (uint16_t)atoi(argv[3])};
+    MP_VECTOR<void*> pa;
+    float co = 23;
+
+    timer();
+    my_path = my_map.path(start, finish);
+    std::cout << "Alex: " << timer() << std::endl;
+    mp->Solve(mgraph.encode(start), mgraph.encode(finish), &pa, &co);
+    std::cout << "Micropather: " << timer() << std::endl;
+    std::cout << "MicroPather says distance is " << co << std::endl;
+    return 0;
+  }
+
+  bool autoshow = false;
+  while (std::cin) {
+    if (autoshow) {
+      my_map.print_map(std::cout, my_path);
+    }
     char cmd;
     std::cout << "\n\n>> ";
     std::cin >> cmd;
@@ -139,11 +157,18 @@ int main(int argc, char** argv) {
         }
         break;
 
+      case 'S':
+        autoshow = !autoshow;
+        break;
+
+      case 's':
+        my_map.print_map(std::cout, my_path);
+        break;
+
       case 'c':
         my_path.clear();
         break;
     }
-
 
     // my_map.print_components(std::cout);
 
@@ -158,77 +183,7 @@ int main(int argc, char** argv) {
     // }
     //
 //     return 0;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
 //     // print_equivalence_classes(std::cout);
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
-//     std::cout << std::endl;
 //     // print_map(std::cout);
 //
 //     // char bees;

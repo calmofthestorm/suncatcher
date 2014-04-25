@@ -50,6 +50,7 @@ class Map {
         ) const ;
 
     bool is_passable(const pathfinder::Coord& cell) const;
+    bool is_apassable(const pathfinder::Coord& cell) const;
 
     bool get_door(Coord cell) const;
     void set_door(Coord cell, bool open);

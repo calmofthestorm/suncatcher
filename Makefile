@@ -1,7 +1,7 @@
 CXX=g++
 RM=rm -f
-# CPPFLAGS=-std=c++11 -Wall -pedantic -Wextra -O3 -DNDEBUG # -ggdb -gstabs
-CPPFLAGS=-std=c++11 -Wall -pedantic -Wextra -ggdb -gstabs
+CPPFLAGS=-std=c++11 -Wall -pedantic -Wextra -O3 -DNDEBUG # -ggdb -gstabs
+# CPPFLAGS=-std=c++11 -Wall -pedantic -Wextra -ggdb -gstabs
 LDFLAGS=-pthread -gstabs -g -ggdb
 LDLIBS=
 
@@ -20,7 +20,7 @@ depend: .depend
 	$(CXX) $(CPPFLAGS) -MM $^>>./.depend;
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(OBJS) pathfinder_repl.o pathfinder_repl
 
 dist-clean: clean
 	$(RM) *~ .dependtool
