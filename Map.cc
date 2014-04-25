@@ -153,10 +153,10 @@ bool Map::same_equivalence_class(Coord a, Coord b) const {
     assert(component_b == COMPONENT_MULTIPLE);
     assert(component_a != COMPONENT_MULTIPLE);
 
-    component_a = find_representative(equivalent_components, subcomponent_a);
+    component_a = find_representative(equivalent_components, component_a);
     auto door_b_adj = doors.find(b)->second.adjacent_components;
     for (const uint_least32_t& subcomponent_b : door_b_adj) {
-      if (subcomponent_b == component_a) {
+      if (find_representative(equivalent_components, subcomponent_b) == component_a) {
         return true;
       }
     }
