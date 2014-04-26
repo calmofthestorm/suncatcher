@@ -49,8 +49,19 @@ class Map {
         pathfinder::Coord dst
         ) const ;
 
-    bool is_passable(const pathfinder::Coord& cell) const;
-    bool is_apassable(const pathfinder::Coord& cell) const;
+    // Returns the current cost to move from start to finish. The two must
+    // be adjacent (including diagonal). Start must be passable.
+    float move_cost(pathfinder::Coord start, pathfinder::Coord finish) const;
+
+    // True iff the cell is always passable to all movement modes and factions.
+    // Thus, returns false for doors regardless of state.
+    bool is_transparent(pathfinder::Coord cell) const;
+
+    // True iff the cell is always impassable to all movement modes and factions.
+    bool is_opaque(pathfinder::Coord cerr) const;
+
+    // True iff the cell is currently passable.
+    bool is_passable(pathfinder::Coord cell) const;
 
     bool get_door(Coord cell) const;
     void set_door(Coord cell, bool open);

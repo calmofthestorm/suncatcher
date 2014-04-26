@@ -57,7 +57,7 @@ void Map::print_map(std::ostream& os, const std::vector<Coord>& path) const {
           os << "\033[1m" << index++ << "\033[0m";
         }
       } else {
-        os << (is_passable({j, i}) ? ' ' : '*');
+        os << (is_opaque({j, i}) ? '*' : ' ');
       }
     }
     os << std::endl;
@@ -110,7 +110,7 @@ void Map::print_components(std::ostream& os) const {
       uint32_t c = component.at(j, i);
       if (c == COMPONENT_MULTIPLE) {
         os << 'd';
-      } else if (is_passable({j, i})) {
+      } else if (!is_opaque({j, i})) {
         os << (char)(c + 'A');
       } else {
         os << '*';
@@ -194,14 +194,50 @@ bool Map::same_equivalence_class(Coord a, Coord b) const {
   }
 }
 
-bool Map::is_apassable(const pathfinder::Coord& cell) const {
-  bool rval = data.check_bounds(cell) && (data.at(cell) != PATH_COST_INFINITE);
-  return rval;
+float Map::move_cost(Coord start, Coord finish) const {
+  assert(check_bounds(start));
+  assert(check_bounds(finish));
+  assert(std::abs(start.row - finish.row) <= 1 &&
+         std::abs(start.col - finish.col) <= 1);
+  assert(is_passable(start));
+  if (start == finish) {
+    return 0;
+  }
+
+  if (start.row == finish.row || start.col == finish.col) {
+    return data.at(finish);
+  }
+
+  // Can only move diagonally if Manhattan squares are passable.
+  if (is_passable({start.row, finish.col}) || is_passable({finish.row, start.col})) {
+    return data.at(finish) * 1.4142135623730951;;
+  } else {
+    return -1;
+  }
 }
 
-bool Map::is_passable(const pathfinder::Coord& cell) const {
+bool Map::is_transparent(Coord cell) const {
+  assert(check_bounds(cell));
+  if (component.at(cell) == COMPONENT_MULTIPLE) {
+    return false;
+  } else {
+    return data.at(cell) != PATH_COST_INFINITE;
+  }
+}
+
+bool Map::is_opaque(Coord cell) const {
+  assert(check_bounds(cell));
+  if (component.at(cell) == COMPONENT_MULTIPLE) {
+    return !(doors.at(cell).open);
+  } else {
+    return data.at(cell) == PATH_COST_INFINITE;
+  }
+}
+
+bool Map::is_passable(Coord cell) const {
+  assert(check_bounds(cell));
   assert(component.at(cell) != COMPONENT_UNKNOWN);
-  bool rval = data.check_bounds(cell) && (data.at(cell) != PATH_COST_INFINITE);
+  bool rval = (data.at(cell) != PATH_COST_INFINITE);
   #ifndef NDEBUG
   if (component.at(cell) == COMPONENT_MULTIPLE) {
     assert(rval == doors.at(cell).open);
@@ -245,7 +281,7 @@ std::vector<Coord> Map::path(const Coord& src, const Coord& dst) const {
 
   while (!fringe.empty()) {
     Entry cur = fringe.top();
-    assert(is_passable(cur.pos));
+    assert(is_occupiable(cur.pos));
     fringe.pop();
     expanded.at(cur.pos) = 1;
     ++num_expanded;
@@ -262,14 +298,11 @@ std::vector<Coord> Map::path(const Coord& src, const Coord& dst) const {
     }
 
     for (const auto& next : data.get_adjacent(cur.pos)) {
-      // if (distance.at(next) > 1 + distance.at(cur.pos) && (
-      float my_dist = distance.at(cur.pos) + 1;
-      if (cur.pos.row != next.row && cur.pos.col != next.col) {
-        my_dist += 0.4142135623730951;
-      }
+      float cost = move_cost(cur.pos, next);
+      float my_dist = distance.at(cur.pos) + cost;
       if (distance.at(next) > my_dist &&
           !expanded.at(next) &&
-          is_passable(next)) {
+          cost != -1) {
         distance.at(next) = my_dist;
         fringe.push({next, manhattan(next, dst) + my_dist});
         previous.at(next) = cur.pos;
@@ -326,7 +359,7 @@ void Map::rebuild_cache() {
     uint16_t restart_col = 0;
     while (restart_col < size().col) {
       if (component.at(restart_row, restart_col) == COMPONENT_UNKNOWN &&
-          is_apassable({restart_row, restart_col})) {
+          is_transparent({restart_row, restart_col})) {
         // Flood fill component.
         std::stack<Coord> todo;
         todo.push({restart_row, restart_col});
@@ -337,14 +370,14 @@ void Map::rebuild_cache() {
           todo.pop();
           // Explore neighbors.
           for (const auto& n : data.get_adjacent(cur)) {
-            if (is_apassable(n) && component.at(n) == COMPONENT_UNKNOWN) {
+            if (is_transparent(n) && component.at(n) == COMPONENT_UNKNOWN) {
               todo.push(n);
               component.at(n) = component.at(cur);
             }
           }
         }
       } else if (component.at({restart_row, restart_col}) != COMPONENT_MULTIPLE &&
-                 !is_apassable({restart_row, restart_col})) {
+                 !is_transparent({restart_row, restart_col})) {
         component.at(restart_row, restart_col) = COMPONENT_IMPASSABLE;
       }
       ++restart_col;
