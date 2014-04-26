@@ -16,12 +16,15 @@
 #include "Coord.h"
 #include "Map.h"
 #include "util.h"
+#include "micropather/MicropatherGraph.h"
 
 namespace {
 
 using suncatcher::util::manhattan;
 using suncatcher::pathfinder::Map;
+using suncatcher::pathfinder::Path;
 using suncatcher::pathfinder::Coord;
+using suncatcher::pathfinder::MicropatherGraph;
 
 int timer() {
   static auto begin = std::chrono::high_resolution_clock::now();
@@ -31,84 +34,28 @@ int timer() {
   return rval;
 }
 
-class MicropatherGraph : public micropather::Graph {
-  public:
-    explicit MicropatherGraph(const Map* my_graph)
-    : graph(my_graph) { }
-
-    virtual float LeastCostEstimate(void* stateStart, void* stateEnd) const {
-      return manhattan(decode(stateStart), decode(stateEnd));
-    }
-
-    virtual void AdjacentCost(
-        void* state, MP_VECTOR< micropather::StateCost > *adjacent
-      ) const {
-      auto cur = decode(state);
-      for (const auto& n : graph->data.get_adjacent(cur)) {
-        float cost = (n.row == cur.row || n.col == cur.col) ? 1 : 1.4142135623730951;
-        if (graph->is_passable(n)) {
-          adjacent->push_back({encode(n), cost});
-        }
-      }
-    }
-
-    virtual void PrintStateInfo(void*) const { }
-
-    void* encode(const suncatcher::pathfinder::Coord& c) const {
-      uintptr_t encoded = (c.row * graph->size().col + c.col);
-      return (void*)encoded;
-    }
-
-    suncatcher::pathfinder::Coord decode(void* c) const {
-      uintptr_t encoded = (uintptr_t)c;
-      uintptr_t width = graph->size().col;
-      return {(uint16_t)(encoded / width),
-              (uint16_t)(encoded % width)};
-    }
-
-  private:
-    const Map* graph;
-};
-
 }  // anonymous namespace
 
 int main(int argc, char** argv) {
   assert(argc == 2 || argc == 4);
   std::ifstream is(argv[1]);
+  suncatcher::pathfinder::MapBuilder mb(is);
 
-  std::vector<Coord> door_index_to_coords;
-
-  std::string line;
-  size_t rows, cols;
-  is >> rows >> cols;
-  std::getline(is, line);
-  assert(is);
-  suncatcher::pathfinder::MapBuilder mb({(uint16_t)rows, (uint16_t)cols}, 1);
-  for (uint16_t row = 0; row < rows; ++row) {
-    std::getline(is, line);
-    assert(is);
-    assert(line.size() >= cols);
-    for (uint16_t col = 0; col < cols; ++col) {
-      mb.cost({row, col}) = (line[col] == '*' ? suncatcher::pathfinder::PATH_COST_INFINITE : 1);
-      if (line[col] == 'd') {
-        mb.add_door({row, col}, true, 1, suncatcher::pathfinder::PATH_COST_INFINITE);
-        door_index_to_coords.push_back({row, col});
-      } else if (line[col] == 'D') {
-        mb.add_door({row, col}, false, 1, suncatcher::pathfinder::PATH_COST_INFINITE);
-        door_index_to_coords.push_back({row, col});
-      }
-    }
-  }
   timer();
   Map my_map(std::move(mb));
   std::cout << "Flood fill time: " << timer() << std::endl;
   my_map.rebuild_equivalence_classes();
   std::cout << "Transitive closure time: " << timer() << std::endl;
 
+  std::vector<Coord> door_index_to_coords;
+  for (const auto& it : my_map.get_doors()) {
+    door_index_to_coords.push_back(it.first);
+  }
+
   MicropatherGraph mgraph(&my_map);
 
   std::unique_ptr<micropather::MicroPather> mp(new micropather::MicroPather(&mgraph, 4000000, 8, false));
-  std::vector<Coord> my_path;
+  Path my_path;
 
   if (argc == 4) {
     Coord start{1, 1};
@@ -172,7 +119,7 @@ int main(int argc, char** argv) {
         break;
 
       case 'c':
-        my_path.clear();
+        my_path = Path();
         break;
     }
 

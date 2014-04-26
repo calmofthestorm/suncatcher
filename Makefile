@@ -1,21 +1,28 @@
 CXX=g++
 RM=rm -f
-# CPPFLAGS=-std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra -O3 -DNDEBUG
-# CPPFLAGS=-std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra -O3 -ggdb -gstabs -g
-CPPFLAGS=-std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra -ggdb -gstabs
+
+CPPFLAGS=-I. -std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra
+DEBUG_FLAGS=-g -ggdb -gstabs -Og
+PROFILE_FLAGS=-O3 -NDEBUG
+
 LDFLAGS=-pthread -gstabs -g -ggdb
 LDLIBS=
 
 SRCS=Map.cc micropather/micropather.cc
+TEST_SRCS=tests/test_main.cc tests/test_pathfinder.cc
 OBJS=$(subst .cc,.o,$(SRCS))
+TEST_OBJS=$(subst .cc,.o,$(TEST_SRCS))
 
 all: pathfinder_repl
 
-pathfinder_repl: $(OBJS) pathfinder_repl.o
-	g++ $(LDFLAGS) -o pathfinder_repl $(OBJS) pathfinder_repl.o $(LDLIBS)
+profile: $(OBJS) pathfinder_repl.o
+	g++ $(LDFLAGS) $(PROFILE_FLAGS) -o pathfinder_repl $(OBJS) pathfinder_repl.o $(LDLIBS)
 
-test: $(OBJS) tests/test_main.o
-	g++ $(LDFLAGS) -o test_main $(OBJS) tests/test_main.o lib/gtest/lib/.libs/libgtest.a $(LDLIBS)
+pathfinder_repl: $(OBJS) pathfinder_repl.o
+	g++ $(LDFLAGS) $(DEBUG_FLAGS) -o pathfinder_repl $(OBJS) pathfinder_repl.o $(LDLIBS)
+
+test: $(OBJS) $(TEST_OBJS)
+	g++ $(LDFLAGS) $(DEBUG_FLAGS) -o test_main $(TEST_OBJS) $(OBJS) lib/gtest/lib/.libs/libgtest.a $(LDLIBS)
 
 depend: .depend
 
@@ -24,7 +31,7 @@ depend: .depend
 	$(CXX) $(CPPFLAGS) -MM $^>>./.depend;
 
 clean:
-	$(RM) $(OBJS) pathfinder_repl.o pathfinder_repl test_main tests/test_main.o
+	$(RM) $(TEST_OBJS) $(OBJS) pathfinder_repl.o pathfinder_repl test_main tests/test_main.o
 
 dist-clean: clean
 	$(RM) *~ .dependtool

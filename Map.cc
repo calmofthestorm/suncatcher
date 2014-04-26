@@ -31,9 +31,9 @@ void MapBuilder::add_door(const Coord& cell, bool open, uint8_t cost_open,
   data.at(cell) = open ? cost_open : cost_closed;
 }
 
-void Map::print_map(std::ostream& os, const std::vector<Coord>& path) const {
+void Map::print_map(std::ostream& os, const Path& path) const {
   // lol this is so bad...debugging only tho...
-  std::set<Coord> in_path(path.begin(), path.end());
+  std::set<Coord> in_path(path.get_path().begin(), path.get_path().end());
   size_t index = 0;
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
@@ -188,20 +188,24 @@ bool Map::same_equivalence_class(Coord a, Coord b) const {
   }
 }
 
-std::vector<Coord> Map::path(const Coord& src, const Coord& dst) const {
+Path Map::path(const Coord& src, const Coord& dst) const {
   Grid<int> expanded(size().row, size().col, 0);
   Grid<Coord> previous(size().row, size().col, {(uint16_t)-1, (uint16_t)-1});
   size_t num_expanded = 0;
 
+  if (!data.check_bounds(src) || !data.check_bounds(dst)) {
+    return Path({}, -1);
+  }
+
   // A path exists iff they are in the same equivalence class and both are
   // passable squares.
   if (!is_passable(src) || !is_passable(dst) || !same_equivalence_class(src, dst)) {
-    return std::vector<Coord>();
+    return Path(std::vector<Coord>(), -1);
   }
 
   // Order intentional, if A is impassable there is no path from A to A.
   if (src == dst) {
-    return std::vector<Coord>{src};
+    return Path(std::vector<Coord>{src}, 0);
   }
 
   Grid<float> distance(size().row, size().col, INFINITY);
@@ -233,8 +237,9 @@ std::vector<Coord> Map::path(const Coord& src, const Coord& dst) const {
       while (rval.back() != src) {
         rval.push_back(previous.at(rval.back()));
       }
-      std::cout << "dist is " << distance.at(dst) << std::endl;
-      return rval;
+      std::reverse(rval.begin(), rval.end());
+      // std::cout << "dist is " << distance.at(dst) << std::endl;
+      return Path(std::move(rval), distance.at(dst));
     }
 
     for (const auto& next : data.get_adjacent(cur.pos)) {
@@ -250,7 +255,7 @@ std::vector<Coord> Map::path(const Coord& src, const Coord& dst) const {
     }
   }
   assert(0);
-  return std::vector<Coord>();
+  return Path(std::vector<Coord>(), -1);
 }
 
 Map::Map(MapBuilder&& builder)
@@ -341,6 +346,32 @@ void Map::rebuild_cache() {
 
   equivalent_components.resize(index);
   rebuild_equivalence_classes();
+}
+
+MapBuilder::MapBuilder(std::istream& is) {
+  std::vector<Coord> door_index_to_coords;
+
+  std::string line;
+  size_t rows, cols;
+  is >> rows >> cols;
+  std::getline(is, line);
+  assert(is);
+  *this = MapBuilder({(uint16_t)rows, (uint16_t)cols}, 1);
+  for (uint16_t row = 0; row < rows; ++row) {
+    std::getline(is, line);
+    assert(is);
+    assert(line.size() >= cols);
+    for (uint16_t col = 0; col < cols; ++col) {
+      cost({row, col}) = (line[col] == '*' ? suncatcher::pathfinder::PATH_COST_INFINITE : 1);
+      if (line[col] == 'd') {
+        add_door({row, col}, true, 1, suncatcher::pathfinder::PATH_COST_INFINITE);
+        door_index_to_coords.push_back({row, col});
+      } else if (line[col] == 'D') {
+        add_door({row, col}, false, 1, suncatcher::pathfinder::PATH_COST_INFINITE);
+        door_index_to_coords.push_back({row, col});
+      }
+    }
+  }
 }
 
 }  // namespace pathfinder

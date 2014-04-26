@@ -16,13 +16,14 @@
 // into memory pressure.
 //
 // The code has undergone substantial refactoring since then, however, so this
-// made were three visiting in the future.
+// may were three visiting in the future.
 
 #include <iostream>
 #include <map>
 #include <vector>
 
 #include "Grid.h"
+#include "Path.h"
 
 namespace suncatcher {
 namespace pathfinder {
@@ -35,15 +36,26 @@ const uint32_t COMPONENT_IMPASSABLE = (uint32_t)-3;
 
 class MapBuilder;
 
+// Not necessarily a door; represents any point that is expected to change
+// between passable and impassible during normal play.
+struct Door {
+  bool open;
+  uint8_t cost_open; // cost to walk through when open
+  uint8_t cost_closed; // cost to walk through when closed
+  std::vector<uint_least32_t> adjacent_components;
+};
+
 class Map {
   public:
     Map(MapBuilder&& builder);
 
     void print_components(std::ostream& os) const;
     void print_equivalence_classes(std::ostream& os) const;
-    void print_map(std::ostream& os, const std::vector<Coord>& path={}) const;
+    void print_map(std::ostream& os, const Path& path={}) const;
 
-    std::vector<pathfinder::Coord> path(
+    inline bool check_bounds(Coord cell) const { return data.check_bounds(cell); }
+
+    Path path(
         const pathfinder::Coord& src,
         const pathfinder::Coord& dst
       ) const ;
@@ -52,6 +64,8 @@ class Map {
         pathfinder::Coord src,
         pathfinder::Coord dst
         ) const ;
+
+    const std::map<Coord, Door>& get_doors() const { return doors; }
 
     // Returns the current cost to move from start to finish. The two must
     // be adjacent (including diagonal). Start must be passable.
@@ -128,15 +142,6 @@ class Map {
     inline Coord size() const { return data.size(); }
 
   // private:
-    friend class MapBuilder;
-    // Not necessarily a door; represents any point that is expected to change
-    // between passable and impassible during normal play.
-    struct Door {
-      bool open;
-      uint8_t cost_open; // cost to walk through when open
-      uint8_t cost_closed; // cost to walk through when closed
-      std::vector<uint_least32_t> adjacent_components;
-    };
 
     suncatcher::util::Grid<uint_least8_t> data;
     suncatcher::util::Grid<uint_least32_t> component;
@@ -148,6 +153,10 @@ class MapBuilder {
   public:
     MapBuilder();
     MapBuilder(const Coord& size, uint8_t cost);
+
+    // Load a mapbuilder from a simple text format. Intended mostly for
+    // tests and debugging.
+    MapBuilder(std::istream& is);
 
     // Set/get the cost of the specified cell. Can't do this to a door.
     inline const uint8_t& cost(const Coord& cell) const { return data.at(cell); }
@@ -163,7 +172,7 @@ class MapBuilder {
   private:
     friend class Map;
     suncatcher::util::Grid<uint8_t> data;
-    std::map<pathfinder::Coord, Map::Door> doors;
+    std::map<pathfinder::Coord, Door> doors;
 };
 
 }  // namespace pathfinder
