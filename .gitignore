@@ -1,0 +1,5 @@
+*.o
+.*.sw*
+test_main
+pathfinder_repl
+.depend

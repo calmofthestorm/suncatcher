@@ -11,7 +11,7 @@ CPPFLAGS=$(COMMON_FLAGS) $(DEBUG_FLAGS)
 LDFLAGS=-pthread -gstabs -g -ggdb
 LDLIBS=
 
-SRCS=Map.cc micropather/micropather.cc
+SRCS=Map.cc micropather/micropather.cc MapMutator.cc
 TEST_SRCS=tests/test_main.cc tests/test_pathfinder.cc
 OBJS=$(subst .cc,.o,$(SRCS))
 TEST_OBJS=$(subst .cc,.o,$(TEST_SRCS))

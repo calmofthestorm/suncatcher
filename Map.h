@@ -24,6 +24,7 @@
 
 #include "Grid.h"
 #include "Path.h"
+#include "MapMutator.h"
 
 namespace suncatcher {
 namespace pathfinder {
@@ -35,7 +36,6 @@ const uint32_t COMPONENT_UNKNOWN = (uint32_t)-2;
 const uint32_t COMPONENT_IMPASSABLE = (uint32_t)-3;
 
 class MapBuilder;
-class MapMutator;
 
 // Not necessarily a door; represents any point that is expected to change
 // between passable and impassible during normal play. This could be used to
@@ -170,28 +170,6 @@ class MapBuilder {
     friend class Map;
     suncatcher::util::Grid<uint8_t> data;
     std::map<pathfinder::Coord, Door> doors;
-};
-
-class MapMutator {
-  public:
-    MapMutator()
-    : map(nullptr) { }
-
-    ~MapMutator() { if (map) map->notify_mutator_destroyed(); }
-
-    MapMutator(const MapMutator& other) = delete;
-    MapMutator& operator=(const MapMutator& other) = delete;
-
-    MapMutator& operator=(MapMutator&& other) = default;
-    MapMutator(MapMutator&& other) = default;
-
-  private:
-    friend class Map;
-
-    MapMutator(Map* map_in)
-    : map(map_in) { map_in->notify_mutator_created(); }
-
-    Map* map;
 };
 
 }  // namespace pathfinder
