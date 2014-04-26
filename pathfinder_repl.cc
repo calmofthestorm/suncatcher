@@ -81,10 +81,12 @@ int main(int argc, char** argv) {
   std::string line;
   size_t rows, cols;
   is >> rows >> cols;
-  assert(std::getline(is, line));
+  std::getline(is, line);
+  assert(is);
   suncatcher::pathfinder::MapBuilder mb({(uint16_t)rows, (uint16_t)cols}, 1);
   for (uint16_t row = 0; row < rows; ++row) {
-    assert(std::getline(is, line));
+    std::getline(is, line);
+    assert(is);
     assert(line.size() >= cols);
     for (uint16_t col = 0; col < cols; ++col) {
       mb.cost({row, col}) = (line[col] == '*' ? suncatcher::pathfinder::PATH_COST_INFINITE : 1);
