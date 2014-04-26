@@ -31,6 +31,10 @@ void MapBuilder::add_door(const Coord& cell, bool open, uint8_t cost_open,
   data.at(cell) = open ? cost_open : cost_closed;
 }
 
+Map::~Map() {
+  assert(outstanding_mutators == 0);
+}
+
 void Map::print_map(std::ostream& os, const Path& path) const {
   // lol this is so bad...debugging only tho...
   std::set<Coord> in_path(path.get_path().begin(), path.get_path().end());
@@ -57,15 +61,6 @@ void Map::print_map(std::ostream& os, const Path& path) const {
     }
     os << std::endl;
   }
-}
-
-bool Map::get_door(Coord cell) const {
-  return doors.at(cell).open;
-}
-
-void Map::set_door(Coord cell, bool open) {
-  doors.at(cell).open = open;
-  data.at(cell) = open ? doors.at(cell).cost_open : doors.at(cell).cost_closed;
 }
 
 // TODO: evaluate if an incremental data struture (eg union find) does
@@ -134,7 +129,11 @@ void Map::print_equivalence_classes(std::ostream& os) const {
   }
 }
 
-bool Map::same_equivalence_class(Coord a, Coord b) const {
+bool Map::path_exists(Coord a, Coord b) const {
+  if (!is_passable(a) || !is_passable(b)) {
+    return false;
+  }
+
   // If either is an open door, then we must check multiple equivalence classes.
   uint_least32_t component_a = component.at(a);
   uint_least32_t component_b = component.at(b);
@@ -199,7 +198,7 @@ Path Map::path(const Coord& src, const Coord& dst) const {
 
   // A path exists iff they are in the same equivalence class and both are
   // passable squares.
-  if (!is_passable(src) || !is_passable(dst) || !same_equivalence_class(src, dst)) {
+  if (!is_passable(src) || !is_passable(dst) || !path_exists(src, dst)) {
     return Path(std::vector<Coord>(), -1);
   }
 
@@ -259,7 +258,8 @@ Path Map::path(const Coord& src, const Coord& dst) const {
 }
 
 Map::Map(MapBuilder&& builder)
-: data(std::move(builder.data)),
+: outstanding_mutators(0),
+  data(std::move(builder.data)),
   doors(std::move(builder.doors)) {
 
   rebuild_cache();
@@ -346,6 +346,23 @@ void Map::rebuild_cache() {
 
   equivalent_components.resize(index);
   rebuild_equivalence_classes();
+}
+
+MapMutator Map::get_mutator() {
+  return MapMutator(this);
+}
+
+// Changes the world immediately, doing all necessary computations. The
+// mutator is cleared to clean state.
+void Map::mutate(MapMutator&& mutation) {
+  // TODO IMPL
+  assert(0);
+}
+
+// Forces recomputation of all cached information.
+void Map::clear_cache() {
+  // TODO IMPL
+  assert(0);
 }
 
 MapBuilder::MapBuilder(std::istream& is) {

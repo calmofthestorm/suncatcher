@@ -25,7 +25,7 @@ class MicropatherGraph : public micropather::Graph {
         void* state, MP_VECTOR< micropather::StateCost > *adjacent
       ) const {
       auto cur = decode(state);
-      for (const auto& n : graph->data.get_adjacent(cur)) {
+      for (const auto& n : graph->get_data().get_adjacent(cur)) {
         float cost = graph->move_cost(cur, n);
         if (cost != -1) {
           adjacent->push_back({encode(n), cost});

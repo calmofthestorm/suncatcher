@@ -1,9 +1,12 @@
 CXX=g++
 RM=rm -f
 
-CPPFLAGS=-I. -std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra
+COMMON_FLAGS=-I. -std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra
 DEBUG_FLAGS=-g -ggdb -gstabs -Og
-PROFILE_FLAGS=-O3 -NDEBUG
+PROFILE_FLAGS=-O3 -DNDEBUG
+
+# CPPFLAGS=$(COMMON_FLAGS) $(PROFILE_FLAGS)
+CPPFLAGS=$(COMMON_FLAGS) $(DEBUG_FLAGS)
 
 LDFLAGS=-pthread -gstabs -g -ggdb
 LDLIBS=
@@ -14,9 +17,6 @@ OBJS=$(subst .cc,.o,$(SRCS))
 TEST_OBJS=$(subst .cc,.o,$(TEST_SRCS))
 
 all: pathfinder_repl
-
-profile: $(OBJS) pathfinder_repl.o
-	g++ $(LDFLAGS) $(PROFILE_FLAGS) -o pathfinder_repl $(OBJS) pathfinder_repl.o $(LDLIBS)
 
 pathfinder_repl: $(OBJS) pathfinder_repl.o
 	g++ $(LDFLAGS) $(DEBUG_FLAGS) -o pathfinder_repl $(OBJS) pathfinder_repl.o $(LDLIBS)

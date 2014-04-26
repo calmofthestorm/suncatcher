@@ -44,8 +44,6 @@ int main(int argc, char** argv) {
   timer();
   Map my_map(std::move(mb));
   std::cout << "Flood fill time: " << timer() << std::endl;
-  my_map.rebuild_equivalence_classes();
-  std::cout << "Transitive closure time: " << timer() << std::endl;
 
   std::vector<Coord> door_index_to_coords;
   for (const auto& it : my_map.get_doors()) {
@@ -106,7 +104,7 @@ int main(int argc, char** argv) {
           std::cout << "There are only " << door_index_to_coords.size() << " doors." << std::endl;
         } else {
           Coord door_coord = door_index_to_coords.at(door);
-          my_map.set_door(door_coord, !my_map.get_door(door_coord));
+          // my_map.set_door(door_coord, !my_map.get_door(door_coord));
         }
         break;
 

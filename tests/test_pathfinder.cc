@@ -39,7 +39,8 @@ class MPWrapper {
     }
 
     Path path(Coord start, Coord finish) {
-      if (!my_map->check_bounds(start) || !my_map->check_bounds(finish)) {
+      if (!my_map->get_data().check_bounds(start) ||
+          !my_map->get_data().check_bounds(finish)) {
         return Path({}, -1);
       }
       MP_VECTOR<void*> path_vc;
@@ -92,24 +93,15 @@ std::unique_ptr<Map> MapTest::main_map = nullptr;
 // Really simple tests for basic functionality.
 
 TEST_F(MapTest, OpenMapOOB1) {
-  ASSERT_EQ(
-      Path({}, -1),
-      MapTest::empty_map->path({0, 0}, {100, 100})
-    );
+  ASSERT_FALSE(MapTest::empty_map->path({0, 0}, {100, 100}));
 }
 
 TEST_F(MapTest, OpenMapOOB2) {
-  ASSERT_EQ(
-      Path({}, -1),
-      MapTest::empty_map->path({0, 0}, {200, 200})
-    );
+  ASSERT_FALSE(MapTest::empty_map->path({0, 0}, {200, 200}));
 }
 
 TEST_F(MapTest, OpenMapIdentityOOB) {
-  ASSERT_EQ(
-      Path({}, -1),
-      MapTest::empty_map->path({100, 100}, {100, 100})
-    );
+  ASSERT_FALSE(MapTest::empty_map->path({100, 100}, {100, 100}));
 }
 
 TEST_F(MapTest, OpenMapIdentityPath) {
@@ -174,38 +166,23 @@ TEST_F(MapTest, OpenMapLongPath) {
 // Invalid cases involving walls
 
 TEST_F(MapTest, WallInvalidToSelf) {
-  ASSERT_EQ(
-      Path({}, -1),
-      MapTest::main_map->path({0, 0}, {0, 0})
-    );
+  ASSERT_FALSE(MapTest::main_map->path({0, 0}, {0, 0}));
 }
 
 TEST_F(MapTest, WallInvalidToAdj) {
-  ASSERT_EQ(
-      Path({}, -1),
-      MapTest::main_map->path({0, 2}, {0, 1})
-    );
+  ASSERT_FALSE(MapTest::main_map->path({0, 2}, {0, 1}));
 }
 
 TEST_F(MapTest, WallInvalidToOtherWall) {
-  ASSERT_EQ(
-      Path({}, -1),
-      MapTest::main_map->path({11, 0}, {55, 39})
-    );
+  ASSERT_FALSE(MapTest::main_map->path({11, 0}, {55, 39}));
 }
 
 TEST_F(MapTest, WallInvalidToOOB1) {
-  ASSERT_EQ(
-      Path({}, -1),
-      MapTest::main_map->path({50, 0}, {85, 100})
-    );
+  ASSERT_FALSE(MapTest::main_map->path({50, 0}, {85, 100}));
 }
 
 TEST_F(MapTest, WallInvalidToOOB2) {
-  ASSERT_EQ(
-      Path({}, -1),
-      MapTest::main_map->path({0, 100}, {55, 0})
-    );
+  ASSERT_FALSE(MapTest::main_map->path({0, 100}, {55, 0}));
 }
 
 // More interesting terrain-based tests.
@@ -219,8 +196,7 @@ TEST_F(MapTest, ULToJustOutsideGreatHall) {
 
 // Upper right into great hall (door locked).
 TEST_F(MapTest, ULToLockedGreatHall) {
-  auto actual = MapTest::main_map->path({1, 98}, {69, 51});
-  ASSERT_EQ(Path({}, -1), actual);
+  ASSERT_FALSE(MapTest::main_map->path({1, 98}, {69, 51}));
 }
 
 // Upper right into left tower
@@ -238,10 +214,7 @@ TEST_F(MapTest, IsolatedInternal) {
 
 // Isolated component outside
 TEST_F(MapTest, IsolatedInternalNoPath) {
-  ASSERT_EQ(
-      Path({}, -1),
-      MapTest::main_map->path({68, 63}, {1, 1})
-    );
+  ASSERT_FALSE(MapTest::main_map->path({68, 63}, {1, 1}));
 }
 
 TEST_F(MapTest, DiagonalWallHug) {
@@ -309,32 +282,22 @@ TEST_F(MapTest, OpenDoorToOpenDoor) {
 }
 
 TEST_F(MapTest, OpenDoorToClosedDoor) {
-  auto actual = MapTest::main_map->path({8, 28}, {70, 51});
-  ASSERT_EQ(actual.get_path().size(), 0);
-  ASSERT_NEAR(actual.get_length(), -1, 0.001);
+  ASSERT_FALSE(MapTest::main_map->path({8, 28}, {70, 51}));
 }
 
 TEST_F(MapTest, ClosedDoorToOpenDoor) {
-  auto actual = MapTest::main_map->path({70, 51}, {8, 28});
-  ASSERT_EQ(actual.get_path().size(), 0);
-  ASSERT_NEAR(actual.get_length(), -1, 0.001);
+  ASSERT_FALSE(MapTest::main_map->path({70, 51}, {8, 28}));
 }
 
 TEST_F(MapTest, ClosedDoorToSelf) {
-  auto actual = MapTest::main_map->path({71, 18}, {71, 18});
-  ASSERT_EQ(actual.get_path().size(), 0);
-  ASSERT_NEAR(actual.get_length(), -1, 0.001);
+  ASSERT_FALSE(MapTest::main_map->path({71, 18}, {71, 18}));
 }
 
 TEST_F(MapTest, ClosedDoorToSpace) {
-  auto actual = MapTest::main_map->path({71, 18}, {68, 18});
-  ASSERT_EQ(actual.get_path().size(), 0);
-  ASSERT_NEAR(actual.get_length(), -1, 0.001);
+  ASSERT_FALSE(MapTest::main_map->path({71, 18}, {68, 18}));
 }
 
 TEST_F(MapTest, SpaceToClosedDoor) {
-  auto actual = MapTest::main_map->path({68, 18}, {71, 18});
-  ASSERT_EQ(actual.get_path().size(), 0);
-  ASSERT_NEAR(actual.get_length(), -1, 0.001);
+  ASSERT_FALSE(MapTest::main_map->path({68, 18}, {71, 18}));
 }
 
