@@ -97,7 +97,11 @@ int main(int argc, char** argv) {
       }
     }
   }
+  timer();
   Map my_map(std::move(mb));
+  std::cout << "Flood fill time: " << timer() << std::endl;
+  my_map.rebuild_equivalence_classes();
+  std::cout << "Transitive closure time: " << timer() << std::endl;
 
   MicropatherGraph mgraph(&my_map);
 
