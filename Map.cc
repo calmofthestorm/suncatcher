@@ -16,14 +16,9 @@
 namespace suncatcher {
 namespace pathfinder {
 
-const uint32_t COMPONENT_MULTIPLE = (uint32_t)-1;
-const uint32_t COMPONENT_UNKNOWN = (uint32_t)-2;
-const uint32_t COMPONENT_IMPASSABLE = (uint32_t)-3;
-
 using suncatcher::util::Grid;
 using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
-
 
 MapBuilder::MapBuilder(const Coord& size, uint8_t cost)
 : data(size, cost),
@@ -192,60 +187,6 @@ bool Map::same_equivalence_class(Coord a, Coord b) const {
     }
   return false;
   }
-}
-
-float Map::move_cost(Coord start, Coord finish) const {
-  assert(check_bounds(start));
-  assert(check_bounds(finish));
-  assert(std::abs(start.row - finish.row) <= 1 &&
-         std::abs(start.col - finish.col) <= 1);
-  assert(is_passable(start));
-  if (start == finish) {
-    return 0;
-  }
-
-  if (start.row == finish.row || start.col == finish.col) {
-    return data.at(finish);
-  }
-
-  // Can only move diagonally if Manhattan squares are passable.
-  if (is_passable({start.row, finish.col}) || is_passable({finish.row, start.col})) {
-    return data.at(finish) * 1.4142135623730951;;
-  } else {
-    return -1;
-  }
-}
-
-bool Map::is_transparent(Coord cell) const {
-  assert(check_bounds(cell));
-  if (component.at(cell) == COMPONENT_MULTIPLE) {
-    return false;
-  } else {
-    return data.at(cell) != PATH_COST_INFINITE;
-  }
-}
-
-bool Map::is_opaque(Coord cell) const {
-  assert(check_bounds(cell));
-  if (component.at(cell) == COMPONENT_MULTIPLE) {
-    return !(doors.at(cell).open);
-  } else {
-    return data.at(cell) == PATH_COST_INFINITE;
-  }
-}
-
-bool Map::is_passable(Coord cell) const {
-  assert(check_bounds(cell));
-  assert(component.at(cell) != COMPONENT_UNKNOWN);
-  bool rval = (data.at(cell) != PATH_COST_INFINITE);
-  #ifndef NDEBUG
-  if (component.at(cell) == COMPONENT_MULTIPLE) {
-    assert(rval == doors.at(cell).open);
-  } else {
-    assert((component.at(cell) != COMPONENT_IMPASSABLE) == rval);
-  }
-  #endif
-  return rval;
 }
 
 std::vector<Coord> Map::path(const Coord& src, const Coord& dst) const {

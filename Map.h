@@ -29,6 +29,10 @@ namespace pathfinder {
 
 const uint8_t PATH_COST_INFINITE = (uint8_t)-1;
 
+const uint32_t COMPONENT_MULTIPLE = (uint32_t)-1;
+const uint32_t COMPONENT_UNKNOWN = (uint32_t)-2;
+const uint32_t COMPONENT_IMPASSABLE = (uint32_t)-3;
+
 class MapBuilder;
 
 class Map {
@@ -51,17 +55,63 @@ class Map {
 
     // Returns the current cost to move from start to finish. The two must
     // be adjacent (including diagonal). Start must be passable.
-    float move_cost(pathfinder::Coord start, pathfinder::Coord finish) const;
+    inline float move_cost(Coord start, Coord finish) const {
+      assert(check_bounds(start));
+      assert(check_bounds(finish));
+      assert(std::abs(start.row - finish.row) <= 1 &&
+            std::abs(start.col - finish.col) <= 1);
+      assert(is_passable(start));
+      if (start == finish) {
+        return 0;
+      }
+
+      if (start.row == finish.row || start.col == finish.col) {
+        return data.at(finish);
+      }
+
+      // Can only move diagonally if Manhattan squares are passable.
+      if (is_passable({start.row, finish.col}) || is_passable({finish.row, start.col})) {
+        return data.at(finish) * 1.4142135623730951;;
+      } else {
+        return -1;
+      }
+    }
 
     // True iff the cell is always passable to all movement modes and factions.
     // Thus, returns false for doors regardless of state.
-    bool is_transparent(pathfinder::Coord cell) const;
+    inline bool is_transparent(Coord cell) const {
+      assert(check_bounds(cell));
+      if (component.at(cell) == COMPONENT_MULTIPLE) {
+        return false;
+      } else {
+        return data.at(cell) != PATH_COST_INFINITE;
+      }
+    }
 
     // True iff the cell is always impassable to all movement modes and factions.
-    bool is_opaque(pathfinder::Coord cerr) const;
+    inline bool is_opaque(Coord cell) const {
+      assert(check_bounds(cell));
+      if (component.at(cell) == COMPONENT_MULTIPLE) {
+        return !(doors.at(cell).open);
+      } else {
+        return data.at(cell) == PATH_COST_INFINITE;
+      }
+    }
 
     // True iff the cell is currently passable.
-    bool is_passable(pathfinder::Coord cell) const;
+    inline bool is_passable(Coord cell) const {
+      assert(check_bounds(cell));
+      assert(component.at(cell) != COMPONENT_UNKNOWN);
+      bool rval = (data.at(cell) != PATH_COST_INFINITE);
+      #ifndef NDEBUG
+      if (component.at(cell) == COMPONENT_MULTIPLE) {
+        assert(rval == doors.at(cell).open);
+      } else {
+        assert((component.at(cell) != COMPONENT_IMPASSABLE) == rval);
+      }
+      #endif
+      return rval;
+    }
 
     bool get_door(Coord cell) const;
     void set_door(Coord cell, bool open);
