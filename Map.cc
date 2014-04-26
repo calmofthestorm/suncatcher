@@ -64,7 +64,6 @@ bool Map::get_door(Coord cell) const {
 }
 
 void Map::set_door(Coord cell, bool open) {
-  std::cout << open << std::endl;
   doors.at(cell).open = open;
   data.at(cell) = open ? doors.at(cell).cost_open : doors.at(cell).cost_closed;
 }
@@ -222,7 +221,7 @@ std::vector<Coord> Map::path(const Coord& src, const Coord& dst) const {
 
   while (!fringe.empty()) {
     Entry cur = fringe.top();
-    assert(is_occupiable(cur.pos));
+    assert(is_passable(cur.pos));
     fringe.pop();
     expanded.at(cur.pos) = 1;
     ++num_expanded;

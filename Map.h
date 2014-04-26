@@ -56,11 +56,15 @@ class Map {
     // Returns the current cost to move from start to finish. The two must
     // be adjacent (including diagonal). Start must be passable.
     inline float move_cost(Coord start, Coord finish) const {
-      assert(check_bounds(start));
-      assert(check_bounds(finish));
+      assert(data.check_bounds(start));
+      assert(data.check_bounds(finish));
       assert(std::abs(start.row - finish.row) <= 1 &&
             std::abs(start.col - finish.col) <= 1);
       assert(is_passable(start));
+      if (!is_passable(finish)) {
+        return -1;
+      }
+
       if (start == finish) {
         return 0;
       }
@@ -80,7 +84,7 @@ class Map {
     // True iff the cell is always passable to all movement modes and factions.
     // Thus, returns false for doors regardless of state.
     inline bool is_transparent(Coord cell) const {
-      assert(check_bounds(cell));
+      assert(data.check_bounds(cell));
       if (component.at(cell) == COMPONENT_MULTIPLE) {
         return false;
       } else {
@@ -90,7 +94,7 @@ class Map {
 
     // True iff the cell is always impassable to all movement modes and factions.
     inline bool is_opaque(Coord cell) const {
-      assert(check_bounds(cell));
+      assert(data.check_bounds(cell));
       if (component.at(cell) == COMPONENT_MULTIPLE) {
         return !(doors.at(cell).open);
       } else {
@@ -100,7 +104,7 @@ class Map {
 
     // True iff the cell is currently passable.
     inline bool is_passable(Coord cell) const {
-      assert(check_bounds(cell));
+      assert(data.check_bounds(cell));
       assert(component.at(cell) != COMPONENT_UNKNOWN);
       bool rval = (data.at(cell) != PATH_COST_INFINITE);
       #ifndef NDEBUG

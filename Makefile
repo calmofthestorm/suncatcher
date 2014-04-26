@@ -1,7 +1,7 @@
 CXX=g++
 RM=rm -f
-CPPFLAGS=-std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra -O3 -DNDEBUG # -ggdb -gstabsa
-# CPPFLAGS=-std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra -ggdb -gstabs
+# CPPFLAGS=-std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra -O3 -DNDEBUG # -ggdb -gstabsa
+CPPFLAGS=-std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra -ggdb -gstabs
 LDFLAGS=-pthread -gstabs -g -ggdb
 LDLIBS=
 
