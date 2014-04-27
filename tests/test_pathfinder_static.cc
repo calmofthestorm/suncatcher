@@ -210,3 +210,16 @@ TEST_F(MapTest, ClosedDoorToSpace) {
 TEST_F(MapTest, SpaceToClosedDoor) {
   ASSERT_FALSE(MapTest::main_map->path({68, 18}, {71, 18}));
 }
+
+// Welcome to Doorland
+
+
+TEST_F(MapTest, DoorlandLockedDoorWall) {
+  Coord inside{2, 2};
+  doorland_map->print_components(std::cout);
+  ASSERT_FALSE(doorland_map->path(inside, {1, 4}));
+  ASSERT_FALSE(doorland_map->path(inside, {2, 4}));
+  ASSERT_FALSE(doorland_map->path(inside, {3, 4}));
+  ASSERT_FALSE(doorland_map->path(inside, {1, 3}));
+  ASSERT_FALSE(doorland_map->path(inside, {3, 3}));
+}

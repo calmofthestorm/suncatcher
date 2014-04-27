@@ -65,6 +65,7 @@ class MPWrapper {
 };
 #endif
 
+// TODO: ugh
 class MapTest : public ::testing::Test {
   protected:
     static void SetUpTestCase() {
@@ -83,6 +84,11 @@ class MapTest : public ::testing::Test {
         micro_map_builder.reset(new MapBuilder(is));
         micro_map.reset(new Map(MapBuilder(*micro_map_builder.get())));
       }
+      {
+        std::ifstream is("maps/doorland.txt");
+        doorland_map_builder.reset(new MapBuilder(is));
+        doorland_map.reset(new Map(MapBuilder(*doorland_map_builder.get())));
+      }
       #ifdef MICROPATHER_DELTA_TEST
         empty_mp.reset(new MPWrapper(empty_map.get()));
         main_mp.reset(new MPWrapper(main_map.get()));
@@ -90,9 +96,9 @@ class MapTest : public ::testing::Test {
     }
 
   public:
-    static std::unique_ptr<const MapBuilder> empty_map_builder, main_map_builder, micro_map_builder;
-    static std::unique_ptr<const Map> empty_map, main_map, micro_map;
-    static std::unique_ptr<MPWrapper> empty_mp, main_mp, micro_mp;
+    static std::unique_ptr<const MapBuilder> empty_map_builder, main_map_builder, micro_map_builder, doorland_map_builder;
+    static std::unique_ptr<const Map> empty_map, main_map, micro_map, doorland_map;
+    static std::unique_ptr<MPWrapper> empty_mp, main_mp, micro_mp, doorland_mp;
 };
 
 //TODO: so not ok...figure out how to do this right

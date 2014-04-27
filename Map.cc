@@ -290,6 +290,8 @@ MapMutator Map::get_mutator() {
 
 // Changes the world immediately, doing all necessary computations.
 void Map::mutate(MapMutator&& mutation) {
+  assert(mutation.version == version);
+  ++version;
   for (const auto& it : mutation.mutations) {
     auto door_iter = doors.find(it.first);
     switch(it.second.kind) {
@@ -398,7 +400,8 @@ void Map::clear_cache() {
   for (auto& door : doors) {
     door.second.adjacent_components.clear();
     for (const auto& n : data.get_adjacent(door.first)) {
-      if (is_transparent(n) && move_cost(n, door.first) != PATH_COST_INFINITE) {
+      if (is_transparent(n) &&
+          (is_transparent({n.row, door.first.col}) || is_transparent({door.first.row, n.col}))) {
         int c = component.at(n.row, n.col);
         if (c >= 0 && std::find(
                   door.second.adjacent_components.begin(),
