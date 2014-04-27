@@ -8,9 +8,11 @@ namespace suncatcher {
 namespace pathfinder {
 
 MapMutator::MapMutator(Map* map_in)
-: map(map_in) {
+: map(map_in),
+  version(0) {
   if (map_in) {
     map_in->notify_mutator_created();
+    version = map_in->version;
   }
 }
 

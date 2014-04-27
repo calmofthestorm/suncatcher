@@ -10,7 +10,7 @@ inline Grid<T>::Grid()
   backing() { }
 
 template <typename T>
-inline Grid<T>::Grid(const suncatcher::pathfinder::Coord& size_in, const T& val)
+inline Grid<T>::Grid(const suncatcher::pathfinder::Coord size_in, const T& val)
 : my_size(size_in),
   backing(size_in.row * size_in.col, val) { }
 
@@ -24,12 +24,12 @@ inline void Grid<T>::fill(const T& val) {
 }
 
 template <typename T>
-inline T& Grid<T>::at(const suncatcher::pathfinder::Coord& cell) {
+inline T& Grid<T>::at(const suncatcher::pathfinder::Coord cell) {
   return at(cell.row, cell.col);
 }
 
 template <typename T>
-inline const T& Grid<T>::at(const suncatcher::pathfinder::Coord& cell) const {
+inline const T& Grid<T>::at(const suncatcher::pathfinder::Coord cell) const {
   return at(cell.row, cell.col);
 }
 
@@ -48,9 +48,9 @@ inline T& Grid<T>::at(uint16_t row, uint16_t col) {
 //TODO: evaluate cache performance of ordering.
 template <typename T>
 inline std::vector<suncatcher::pathfinder::Coord> Grid<T>::get_adjacent(
-    const suncatcher::pathfinder::Coord& cell
+    const suncatcher::pathfinder::Coord cell
     ) const {
-  static const std::vector<suncatcher::pathfinder::Coord> ADJ_DELTA{
+  const static std::vector<suncatcher::pathfinder::Coord> ADJ_DELTA{
     {0, (uint16_t)-1}, {(uint16_t)-1, 0}, {1, 0},
       {(uint16_t)-1, (uint16_t)-1}, {1, 1},
       {(uint16_t)-1, 1}, {1, (uint16_t)-1}, {0, 1}
@@ -69,7 +69,7 @@ inline std::vector<suncatcher::pathfinder::Coord> Grid<T>::get_adjacent(
 }
 
 template <typename T>
-inline bool Grid<T>::check_bounds(const suncatcher::pathfinder::Coord& cell) const {
+inline bool Grid<T>::check_bounds(const suncatcher::pathfinder::Coord cell) const {
   return check_bounds(cell.row, cell.col);
 }
 

@@ -258,11 +258,12 @@ Path Map::path(const Coord& src, const Coord& dst) const {
 }
 
 Map::Map(MapBuilder&& builder)
-: outstanding_mutators(0),
+: version(0),
+  outstanding_mutators(0),
   data(std::move(builder.data)),
   doors(std::move(builder.doors)) {
 
-  rebuild_cache();
+  clear_cache();
 }
 
 // TODO: evaluate whether a dynamic algorithm (eg union-find) makes sense here
@@ -287,7 +288,48 @@ void Map::rebuild_equivalence_classes() {
   }
 }
 
-void Map::rebuild_cache() {
+MapMutator Map::get_mutator() {
+  return MapMutator(this);
+}
+
+// Changes the world immediately, doing all necessary computations.
+void Map::mutate(MapMutator&& mutation) {
+  for (const auto& it : mutation.mutations) {
+    auto door_iter = doors.find(it.first);
+    switch(it.second.kind) {
+      case MapMutator::Mutation::Kind::CREATE_DOOR:
+        assert(door_iter == doors.end());
+        assert(it.second.cost != PATH_COST_INFINITE);
+        doors.at(it.first) = Door{it.second.state, it.second.cost, PATH_COST_INFINITE, {}};
+        break;
+
+      case MapMutator::Mutation::Kind::REMOVE_DOOR:
+        assert(door_iter != doors.end());
+        doors.erase(door_iter);
+        data.at(it.first) = it.second.cost;
+        break;
+
+      case MapMutator::Mutation::Kind::SET_COST:
+        assert(door_iter == doors.end());
+        data.at(it.first) = it.second.cost;
+        break;
+
+      case MapMutator::Mutation::Kind::UPDATE_DOOR:
+        assert(door_iter != doors.end());
+        doors.erase(door_iter);
+        data.at(it.first) = it.second.cost;
+        break;
+
+      default:
+        assert(0);
+
+    }
+  }
+  clear_cache(); // TODO: lol dynamic is the whole point;)
+}
+
+// Forces recomputation of all cached information.
+void Map::clear_cache() {
   component = Grid<uint32_t>(size(), COMPONENT_UNKNOWN);
   component.fill(COMPONENT_UNKNOWN);
 
@@ -346,23 +388,6 @@ void Map::rebuild_cache() {
 
   equivalent_components.resize(index);
   rebuild_equivalence_classes();
-}
-
-MapMutator Map::get_mutator() {
-  return MapMutator(this);
-}
-
-// Changes the world immediately, doing all necessary computations. The
-// mutator is cleared to clean state.
-void Map::mutate(MapMutator&& mutation) {
-  // TODO IMPL
-  assert(0);
-}
-
-// Forces recomputation of all cached information.
-void Map::clear_cache() {
-  // TODO IMPL
-  assert(0);
 }
 
 MapBuilder::MapBuilder(std::istream& is) {

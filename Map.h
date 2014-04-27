@@ -136,9 +136,9 @@ class Map {
 
     void update_equivalence(const pathfinder::Coord& pos, bool new_state);
 
-    void rebuild_cache();
     void rebuild_equivalence_classes();
 
+    size_t version;
     size_t outstanding_mutators;
     suncatcher::util::Grid<uint_least8_t> data;
     suncatcher::util::Grid<uint_least32_t> component;
@@ -168,6 +168,7 @@ class MapBuilder {
 
   private:
     friend class Map;
+    size_t version;
     suncatcher::util::Grid<uint8_t> data;
     std::map<const Coord, Door> doors;
 };

@@ -21,23 +21,23 @@ class Grid {
   public:
     inline Grid();
 
-    inline Grid(const suncatcher::pathfinder::Coord& size_in, const T& val);
+    inline Grid(const suncatcher::pathfinder::Coord size_in, const T& val);
 
     inline Grid(uint16_t r, uint16_t c, const T& val);
 
     inline void fill(const T& val);
 
-    inline T& at(const suncatcher::pathfinder::Coord& cell);
-    inline const T& at(const suncatcher::pathfinder::Coord& cell) const;
+    inline T& at(const suncatcher::pathfinder::Coord cell);
+    inline const T& at(const suncatcher::pathfinder::Coord cell) const;
 
     inline T& at(uint16_t row, uint16_t col);
     inline const T& at(uint16_t row, uint16_t col) const;
 
     inline std::vector<suncatcher::pathfinder::Coord> get_adjacent(
-        const suncatcher::pathfinder::Coord& cell
+        const suncatcher::pathfinder::Coord cell
       ) const;
 
-    inline bool check_bounds(const suncatcher::pathfinder::Coord& cell) const;
+    inline bool check_bounds(const suncatcher::pathfinder::Coord cell) const;
     inline bool check_bounds(uint16_t row, uint16_t col) const;
 
     inline const suncatcher::pathfinder::Coord& size() const;

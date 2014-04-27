@@ -77,6 +77,7 @@ class MapMutator {
 
   private:
     Map* map;
+    size_t version;
     std::map<Coord, Mutation> mutations;
 };
 
