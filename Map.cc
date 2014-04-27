@@ -63,36 +63,6 @@ void Map::print_map(std::ostream& os, const Path& path) const {
   }
 }
 
-// TODO: evaluate if an incremental data struture (eg union find) does
-// better than eager transitive closure in practice.
-// TODO: evaluate if we can do this more efficiently.
-void Map::update_equivalence(const Coord&, bool) {
-  // if (new_state) {
-  //   auto bridged = doors[find_door(pos)].get_adjacent_components();
-  //   // Slight savings available with partially-incremental update.
-  // }
-  for (size_t i = 0; i < equivalent_components.size(); ++i) {
-    equivalent_components[i] = i;
-  }
-
-  for (const auto& d : doors) {
-    if (d.second.open) {
-      auto bridged = d.second.adjacent_components;
-      int class1 = find_representative(equivalent_components, bridged.front());
-      for (auto it = bridged.begin() + 1; it < bridged.end(); ++it) {
-        int class2 = find_representative(equivalent_components, *it);
-        equivalent_components[class2] = class1;
-      }
-    }
-  }
-
-  // Transitive closure
-  // TODO: faster; path compression
-  for (size_t i = 0; i < equivalent_components.size(); ++i) {
-    equivalent_components[i] = find_representative(equivalent_components, i);
-  }
-}
-
 void Map::print_components(std::ostream& os) const {
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
@@ -137,7 +107,6 @@ bool Map::path_exists(Coord a, Coord b) const {
   // If either is an open door, then we must check multiple equivalence classes.
   uint_least32_t component_a = component.at(a);
   uint_least32_t component_b = component.at(b);
-  assert(true);
   assert((doors.find(a) != doors.end()) == (component_a == COMPONENT_MULTIPLE));
   assert((doors.find(b) != doors.end()) == (component_b == COMPONENT_MULTIPLE));
   if (component_a != COMPONENT_MULTIPLE && component_b != COMPONENT_MULTIPLE) {
@@ -155,6 +124,7 @@ bool Map::path_exists(Coord a, Coord b) const {
       auto door_a = doors.find(a);
       auto door_b = doors.find(b);
       // Both are doors.
+      // TODO: eager closure makes the find_representative unnecessary.
       for (const uint_least32_t& subcomponent_a : door_a->second.adjacent_components) {
         for (const uint_least32_t& subcomponent_b : door_b->second.adjacent_components) {
           if (find_representative(equivalent_components, subcomponent_a) ==
@@ -237,7 +207,6 @@ Path Map::path(const Coord& src, const Coord& dst) const {
         rval.push_back(previous.at(rval.back()));
       }
       std::reverse(rval.begin(), rval.end());
-      // std::cout << "dist is " << distance.at(dst) << std::endl;
       return Path(std::move(rval), distance.at(dst));
     }
 
@@ -265,6 +234,7 @@ Map::Map(MapBuilder&& builder)
 
   clear_cache();
 }
+
 
 // TODO: evaluate whether a dynamic algorithm (eg union-find) makes sense here
 void Map::rebuild_equivalence_classes() {
