@@ -68,7 +68,11 @@ void Map::print_components(std::ostream& os) const {
     for (uint16_t i = 0; i < size().col; ++i) {
       uint32_t c = component.at(j, i);
       if (c == COMPONENT_MULTIPLE) {
-        os << 'd';
+        if (doors.find({j, i})->second.open) {
+          os << '_';
+        } else {
+          os << 'd';
+        }
       } else if (!is_opaque({j, i})) {
         os << (char)(c + 'A');
       } else {
@@ -77,6 +81,23 @@ void Map::print_components(std::ostream& os) const {
     }
     os << std::endl;
   }
+  os << std::endl;
+  for (size_t i = 0; i < equivalent_components.size(); ++i) {
+    std::vector<uint32_t> equiv;
+    for (size_t j = 0; j < equivalent_components.size(); ++j) {
+      if (equivalent_components[j] == i) {
+        equiv.push_back(j);
+      }
+    }
+    if (!equiv.empty()) {
+      os << i << ": ";
+      for (const auto& it : equiv) {
+        os << ((char)('A' + it));
+      }
+      os << std::endl;
+    }
+  }
+  os << std::endl;
 }
 
 void Map::print_equivalence_classes(std::ostream& os) const {
