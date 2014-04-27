@@ -284,7 +284,7 @@ TEST_F(DynamicMicroMapTest, NonUniformHillGoAround) {
 
 
 // Create an expensive "ridge" but path into it explicitely.
-TEST_F(DynamicMicroMapTest, NonUniformHillYouMustClimbIt) {
+TEST_F(DynamicMicroMapTest, DeliciousNonUniformHillYouMustClimbIt) {
   Coord src{5, 7};
   Coord dst{6, 7};
   auto actual = map->path(src, dst);
@@ -482,3 +482,24 @@ TEST_F(DynamicMicroMapTest, OpenDoorAndGoThroughAsShortcut) {
 }
 
 
+TEST_F(DynamicMicroMapTest, DoorToDoorTogglingFun) {
+  Coord outer_door{6, 4};
+  Coord inner_door{8, 4};
+
+  for (size_t i = 0; i < 4; ++i) {
+    ASSERT_FALSE(map->path(outer_door, inner_door));
+    ASSERT_FALSE(map->path(inner_door, outer_door));
+    map->mutate(std::move(map->get_mutator().toggle_door_open(inner_door)));
+    ASSERT_FALSE(map->path(outer_door, inner_door));
+    ASSERT_FALSE(map->path(inner_door, outer_door));
+    map->mutate(std::move(map->get_mutator().toggle_door_open(outer_door)));
+    ASSERT_FALSE(map->path(outer_door, inner_door));
+    ASSERT_FALSE(map->path(inner_door, outer_door));
+    map->mutate(std::move(map->get_mutator().toggle_door_open(inner_door)));
+    ASSERT_TRUE((bool)map->path(outer_door, inner_door));
+    ASSERT_TRUE((bool)map->path(inner_door, outer_door));
+    map->mutate(std::move(map->get_mutator().toggle_door_open(outer_door)));
+    ASSERT_FALSE(map->path(outer_door, inner_door));
+    ASSERT_FALSE(map->path(inner_door, outer_door));
+  }
+}
