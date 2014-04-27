@@ -80,7 +80,7 @@ class Map {
     inline Coord size() const { return data.size(); }
 
     // Returns a constant reference to the mapping from coordinates to doors.
-    const std::map<Coord, Door>& get_doors() const { return doors; }
+    const std::map<const Coord, Door>& get_doors() const { return doors; }
 
     // Returns a constant reference to the underlying backing, for bounds
     // checks, direct access, etc.
@@ -143,7 +143,7 @@ class Map {
     suncatcher::util::Grid<uint_least8_t> data;
     suncatcher::util::Grid<uint_least32_t> component;
     std::vector<uint_least32_t> equivalent_components;
-    std::map<pathfinder::Coord, Door> doors;
+    std::map<const Coord, Door> doors;
 };
 
 class MapBuilder {
@@ -169,7 +169,7 @@ class MapBuilder {
   private:
     friend class Map;
     suncatcher::util::Grid<uint8_t> data;
-    std::map<pathfinder::Coord, Door> doors;
+    std::map<const Coord, Door> doors;
 };
 
 }  // namespace pathfinder
