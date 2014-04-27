@@ -16,7 +16,7 @@
 // into memory pressure.
 //
 // The code has undergone substantial refactoring since then, however, so this
-// may were three visiting in the future.
+// may need revisiting in the future.
 
 #include <iostream>
 #include <map>
@@ -25,6 +25,8 @@
 #include "Grid.h"
 #include "Path.h"
 #include "MapMutator.h"
+#include "DynamicDisjointSets.h"
+
 
 namespace suncatcher {
 namespace pathfinder {
@@ -134,16 +136,26 @@ class Map {
     inline void notify_mutator_destroyed() { --outstanding_mutators; }
     inline void notify_mutator_created() { ++outstanding_mutators;};
 
-    void update_equivalence(const pathfinder::Coord& pos, bool new_state);
-
     void rebuild_equivalence_classes();
 
+    // Mutator synchronization state
     size_t version;
     size_t outstanding_mutators;
+
+    // Cost to traverse terrain.
     suncatcher::util::Grid<uint_least8_t> data;
-    suncatcher::util::Grid<uint_least32_t> component;
-    std::vector<uint_least32_t> equivalent_components;
+
+    // All registered doors, and the static components they bridge.
     std::map<const Coord, Door> doors;
+
+    // Which static component the cell is a member of.
+    suncatcher::util::Grid<uint_least32_t> component;
+
+    // Dynamic component tracking -- organizes static components (rooms) into
+    // dynamic components (reachability). This lets us minimize expensive
+    // operations such as DFS to determine connected components by performing
+    // the frequent ones on a simplified graph.
+    util::DynamicDisjointSets<Coord> dynamic_component;
 };
 
 class MapBuilder {

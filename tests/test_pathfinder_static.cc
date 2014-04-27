@@ -221,5 +221,18 @@ TEST_F(MapTest, DoorlandLockedDoorWall) {
   ASSERT_FALSE(doorland_map->path(inside, {2, 4}));
   ASSERT_FALSE(doorland_map->path(inside, {3, 4}));
   ASSERT_FALSE(doorland_map->path(inside, {1, 3}));
+  ASSERT_FALSE(doorland_map->path(inside, {2, 3}));
   ASSERT_FALSE(doorland_map->path(inside, {3, 3}));
+}
+
+
+TEST_F(MapTest, DoorlandOpenDoorWall) {
+  Coord inside{2, 6};
+  doorland_map->print_components(std::cout);
+  ASSERT_FALSE(doorland_map->path(inside, {1, 8}));
+  // ASSERT_FALSE(doorland_map->path(inside, {2, 8}));
+  // ASSERT_FALSE(doorland_map->path(inside, {3, 8}));
+  // ASSERT_FALSE(doorland_map->path(inside, {1, 7}));
+  // ASSERT_FALSE(doorland_map->path(inside, {2, 7}));
+  // ASSERT_FALSE(doorland_map->path(inside, {3, 7}));
 }
