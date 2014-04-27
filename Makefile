@@ -2,7 +2,7 @@ CXX=g++
 RM=rm -f
 
 COMMON_FLAGS=-I. -std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra
-DEBUG_FLAGS=-g -ggdb -gstabs -Og
+DEBUG_FLAGS=-g -ggdb -gstabs -O0 -fno-inline-functions
 PROFILE_FLAGS=-O3 -DNDEBUG
 
 # CPPFLAGS=$(COMMON_FLAGS) $(PROFILE_FLAGS)
@@ -12,7 +12,7 @@ LDFLAGS=-pthread -gstabs -g -ggdb
 LDLIBS=
 
 SRCS=Map.cc micropather/micropather.cc MapMutator.cc
-TEST_SRCS=tests/test_main.cc tests/test_pathfinder.cc
+TEST_SRCS=tests/test_main.cc tests/test_pathfinder_static.cc tests/test_pathfinder_mutation.cc tests/test_pathfinder_common.cc
 OBJS=$(subst .cc,.o,$(SRCS))
 TEST_OBJS=$(subst .cc,.o,$(TEST_SRCS))
 

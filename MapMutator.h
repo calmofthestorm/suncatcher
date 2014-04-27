@@ -21,6 +21,10 @@ class Map;
 //
 // This restriction is in place due to the complexity of tracking changes and
 // lack of a compelling use case.
+//
+// NOTE: currently multiple cell mutations are applied sequentially, which is
+// inefficient (IE, no advantage over one call to Map::mutate per affected
+// cell). I plan to fix this later.
 class MapMutator {
   public:
     // Sets/toggles a door's openness state Asserts cell is a door. Opening a

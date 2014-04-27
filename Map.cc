@@ -277,6 +277,11 @@ void Map::rebuild_equivalence_classes() {
       }
     }
   }
+
+  // TODO: SLOOOOOOOOOOOOOOW
+  for (size_t i = 0; i < equivalent_components.size(); ++i) {
+    equivalent_components[i] = find_representative(equivalent_components, i);
+  }
 }
 
 MapMutator Map::get_mutator() {
@@ -291,7 +296,12 @@ void Map::mutate(MapMutator&& mutation) {
       case MapMutator::Mutation::Kind::CREATE_DOOR:
         assert(door_iter == doors.end());
         assert(it.second.cost != PATH_COST_INFINITE);
-        doors.at(it.first) = Door{it.second.state, it.second.cost, PATH_COST_INFINITE, {}};
+        doors[it.first] = Door{it.second.state, it.second.cost, PATH_COST_INFINITE, {}};
+        if (it.second.state) {
+          data.at(it.first) = it.second.cost;
+        } else {
+          data.at(it.first) = PATH_COST_INFINITE;
+        }
         break;
 
       case MapMutator::Mutation::Kind::REMOVE_DOOR:
@@ -307,8 +317,16 @@ void Map::mutate(MapMutator&& mutation) {
 
       case MapMutator::Mutation::Kind::UPDATE_DOOR:
         assert(door_iter != doors.end());
-        doors.erase(door_iter);
-        data.at(it.first) = it.second.cost;
+        door_iter->second.open ^= it.second.state;
+        // Internally we use PATH_COST_INFINITE to represent the current value.
+        if (it.second.cost != PATH_COST_INFINITE) {
+          door_iter->second.cost_open = it.second.cost;
+        }
+        if (door_iter->second.open) {
+          data.at(it.first) = door_iter->second.cost_open;
+        } else {
+          data.at(it.first) = PATH_COST_INFINITE;
+        }
         break;
 
       default:
@@ -332,7 +350,7 @@ void Map::clear_cache() {
   // Identify connected components, stopping at walls and doors. We also mark
   // doors and walls with the appropriate component value.
   uint16_t restart_row = 0;
-  int index = 0;
+  uint32_t index = 0;
   while (restart_row < size().row) {
     uint16_t restart_col = 0;
     while (restart_col < size().col) {
@@ -348,7 +366,8 @@ void Map::clear_cache() {
           todo.pop();
           // Explore neighbors.
           for (const auto& n : data.get_adjacent(cur)) {
-            if (is_transparent(n) && component.at(n) == COMPONENT_UNKNOWN) {
+            if (is_transparent(n) && component.at(n) == COMPONENT_UNKNOWN &&
+                (is_transparent({n.row, cur.col}) || is_transparent({cur.row, n.col}))) {
               todo.push(n);
               component.at(n) = component.at(cur);
             }
@@ -363,16 +382,31 @@ void Map::clear_cache() {
     ++restart_row;
   }
 
+  #ifndef NDEBUG
+  for (size_t j = 0;j < size().row; ++j) {
+    for (size_t i = 0; i < size().col; ++i) {
+      assert(
+          component.at(j, i) < index ||
+          component.at(j, i) == COMPONENT_MULTIPLE ||
+          component.at(j, i) == COMPONENT_IMPASSABLE
+        );
+    }
+  }
+  #endif
+
   // Identify all adjacent components for doors.
   for (auto& door : doors) {
+    door.second.adjacent_components.clear();
     for (const auto& n : data.get_adjacent(door.first)) {
-      int c = component.at(n.row, n.col);
-      if (c >= 0 && std::find(
-                door.second.adjacent_components.begin(),
-                door.second.adjacent_components.end(),
-                c
-            ) == door.second.adjacent_components.end()) {
-        door.second.adjacent_components.push_back(c);
+      if (is_transparent(n) && move_cost(n, door.first) != PATH_COST_INFINITE) {
+        int c = component.at(n.row, n.col);
+        if (c >= 0 && std::find(
+                  door.second.adjacent_components.begin(),
+                  door.second.adjacent_components.end(),
+                  c
+              ) == door.second.adjacent_components.end()) {
+          door.second.adjacent_components.push_back(c);
+        }
       }
     }
   }

@@ -23,6 +23,7 @@ MapMutator::~MapMutator() {
 }
 
 MapMutator& MapMutator::set_door_open(Coord door, bool state) {
+  assert(map);
   auto door_it = map->get_doors().find(door);
   assert(door_it != map->get_doors().cend());
   assert(mutations.find(door) == mutations.end() ||
@@ -34,6 +35,7 @@ MapMutator& MapMutator::set_door_open(Coord door, bool state) {
 }
 
 MapMutator& MapMutator::toggle_door_open(Coord door) {
+  assert(map);
   auto door_it = map->get_doors().find(door);
   assert(door_it != map->get_doors().cend());
   assert(mutations.find(door) == mutations.end() ||
@@ -44,6 +46,7 @@ MapMutator& MapMutator::toggle_door_open(Coord door) {
 }
 
 MapMutator& MapMutator::set_door_open_cost(Coord door, uint_least8_t cost) {
+  assert(map);
   auto door_it = map->get_doors().find(door);
   assert(door_it != map->get_doors().cend());
   assert(cost != PATH_COST_INFINITE);
@@ -54,12 +57,14 @@ MapMutator& MapMutator::set_door_open_cost(Coord door, uint_least8_t cost) {
 }
 
 MapMutator& MapMutator::set_cost(Coord cell, uint_least8_t cost) {
+  assert(map);
   assert(map->get_doors().find(cell) == map->get_doors().cend());
   mutations[cell] = {Mutation::Kind::SET_COST, false, cost};
   return *this;
 }
 
 MapMutator& MapMutator::create_door(Coord cell, bool open, uint_least8_t open_cost) {
+  assert(map);
   assert(open_cost != PATH_COST_INFINITE);
   assert(map->get_doors().find(cell) == map->get_doors().cend());
   mutations[cell] = {Mutation::Kind::CREATE_DOOR, open, open_cost};
@@ -68,6 +73,7 @@ MapMutator& MapMutator::create_door(Coord cell, bool open, uint_least8_t open_co
 }
 
 MapMutator& MapMutator::remove_door(Coord cell, uint_least8_t new_cost) {
+  assert(map);
   assert(map->get_doors().find(cell) != map->get_doors().cend());
   mutations[cell] = {Mutation::Kind::REMOVE_DOOR, false, new_cost};
 

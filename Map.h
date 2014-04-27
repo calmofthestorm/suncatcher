@@ -168,7 +168,6 @@ class MapBuilder {
 
   private:
     friend class Map;
-    size_t version;
     suncatcher::util::Grid<uint8_t> data;
     std::map<const Coord, Door> doors;
 };
