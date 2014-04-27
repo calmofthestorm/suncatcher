@@ -424,7 +424,7 @@ TEST_F(DynamicMicroMapTest, Airlock) {
 
   // Add a wall to make it an airlock.
   auto mutator = map->get_mutator();
-  for (size_t i = 0; i <= 9; ++i) {
+  for (uint16_t i = 0; i <= 9; ++i) {
     if (i != 4) {
       mutator.set_cost({6, i}, PATH_COST_INFINITE);
     }
