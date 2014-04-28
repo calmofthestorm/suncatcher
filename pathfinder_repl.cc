@@ -123,6 +123,10 @@ int main(int argc, char** argv) {
       case 'e':
         my_map.print_equivalence_classes(std::cout);
         break;
+
+      default:
+        std::cout << "Commands: p <> <> <> <>; d <>; s; S; c; e" << std::endl;
+        break;
     }
 
     // my_map.print_components(std::cout);

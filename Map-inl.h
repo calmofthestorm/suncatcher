@@ -55,8 +55,8 @@ inline bool Map::is_door(Coord cell) const {
 }
 
 
-inline bool Map::is_door(uint_least32_t color) const {
-  return color >= door_base_color;
+inline bool Map::is_door(uint_least32_t cell_color) const {
+  return cell_color >= door_base_color;
 }
 
 

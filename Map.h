@@ -98,7 +98,7 @@ class Map {
     // coordinate or a (valid) color, since all doors have their own color.
     // Both are constant time.
     inline bool is_door(Coord cell) const;
-    inline bool is_door(uint_least32_t color) const;
+    inline bool is_door(uint_least32_t cell_color) const;
 
     // True iff the cell is always passable to all movement modes and factions.
     // Thus, returns false for doors regardless of state.
@@ -171,7 +171,7 @@ class Map {
 class MapBuilder {
   public:
     MapBuilder();
-    MapBuilder(Coord size, uint_least8_t cost);
+    MapBuilder(Coord size, uint_least8_t default_cost);
 
     // Load a MapBuilder from a simple text format. Intended mostly for
     // tests and debugging.

@@ -20,8 +20,8 @@ using suncatcher::util::Grid;
 using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
 
-MapBuilder::MapBuilder(Coord size, uint_least8_t cost)
-: data(size, cost),
+MapBuilder::MapBuilder(Coord size, uint_least8_t default_cost)
+: data(size, default_cost),
   dynamic_updates(true),
   doors() { }
 
@@ -36,8 +36,8 @@ Map::~Map() {
   assert(outstanding_mutators == 0);
 }
 
-void Map::print_map(std::ostream& os, const Path& path) const {
-  std::set<Coord> in_path(path.get_path().begin(), path.get_path().end());
+void Map::print_map(std::ostream& os, const Path& path_to_show) const {
+  std::set<Coord> in_path(path_to_show.get_path().begin(), path_to_show.get_path().end());
   size_t index = 0;
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
@@ -290,7 +290,10 @@ void Map::mutate(MapMutator&& mutation) {
 // Forces recomputation of all cached information.
 void Map::clear_cache() {
   dynamic_component = decltype(dynamic_component)();
-  auto is_transparent = [this] (Coord cell) {
+
+  // Temporary function for determining transparancy since doors have not
+  // yet been set to appropriate colors.
+  auto is_transparent_temporary = [this] (Coord cell) {
     if (color.at(cell) == COLOR_MULTIPLE) {
       return false;
     } else {
@@ -316,7 +319,7 @@ void Map::clear_cache() {
     restart.col = 0;
     while (restart.col < size().col) {
       if (color.at(restart) == COLOR_UNKNOWN &&
-          is_transparent(restart)) {
+          is_transparent_temporary(restart)) {
         // Flood fill colors.
         std::stack<Coord> todo;
         todo.push(restart);
@@ -327,14 +330,14 @@ void Map::clear_cache() {
           todo.pop();
           // Explore neighbors, but only Manhattan adjacent ones.
           for (const auto& n : data.get_adjacent(cur, false)) {
-            if (is_transparent(n) && color.at(n) == COLOR_UNKNOWN) {
+            if (is_transparent_temporary(n) && color.at(n) == COLOR_UNKNOWN) {
               todo.push(n);
               color.at(n) = color.at(cur);
             }
           }
         }
       } else if (color.at(restart) != COLOR_MULTIPLE &&
-                 !is_transparent(restart)) {
+                 !is_transparent_temporary(restart)) {
         color.at(restart) = COLOR_IMPASSABLE;
       }
       ++restart.col;
