@@ -152,6 +152,9 @@ class Map {
     // the frequent ones on a simplified graph.
     util::DynamicDisjointSets<uint_least32_t> dynamic_component;
 
+    // If false, rebuild the entire map after every mutation.
+    bool dynamic_updates;
+
     // All components less than door_base are non-doors. Any component >=
     // door_base, if valid, is a door.
     uint_least32_t door_base_component;
@@ -173,6 +176,8 @@ class MapBuilder {
       return data.at(cell);
     }
 
+    void enable_dynamic_updates(bool enabled) { dynamic_updates = enabled; }
+
     // Add a door to the given cell.
     void add_door(Coord cell, bool open, uint_least8_t cost_open,
                   uint_least8_t cost_closed);
@@ -180,6 +185,7 @@ class MapBuilder {
   private:
     friend class Map;
     suncatcher::util::Grid<uint_least8_t> data;
+    bool dynamic_updates;
     std::map<const Coord, Door> doors;
 };
 

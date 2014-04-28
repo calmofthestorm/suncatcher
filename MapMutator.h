@@ -69,7 +69,7 @@ class MapMutator {
 
   private:
     friend class Map;
-    MapMutator(Map* map_in);
+    MapMutator(Map* map_in, size_t version);
 
     struct Mutation {
       enum class Kind {UPDATE_DOOR, CREATE_DOOR, REMOVE_DOOR, SET_COST};

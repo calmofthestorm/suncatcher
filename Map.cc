@@ -22,6 +22,7 @@ using suncatcher::util::manhattan;
 
 MapBuilder::MapBuilder(Coord size, uint_least8_t cost)
 : data(size, cost),
+  dynamic_updates(true),
   doors() { }
 
 void MapBuilder::add_door(Coord cell, bool open, uint_least8_t cost_open,
@@ -36,7 +37,6 @@ Map::~Map() {
 }
 
 void Map::print_map(std::ostream& os, const Path& path) const {
-  // lol this is so bad...debugging only tho...
   std::set<Coord> in_path(path.get_path().begin(), path.get_path().end());
   size_t index = 0;
   for (uint16_t j = 0; j < size().row; ++j) {
@@ -182,6 +182,7 @@ Map::Map(MapBuilder&& builder)
   outstanding_mutators(0),
   data(std::move(builder.data)),
   doors(std::move(builder.doors)),
+  dynamic_updates(builder.dynamic_updates),
   door_base_component(0) {
 
   clear_cache();
@@ -189,7 +190,7 @@ Map::Map(MapBuilder&& builder)
 
 
 MapMutator Map::get_mutator() {
-  return MapMutator(this);
+  return MapMutator(this, version);
 }
 
 
@@ -231,6 +232,7 @@ void Map::mutate(MapMutator&& mutation) {
         door_iter->second.open ^= it.second.state;
 
         // Internally we use PATH_COST_INFINITE to represent the current value.
+        // Only MapMutator::*door* and Map::mutate need to know this.
         if (it.second.cost != PATH_COST_INFINITE) {
           door_iter->second.cost_open = it.second.cost;
         }
@@ -265,7 +267,7 @@ void Map::mutate(MapMutator&& mutation) {
     }
   }
 
-  if (dirty) {
+  if (dirty || !dynamic_updates) {
     clear_cache(); // TODO: lol dynamic is the whole point;)
   }
 }
