@@ -60,6 +60,9 @@ class DynamicDisjointSets {
     inline void remove_edge(T label1, T label2);
     inline void remove_edges(const std::vector<std::pair<T, T>>& edges);
 
+    // Remove all of the label's adjacent edges (but not it). Linear.
+    inline void isolate_component(T label);
+
     // Get a representative label for the given label. All nodes in an
     // equivalence class will have the same representative label. Note that
     // adding or removing edges may change the representative for any/all

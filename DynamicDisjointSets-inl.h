@@ -30,6 +30,18 @@ inline void DynamicDisjointSets<T>::remove_edge(T label1, T label2) {
 }
 
 
+//TODO: make not need 2 linear scan; cando in 1.
+template <typename T>
+inline void DynamicDisjointSets<T>::isolate_component(T label) {
+  for (auto& edge : weights ) {
+    if (edge.first.first == label || edge.first.second == label) {
+      edge.second = 0;
+    }
+  }
+  rebuild();
+}
+
+
 template <typename T>
 inline void DynamicDisjointSets<T>::remove_edges(const std::vector<std::pair<T, T>>& edges) {
   for (const auto& edge : edges) {
@@ -60,7 +72,7 @@ void DynamicDisjointSets<T>::rebuild() {
   uf = UnionFind<T>();
   for (const auto& edge : weights) {
     if (edge.second > 0) {
-      uf.union_sets(uf[edge.first], uf[edge.second]);
+      uf.union_sets(uf[edge.first.first], uf[edge.first.second]);
     }
   }
 }
