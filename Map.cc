@@ -197,10 +197,12 @@ MapMutator Map::get_mutator() {
 void Map::mutate(MapMutator&& mutation) {
   assert(mutation.version == version);
   ++version;
+  bool dirty = false;
   for (const auto& it : mutation.mutations) {
     auto door_iter = doors.find(it.first);
     switch(it.second.kind) {
       case MapMutator::Mutation::Kind::CREATE_DOOR:
+        dirty = true;
         assert(door_iter == doors.end());
         assert(it.second.cost != PATH_COST_INFINITE);
         doors[it.first] = Door{it.second.state, it.second.cost, PATH_COST_INFINITE, {}};
@@ -212,12 +214,14 @@ void Map::mutate(MapMutator&& mutation) {
         break;
 
       case MapMutator::Mutation::Kind::REMOVE_DOOR:
+        dirty = true;
         assert(door_iter != doors.end());
         doors.erase(door_iter);
         data.at(it.first) = it.second.cost;
         break;
 
       case MapMutator::Mutation::Kind::SET_COST:
+        dirty = true;
         assert(door_iter == doors.end());
         data.at(it.first) = it.second.cost;
         break;
@@ -225,14 +229,33 @@ void Map::mutate(MapMutator&& mutation) {
       case MapMutator::Mutation::Kind::UPDATE_DOOR:
         assert(door_iter != doors.end());
         door_iter->second.open ^= it.second.state;
+
         // Internally we use PATH_COST_INFINITE to represent the current value.
         if (it.second.cost != PATH_COST_INFINITE) {
           door_iter->second.cost_open = it.second.cost;
         }
+
+        // Update map costs.
         if (door_iter->second.open) {
           data.at(it.first) = door_iter->second.cost_open;
         } else {
           data.at(it.first) = PATH_COST_INFINITE;
+        }
+
+        // Maintain links if door changed state.
+        if (it.second.state) {
+          if (door_iter->second.open) {
+            uint_least32_t door_component = component.at(it.first);
+            for (const auto& n : data.get_adjacent(it.first, false)) {
+              if (component.at(n) != COMPONENT_IMPASSABLE &&
+                  (!is_door(n) || (doors.find(n)->second.open && n < it.first))) {
+                dynamic_component.add_edge(component.at(n), door_component);
+              }
+            }
+          } else {
+            uint_least32_t door_component = component.at(it.first);
+            dynamic_component.isolate_component(door_component);
+          }
         }
         break;
 
@@ -241,7 +264,10 @@ void Map::mutate(MapMutator&& mutation) {
 
     }
   }
-  clear_cache(); // TODO: lol dynamic is the whole point;)
+
+  if (dirty) {
+    clear_cache(); // TODO: lol dynamic is the whole point;)
+  }
 }
 
 // Forces recomputation of all cached information.
@@ -322,7 +348,7 @@ void Map::clear_cache() {
       uint_least32_t door_component = component.at(door.first);
       for (const auto& n : data.get_adjacent(door.first, false)) {
         if (component.at(n) != COMPONENT_IMPASSABLE &&
-            (!is_door(n) || doors.find(n)->second.open)) {
+            (!is_door(n) || (doors.find(n)->second.open && n < door.first))) {
           dynamic_component.add_edge(component.at(n), door_component);
         }
       }
