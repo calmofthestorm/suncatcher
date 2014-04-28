@@ -503,3 +503,66 @@ TEST_F(DynamicMicroMapTest, DoorToDoorTogglingFun) {
     ASSERT_FALSE(map->path(inner_door, outer_door));
   }
 }
+
+
+TEST_F(DynamicMicroMapTest, DoorDisconnectsDiagonalComponents) {
+  Coord door{11, 6};
+  Coord outer{11, 7};
+  Coord inner{11, 5};
+  ASSERT_TRUE((bool)map->path(outer, inner));
+  map->mutate(std::move(map->get_mutator().create_door(door, true, 1)));
+  ASSERT_TRUE((bool)map->path(inner, outer));
+  map->mutate(std::move(map->get_mutator().toggle_door_open(door)));
+  ASSERT_FALSE((bool)map->path(inner, outer));
+}
+
+
+TEST_F(DynamicMicroMapTest, DISABLED_MultipleDoorsDisconnectingComponents) {
+  std::array<Coord, 3> doors{Coord{10, 6}, Coord{11, 6}, Coord{12, 6}};
+  Coord outer{9, 7};
+  Coord inner{11, 5};
+
+  // Create doors
+  auto mutator = map->get_mutator();
+  for (const Coord& door : doors) {
+    mutator.create_door(door, true, 1);
+  }
+  map->mutate(std::move(mutator));
+
+  // 111
+  ASSERT_TRUE((bool)map->path(outer, inner));
+
+  map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
+  // 110
+  ASSERT_TRUE((bool)map->path(outer, inner));
+
+  map->mutate(std::move(map->get_mutator().toggle_door_open(doors[1])));
+  map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
+  // 101
+  ASSERT_FALSE((bool)map->path(outer, inner));
+
+  // map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
+  // // 100
+  // ASSERT_FALSE((bool)map->path(outer, inner));
+
+  // mutator = map->get_mutator();
+  // for (const Coord& door : doors) {
+  //   mutator.toggle_door_open(door);
+  // }
+  // map->mutate(std::move(mutator));
+  // // 011
+  // ASSERT_TRUE((bool)map->path(outer, inner));
+  //
+  // map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
+  // // 010
+  // ASSERT_TRUE((bool)map->path(outer, inner));
+  //
+  // map->mutate(std::move(map->get_mutator().toggle_door_open(doors[1])));
+  // map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
+  // // 001
+  // ASSERT_FALSE((bool)map->path(outer, inner));
+  //
+  // map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
+  // // 000
+  // ASSERT_FALSE((bool)map->path(outer, inner));
+}

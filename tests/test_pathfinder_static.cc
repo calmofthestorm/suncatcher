@@ -97,7 +97,7 @@ TEST_F(MapTest, WallInvalidToOOB2) {
 
 // More interesting terrain-based tests.
 
-// Upper left just outside great hall.
+// Upper left to just outside great hall.
 TEST_F(MapTest, ULToJustOutsideGreatHall) {
   auto actual = MapTest::main_map->path({1, 1}, {67, 51});
   ASSERT_NEAR(908.366, actual.get_length(), 0.5);
@@ -216,10 +216,21 @@ TEST_F(MapTest, SpaceToClosedDoor) {
 
 TEST_F(MapTest, DoorlandLockedDoorWall) {
   Coord inside{2, 2};
-  doorland_map->print_components(std::cout);
   ASSERT_FALSE(doorland_map->path(inside, {1, 4}));
   ASSERT_FALSE(doorland_map->path(inside, {2, 4}));
   ASSERT_FALSE(doorland_map->path(inside, {3, 4}));
   ASSERT_FALSE(doorland_map->path(inside, {1, 3}));
+  ASSERT_FALSE(doorland_map->path(inside, {2, 3}));
   ASSERT_FALSE(doorland_map->path(inside, {3, 3}));
+}
+
+
+TEST_F(MapTest, DoorlandOpenDoorWall) {
+  Coord inside{2, 6};
+  ASSERT_TRUE((bool)doorland_map->path(inside, {1, 8}));
+  ASSERT_TRUE((bool)doorland_map->path(inside, {2, 8}));
+  ASSERT_TRUE((bool)doorland_map->path(inside, {3, 8}));
+  ASSERT_TRUE((bool)doorland_map->path(inside, {1, 7}));
+  ASSERT_TRUE((bool)doorland_map->path(inside, {2, 7}));
+  ASSERT_TRUE((bool)doorland_map->path(inside, {3, 7}));
 }

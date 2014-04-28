@@ -56,7 +56,7 @@ void Map::print_map(std::ostream& os, const Path& path) const {
           os << "\033[1m" << index++ << "\033[0m";
         }
       } else {
-        os << (is_opaque({j, i}) ? '*' : ' ');
+        os << (data.at(j, i) == PATH_COST_INFINITE ? '*' : ' ');
       }
     }
     os << std::endl;
@@ -67,13 +67,14 @@ void Map::print_components(std::ostream& os) const {
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
       uint32_t c = component.at(j, i);
-      if (c == COMPONENT_MULTIPLE) {
+      auto door = doors.find({j, i});
+      if (door != doors.end()) {
         if (doors.find({j, i})->second.open) {
           os << '_';
         } else {
           os << 'd';
         }
-      } else if (!is_opaque({j, i})) {
+      } else if (data.at(j, i) != PATH_COST_INFINITE) {
         os << (char)(c + 'A');
       } else {
         os << '*';
@@ -82,38 +83,20 @@ void Map::print_components(std::ostream& os) const {
     os << std::endl;
   }
   os << std::endl;
-  for (size_t i = 0; i < equivalent_components.size(); ++i) {
-    std::vector<uint32_t> equiv;
-    for (size_t j = 0; j < equivalent_components.size(); ++j) {
-      if (equivalent_components[j] == i) {
-        equiv.push_back(j);
-      }
-    }
-    if (!equiv.empty()) {
-      os << i << ": ";
-      for (const auto& it : equiv) {
-        os << ((char)('A' + it));
-      }
-      os << std::endl;
-    }
-  }
-  os << std::endl;
 }
 
 void Map::print_equivalence_classes(std::ostream& os) const {
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
-      if (data.at(j, i) == ' ') {
-        int c = equivalent_components.at(component.at(j, i));
-        if (c == -2) {
-          os << ' ';
-        } else if (c >= 0 && c < 25) {
+      if (component.at(j, i) == COMPONENT_IMPASSABLE) {
+        os << ' ';
+      } else {
+        uint_least32_t c = dynamic_component.lookup(component.at(j, i));
+        if (c < 25) {
           os << (char)(c + 'A');
         } else {
           os << ' ' << c << ' ';
         }
-      } else {
-        os << data.at(j, i);
       }
     }
     os << std::endl;
@@ -121,61 +104,8 @@ void Map::print_equivalence_classes(std::ostream& os) const {
 }
 
 bool Map::path_exists(Coord a, Coord b) const {
-  if (!is_passable(a) || !is_passable(b)) {
-    return false;
-  }
-
-  // If either is an open door, then we must check multiple equivalence classes.
-  uint_least32_t component_a = component.at(a);
-  uint_least32_t component_b = component.at(b);
-  assert((doors.find(a) != doors.end()) == (component_a == COMPONENT_MULTIPLE));
-  assert((doors.find(b) != doors.end()) == (component_b == COMPONENT_MULTIPLE));
-  if (component_a != COMPONENT_MULTIPLE && component_b != COMPONENT_MULTIPLE) {
-    // Fast path -- neither is a door.
-
-    assert(component_a != COMPONENT_UNKNOWN && component_b != COMPONENT_UNKNOWN);
-    assert(component_a < equivalent_components.size());
-    assert(component_b < equivalent_components.size());
-    return (find_representative(equivalent_components, component_a) ==
-            find_representative(equivalent_components, component_b));
-  } else {
-    // Slow path -- one or more doors.
-
-    if (component_a == COMPONENT_MULTIPLE && component_b == COMPONENT_MULTIPLE) {
-      auto door_a = doors.find(a);
-      auto door_b = doors.find(b);
-      // Both are doors.
-      // TODO: eager closure makes the find_representative unnecessary.
-      for (const uint_least32_t& subcomponent_a : door_a->second.adjacent_components) {
-        for (const uint_least32_t& subcomponent_b : door_b->second.adjacent_components) {
-          if (find_representative(equivalent_components, subcomponent_a) ==
-              find_representative(equivalent_components, subcomponent_b)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-
-    // One door one non door.
-    if (component_a == COMPONENT_MULTIPLE) {
-      assert(component_b != COMPONENT_MULTIPLE);
-      std::swap(component_a, component_b);
-      std::swap(a, b);
-    }
-
-    assert(component_b == COMPONENT_MULTIPLE);
-    assert(component_a != COMPONENT_MULTIPLE);
-
-    component_a = find_representative(equivalent_components, component_a);
-    auto door_b_adj = doors.find(b)->second.adjacent_components;
-    for (const uint_least32_t& subcomponent_b : door_b_adj) {
-      if (find_representative(equivalent_components, subcomponent_b) == component_a) {
-        return true;
-      }
-    }
-  return false;
-  }
+  return (is_passable(a) && is_passable(b) &&
+          dynamic_component.equivalent(component.at(a), component.at(b)));
 }
 
 Path Map::path(const Coord& src, const Coord& dst) const {
@@ -251,42 +181,17 @@ Map::Map(MapBuilder&& builder)
 : version(0),
   outstanding_mutators(0),
   data(std::move(builder.data)),
+  door_base_component(0),
   doors(std::move(builder.doors)) {
 
   clear_cache();
 }
 
 
-// TODO: evaluate whether a dynamic algorithm (eg union-find) makes sense here
-void Map::rebuild_equivalence_classes() {
-  for (size_t i = 0; i < equivalent_components.size(); ++i) {
-    equivalent_components[i] = i;
-  }
-
-  for (const auto& door : doors) {
-    if (door.second.open) {
-      // TODO: O(n^2) because long-term plan is to use refcounts. Also n<=4;P
-      for (auto it = door.second.adjacent_components.begin();
-           it < door.second.adjacent_components.end();
-           ++it) {
-        for (auto jt = it + 1; jt < door.second.adjacent_components.end(); ++jt) {
-          auto rep1 = find_representative(equivalent_components, *it);
-          auto rep2 = find_representative(equivalent_components, *jt);
-          equivalent_components[rep1] = rep2;
-        }
-      }
-    }
-  }
-
-  // TODO: SLOOOOOOOOOOOOOOW
-  for (size_t i = 0; i < equivalent_components.size(); ++i) {
-    equivalent_components[i] = find_representative(equivalent_components, i);
-  }
-}
-
 MapMutator Map::get_mutator() {
   return MapMutator(this);
 }
+
 
 // Changes the world immediately, doing all necessary computations.
 void Map::mutate(MapMutator&& mutation) {
@@ -341,10 +246,20 @@ void Map::mutate(MapMutator&& mutation) {
 
 // Forces recomputation of all cached information.
 void Map::clear_cache() {
+  dynamic_component = decltype(dynamic_component)();
+  auto is_transparent = [this] (Coord cell) {
+    if (component.at(cell) == COMPONENT_MULTIPLE) {
+      return false;
+    } else {
+      return data.at(cell) != PATH_COST_INFINITE;
+    }
+  };
+
   component = Grid<uint32_t>(size(), COMPONENT_UNKNOWN);
   component.fill(COMPONENT_UNKNOWN);
 
-  // Mark doors as having multiple components.
+  // Temporarily mark doors as having multiple components. We do this so we
+  // can quickly detect if a cell is a door without having to search.
   for (const auto& door : doors) {
     component.at(door.first) = COMPONENT_MULTIPLE;
   }
@@ -361,15 +276,14 @@ void Map::clear_cache() {
         // Flood fill component.
         std::stack<Coord> todo;
         todo.push({restart_row, restart_col});
-        component.at(restart_row, restart_col) = index++;
+        dynamic_component.add_component(component.at(restart_row, restart_col) = index++);
 
         while (!todo.empty()) {
           auto cur = todo.top();
           todo.pop();
-          // Explore neighbors.
-          for (const auto& n : data.get_adjacent(cur)) {
-            if (is_transparent(n) && component.at(n) == COMPONENT_UNKNOWN &&
-                (is_transparent({n.row, cur.col}) || is_transparent({cur.row, n.col}))) {
+          // Explore neighbors, but only Manhattan adjacent ones.
+          for (const auto& n : data.get_adjacent(cur, false)) {
+            if (is_transparent(n) && component.at(n) == COMPONENT_UNKNOWN) {
               todo.push(n);
               component.at(n) = component.at(cur);
             }
@@ -384,38 +298,36 @@ void Map::clear_cache() {
     ++restart_row;
   }
 
+  // Each door is its own connected component.
+  door_base_component = index;
+  for (const auto& door : doors) {
+    dynamic_component.add_component(component.at(door.first) = index++);
+  }
+
   #ifndef NDEBUG
   for (size_t j = 0;j < size().row; ++j) {
     for (size_t i = 0; i < size().col; ++i) {
       assert(
           component.at(j, i) < index ||
-          component.at(j, i) == COMPONENT_MULTIPLE ||
           component.at(j, i) == COMPONENT_IMPASSABLE
         );
     }
   }
   #endif
 
-  // Identify all adjacent components for doors.
+  // Dynamically union all open doors with their neighbors.
   for (auto& door : doors) {
     door.second.adjacent_components.clear();
-    for (const auto& n : data.get_adjacent(door.first)) {
-      if (is_transparent(n) &&
-          (is_transparent({n.row, door.first.col}) || is_transparent({door.first.row, n.col}))) {
-        int c = component.at(n.row, n.col);
-        if (c >= 0 && std::find(
-                  door.second.adjacent_components.begin(),
-                  door.second.adjacent_components.end(),
-                  c
-              ) == door.second.adjacent_components.end()) {
-          door.second.adjacent_components.push_back(c);
+    if (door.second.open) {
+      uint_least32_t door_component = component.at(door.first);
+      for (const auto& n : data.get_adjacent(door.first, false)) {
+        if (component.at(n) != COMPONENT_IMPASSABLE &&
+            (!is_door(n) || doors.find(n)->second.open)) {
+          dynamic_component.add_edge(component.at(n), door_component);
         }
       }
     }
   }
-
-  equivalent_components.resize(index);
-  rebuild_equivalence_classes();
 }
 
 MapBuilder::MapBuilder(std::istream& is) {

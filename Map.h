@@ -16,7 +16,7 @@
 // into memory pressure.
 //
 // The code has undergone substantial refactoring since then, however, so this
-// may were three visiting in the future.
+// may need revisiting in the future.
 
 #include <iostream>
 #include <map>
@@ -25,6 +25,8 @@
 #include "Grid.h"
 #include "Path.h"
 #include "MapMutator.h"
+#include "DynamicDisjointSets.h"
+
 
 namespace suncatcher {
 namespace pathfinder {
@@ -91,17 +93,17 @@ class Map {
     // if the move is illegal. Asserts coordinates adjacent.
     inline float move_cost(Coord start, Coord finish) const;
 
-    // True iff the cell is always passable to all movement modes and factions.
-    // Thus, returns false for doors regardless of state.
-    inline bool is_transparent(Coord cell) const;
-
-    // True iff the cell is ALWAYS impassable to all movement modes and factions.
-    // (think walls...closed doors are neither transparant nor opaque)
-    inline bool is_opaque(Coord cell) const;
-
     // True iff the cell is currently passable in its current state (eg, doors
     // return true/false based on state).
     inline bool is_passable(Coord cell) const;
+
+    // True iff the cell/static component is a door.
+    inline bool is_door(Coord cell) const;
+    inline bool is_door(uint_least32_t static_component) const;
+
+    // True iff the cell is always passable to all movement modes and factions.
+    // Thus, returns false for doors regardless of state.
+    inline bool is_transparent(Coord cell) const;
 
     // Returns a mutator object, which can be used to describe desired changes
     // in game world state. Note that destruction of a map with outstanding
@@ -134,16 +136,28 @@ class Map {
     inline void notify_mutator_destroyed() { --outstanding_mutators; }
     inline void notify_mutator_created() { ++outstanding_mutators;};
 
-    void update_equivalence(const pathfinder::Coord& pos, bool new_state);
-
-    void rebuild_equivalence_classes();
-
+    // Mutator synchronization state
     size_t version;
     size_t outstanding_mutators;
+
+    // Cost to traverse terrain.
     suncatcher::util::Grid<uint_least8_t> data;
-    suncatcher::util::Grid<uint_least32_t> component;
-    std::vector<uint_least32_t> equivalent_components;
+
+    // All registered doors, and the static components they bridge.
     std::map<const Coord, Door> doors;
+
+    // Which static component the cell is a member of.
+    suncatcher::util::Grid<uint_least32_t> component;
+
+    // Dynamic component tracking -- organizes static components (rooms) into
+    // dynamic components (reachability). This lets us minimize expensive
+    // operations such as DFS to determine connected components by performing
+    // the frequent ones on a simplified graph.
+    util::DynamicDisjointSets<uint_least32_t> dynamic_component;
+
+    // All components less than door_base are non-doors. Any component >=
+    // door_base, if valid, is a door.
+    uint32_t door_base_component;
 };
 
 class MapBuilder {

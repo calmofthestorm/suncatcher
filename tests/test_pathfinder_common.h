@@ -11,11 +11,13 @@
 
 #include <gtest/gtest.h>
 
-#define MICROPATHER_DELTA_TEST
+// TODO: figure out why MP segfaults only under gtest in path-dependent ways:/
+// #define MICROPATHER_DELTA_TEST
 
 #ifdef MICROPATHER_DELTA_TEST
 #include "micropather/micropather.h"
 #include "micropather/MicropatherGraph.h"
+using suncatcher::pathfinder::MicropatherGraph;
 #endif
 
 #include "Coord.h"
@@ -28,7 +30,6 @@ using suncatcher::pathfinder::Map;
 using suncatcher::pathfinder::MapMutator;
 using suncatcher::pathfinder::MapBuilder;
 using suncatcher::pathfinder::Path;
-using suncatcher::pathfinder::MicropatherGraph;
 using suncatcher::pathfinder::Coord;
 using suncatcher::pathfinder::PATH_COST_INFINITE;
 
@@ -60,8 +61,10 @@ class MPWrapper {
 
   private:
     const Map* my_map;
-    std::unique_ptr<MicropatherGraph> mpg;
-    std::unique_ptr<micropather::MicroPather> mp;
+    #ifdef MICROPATHER_DELTA_TEST
+      std::unique_ptr<MicropatherGraph> mpg;
+      std::unique_ptr<micropather::MicroPather> mp;
+    #endif
 };
 #endif
 
@@ -98,7 +101,9 @@ class MapTest : public ::testing::Test {
   public:
     static std::unique_ptr<const MapBuilder> empty_map_builder, main_map_builder, micro_map_builder, doorland_map_builder;
     static std::unique_ptr<const Map> empty_map, main_map, micro_map, doorland_map;
-    static std::unique_ptr<MPWrapper> empty_mp, main_mp, micro_mp, doorland_mp;
+    #ifdef MICROPATHER_DELTA_TEST
+      static std::unique_ptr<MPWrapper> empty_mp, main_mp, micro_mp, doorland_mp;
+    #endif
 };
 
 //TODO: so not ok...figure out how to do this right
@@ -120,7 +125,9 @@ class DynamicMapTest : public ::testing::Test {
 
   public:
     std::unique_ptr<Map> map;
-    std::unique_ptr<MPWrapper> micro;
+    #ifdef MICROPATHER_DELTA_TEST
+      std::unique_ptr<MPWrapper> micro;
+    #endif
 };
 
 class DynamicMainMapTest : public DynamicMapTest {

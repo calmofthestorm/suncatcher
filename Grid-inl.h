@@ -48,18 +48,19 @@ inline T& Grid<T>::at(uint16_t row, uint16_t col) {
 //TODO: evaluate cache performance of ordering.
 template <typename T>
 inline std::vector<suncatcher::pathfinder::Coord> Grid<T>::get_adjacent(
-    const suncatcher::pathfinder::Coord cell
+    const suncatcher::pathfinder::Coord cell,
+    bool include_diagonals
     ) const {
   const static std::vector<suncatcher::pathfinder::Coord> ADJ_DELTA{
-    {0, (uint16_t)-1}, {(uint16_t)-1, 0}, {1, 0},
+    {0, (uint16_t)-1}, {(uint16_t)-1, 0}, {1, 0}, {0, 1},
       {(uint16_t)-1, (uint16_t)-1}, {1, 1},
-      {(uint16_t)-1, 1}, {1, (uint16_t)-1}, {0, 1}
+      {(uint16_t)-1, 1}, {1, (uint16_t)-1}
   };
 
   std::vector<suncatcher::pathfinder::Coord> neighbors;
 
-  for (const auto& delta : ADJ_DELTA) {
-    auto n = delta + cell;
+  for (size_t i = 0; i < (include_diagonals ? 8 : 4); ++i) {
+    auto n = ADJ_DELTA[i] + cell;
     if (check_bounds(n)) {
       neighbors.push_back(n);
     }

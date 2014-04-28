@@ -1,6 +1,7 @@
 CXX=g++
 RM=rm -f
 
+MAKEFLAGS=-j 8
 COMMON_FLAGS=-I. -std=c++11 -Wall -pedantic -isystem lib/gtest/include -Wextra
 DEBUG_FLAGS=-g -ggdb -gstabs -O0 -fno-inline-functions
 PROFILE_FLAGS=-O3 -DNDEBUG

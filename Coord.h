@@ -1,14 +1,17 @@
 #ifndef COORD_d0dcb74311134c19b0239c6c7238cfad
 #define COORD_d0dcb74311134c19b0239c6c7238cfad
 
-// POD class representing a position on the pathfinding map abstraction.
-// 
 #include <cstdint>
 #include <iostream>
+
+#include <boost/functional/hash.hpp>
+
+#include "UnionFind.h"
 
 namespace suncatcher {
 namespace pathfinder {
 
+// POD class representing a position on the pathfinding map abstraction.
 struct Coord {
   uint16_t row, col;
 
@@ -39,5 +42,21 @@ inline std::ostream& operator<< (std::ostream& os, const pathfinder::Coord& c) {
 
 }  // namespace pathfinder
 }  // namespace suncatcher
+
+namespace std {
+
+template <>
+struct hash<suncatcher::pathfinder::Coord> {
+  size_t operator () (const suncatcher::pathfinder::Coord& key) const {
+    size_t seed = 0;
+    boost::hash_combine(seed, key.row);
+    boost::hash_combine(seed, key.col);
+    return seed;
+  }
+};
+
+}
+
+
 
 #endif  /* COORD_d0dcb74311134c19b0239c6c7238cfad */
