@@ -30,30 +30,12 @@ inline float Map::move_cost(Coord start, Coord finish) const {
   }
 }
 
-inline bool Map::is_transparent(Coord cell) const {
-  assert(data.check_bounds(cell));
-  if (component.at(cell) == COMPONENT_MULTIPLE) {
-    return false;
-  } else {
-    return data.at(cell) != PATH_COST_INFINITE;
-  }
-}
-
-inline bool Map::is_opaque(Coord cell) const {
-  assert(data.check_bounds(cell));
-  if (component.at(cell) == COMPONENT_MULTIPLE) {
-    return !(doors.at(cell).open);
-  } else {
-    return data.at(cell) == PATH_COST_INFINITE;
-  }
-}
-
 inline bool Map::is_passable(Coord cell) const {
   assert(data.check_bounds(cell));
   assert(component.at(cell) != COMPONENT_UNKNOWN);
   bool rval = (data.at(cell) != PATH_COST_INFINITE);
   #ifndef NDEBUG
-    if (component.at(cell) == COMPONENT_MULTIPLE) {
+    if (is_door(cell)) {
       assert(rval == doors.at(cell).open);
     } else {
       assert((component.at(cell) != COMPONENT_IMPASSABLE) == rval);
@@ -61,6 +43,22 @@ inline bool Map::is_passable(Coord cell) const {
     #endif
   return rval;
 }
+
+inline bool Map::is_transparent(Coord cell) const {
+  assert(data.check_bounds(cell));
+  return (!is_door(cell) && data.at(cell) != PATH_COST_INFINITE);
+}
+
+inline bool Map::is_door(Coord cell) const {
+  return is_door(component.at(cell));
+}
+
+
+inline bool Map::is_door(uint_least32_t static_component) const {
+  return static_component >=door_base_component;
+}
+
+
 
 }  // namespace pathfinder
 }  // namespace suncatcher
