@@ -69,10 +69,18 @@ inline bool DynamicDisjointSets<T>::equivalent(T label1, T label2) const {
 
 template <typename T>
 void DynamicDisjointSets<T>::rebuild() {
-  uf = UnionFind<T>();
+  UnionFind<T> succ;
+
+  // New union find has all the same elements.
+  for (const auto& elem : uf.get_elements()) {
+    succ[elem];
+  }
+
+  // Add only the edges that have non-zero weight.
+  std::swap(succ, uf);
   for (const auto& edge : weights) {
     if (edge.second > 0) {
-      uf.union_sets(uf[edge.first.first], uf[edge.first.second]);
+      uf.union_sets(edge.first.first, edge.first.second);
     }
   }
 }
