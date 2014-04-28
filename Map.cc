@@ -222,8 +222,23 @@ void Map::mutate(MapMutator&& mutation) {
         break;
 
       case MapMutator::Mutation::Kind::SET_COST:
-        dirty = true;
         assert(door_iter == doors.end());
+
+        // Removing a wall.
+        if (data.at(it.first) == PATH_COST_INFINITE &&
+            it.second.cost != PATH_COST_INFINITE) {
+          // TODO: union static components
+          dirty = true;
+        } else if (data.at(it.first) != PATH_COST_INFINITE &&
+                   it.second.cost == PATH_COST_INFINITE) {
+          // Building a wall. Flood fill required.
+          // TODO: neighborhood optimization
+          dirty = true;
+        }
+        // else -- either PATH_COST_INFINITE -> PATH_COST_INFINITE (nop)
+        // or passable value to passable value -- components are not affected
+        // (even though path cost might be).
+
         data.at(it.first) = it.second.cost;
         break;
 

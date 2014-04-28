@@ -152,7 +152,6 @@ class Map {
     // the frequent ones on a simplified graph.
     util::DynamicDisjointSets<uint_least32_t> dynamic_component;
 
-    // If false, rebuild the entire map after every mutation.
     bool dynamic_updates;
 
     // All components less than door_base are non-doors. Any component >=
