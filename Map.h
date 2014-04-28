@@ -66,10 +66,7 @@ class Map {
 
     // Compute the shortest path between two points if one exists. Returns false
     // path on failure (out of bounds, no path, impassable src/dest, etc).
-    Path path(
-        const pathfinder::Coord& src,
-        const pathfinder::Coord& dst
-      ) const ;
+    Path path(Coord src, Coord dst) const ;
 
     // Returns true if it is possible to path from src to dst. Unlike path,
     // this will always run in constant time. Invalid inputs result in false.
@@ -163,21 +160,21 @@ class Map {
 class MapBuilder {
   public:
     MapBuilder();
-    MapBuilder(const Coord& size, uint8_t cost);
+    MapBuilder(Coord size, uint8_t cost);
 
     // Load a MapBuilder from a simple text format. Intended mostly for
     // tests and debugging.
     MapBuilder(std::istream& is);
 
     // Set/get the cost of the specified cell. Can't do this to a door.
-    inline const uint8_t& cost(const Coord& cell) const { return data.at(cell); }
-    inline uint8_t& cost(const Coord& cell) {
+    inline const uint8_t& cost(Coord cell) const { return data.at(cell); }
+    inline uint8_t& cost(Coord cell) {
       assert(doors.find(cell) == doors.end());
       return data.at(cell);
     }
 
     // Add a door to the given cell.
-    void add_door(const Coord& cell, bool open, uint8_t cost_open,
+    void add_door(Coord cell, bool open, uint8_t cost_open,
                   uint8_t cost_closed);
 
   private:

@@ -20,11 +20,11 @@ using suncatcher::util::Grid;
 using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
 
-MapBuilder::MapBuilder(const Coord& size, uint8_t cost)
+MapBuilder::MapBuilder(Coord size, uint8_t cost)
 : data(size, cost),
   doors() { }
 
-void MapBuilder::add_door(const Coord& cell, bool open, uint8_t cost_open,
+void MapBuilder::add_door(Coord cell, bool open, uint8_t cost_open,
                           uint8_t cost_closed) {
   assert(doors.find(cell) == doors.end());
   doors[cell] = {open, cost_open, cost_closed, {}};
@@ -108,7 +108,7 @@ bool Map::path_exists(Coord a, Coord b) const {
           dynamic_component.equivalent(component.at(a), component.at(b)));
 }
 
-Path Map::path(const Coord& src, const Coord& dst) const {
+Path Map::path(Coord src, Coord dst) const {
   Grid<int> expanded(size().row, size().col, 0);
   Grid<Coord> previous(size().row, size().col, {(uint16_t)-1, (uint16_t)-1});
   size_t num_expanded = 0;
@@ -181,8 +181,8 @@ Map::Map(MapBuilder&& builder)
 : version(0),
   outstanding_mutators(0),
   data(std::move(builder.data)),
-  door_base_component(0),
-  doors(std::move(builder.doors)) {
+  doors(std::move(builder.doors)),
+  door_base_component(0) {
 
   clear_cache();
 }
