@@ -41,14 +41,22 @@ class MPWrapper {
       mpg.reset(new MicropatherGraph(map));
     }
 
+    void new_pather() {
+      mp.reset(new micropather::MicroPather(mpg.get(), 4000000, 8, false));
+    }
+
     Path path(Coord start, Coord finish) {
       if (!my_map->get_data().check_bounds(start) ||
-          !my_map->get_data().check_bounds(finish)) {
+          !my_map->get_data().check_bounds(finish) ||
+          !my_map->is_passable(start) || !my_map->is_passable(finish)) {
         return Path({}, -1);
+      }
+      if (start == finish) {
+        return Path{{start}, 0};
       }
       // Paradoxically, keeping the pather around slows it down AND caches even
       // when manually cleared and constructed with disabled cache...
-      mp.reset(new micropather::MicroPather(mpg.get(), 4000000, 8, false));
+      new_pather();
       MP_VECTOR<void*> path_vc;
       float length = 279;
       mp->Solve(mpg->encode(start), mpg->encode(finish), &path_vc, &length);
@@ -56,15 +64,17 @@ class MPWrapper {
       for (size_t i = 0; i < path_vc.size(); ++i) {
         real_path[i] = mpg->decode(path_vc[i]);
       }
-      return Path(std::move(real_path), length);
+      if (real_path.size() > 0) {
+        return Path(std::move(real_path), length);
+      } else {
+        return Path{{}, -1};
+      }
     }
 
   private:
     const Map* my_map;
-    #ifdef MICROPATHER_DELTA_TEST
-      std::unique_ptr<MicropatherGraph> mpg;
-      std::unique_ptr<micropather::MicroPather> mp;
-    #endif
+    std::unique_ptr<MicropatherGraph> mpg;
+    std::unique_ptr<micropather::MicroPather> mp;
 };
 #endif
 

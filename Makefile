@@ -19,6 +19,9 @@ TEST_OBJS=$(subst .cc,.o,$(TEST_SRCS))
 
 all: pathfinder_repl
 
+door_torture: $(OBJS) door_torture.o
+	g++ $(LDFLAGS) $(DEBUG_FLAGS) -o door_torture $(OBJS) door_torture.o $(LDLIBS)
+
 pathfinder_repl: $(OBJS) pathfinder_repl.o
 	g++ $(LDFLAGS) $(DEBUG_FLAGS) -o pathfinder_repl $(OBJS) pathfinder_repl.o $(LDLIBS)
 
