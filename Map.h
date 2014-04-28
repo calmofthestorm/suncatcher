@@ -31,11 +31,11 @@
 namespace suncatcher {
 namespace pathfinder {
 
-const uint8_t PATH_COST_INFINITE = (uint8_t)-1;
+const uint_least8_t PATH_COST_INFINITE = (uint_least8_t)-1;
 
-const uint32_t COMPONENT_MULTIPLE = (uint32_t)-1;
-const uint32_t COMPONENT_UNKNOWN = (uint32_t)-2;
-const uint32_t COMPONENT_IMPASSABLE = (uint32_t)-3;
+const uint_least32_t COMPONENT_MULTIPLE = (uint_least32_t)-1;
+const uint_least32_t COMPONENT_UNKNOWN = (uint_least32_t)-2;
+const uint_least32_t COMPONENT_IMPASSABLE = (uint_least32_t)-3;
 
 class MapBuilder;
 
@@ -47,8 +47,8 @@ class MapBuilder;
 
 struct Door {
   bool open;
-  uint8_t cost_open; // cost to walk through when open
-  uint8_t cost_closed; // cost to walk through when closed
+  uint_least8_t cost_open; // cost to walk through when open
+  uint_least8_t cost_closed; // cost to walk through when closed
   std::vector<uint_least32_t> adjacent_components;
 };
 
@@ -113,7 +113,7 @@ class Map {
     // mutator is cleared to clean state.
     void mutate(MapMutator&& mutation);
 
-    // Useful debugging features -- dump a simple representation of aspecs
+    // Useful debugging features -- dump a simple representation of aspects
     // of the map to a stream.
     void print_components(std::ostream& os) const;
     void print_equivalence_classes(std::ostream& os) const;
@@ -154,32 +154,32 @@ class Map {
 
     // All components less than door_base are non-doors. Any component >=
     // door_base, if valid, is a door.
-    uint32_t door_base_component;
+    uint_least32_t door_base_component;
 };
 
 class MapBuilder {
   public:
     MapBuilder();
-    MapBuilder(Coord size, uint8_t cost);
+    MapBuilder(Coord size, uint_least8_t cost);
 
     // Load a MapBuilder from a simple text format. Intended mostly for
     // tests and debugging.
     MapBuilder(std::istream& is);
 
     // Set/get the cost of the specified cell. Can't do this to a door.
-    inline const uint8_t& cost(Coord cell) const { return data.at(cell); }
-    inline uint8_t& cost(Coord cell) {
+    inline const uint_least8_t& cost(Coord cell) const { return data.at(cell); }
+    inline uint_least8_t& cost(Coord cell) {
       assert(doors.find(cell) == doors.end());
       return data.at(cell);
     }
 
     // Add a door to the given cell.
-    void add_door(Coord cell, bool open, uint8_t cost_open,
-                  uint8_t cost_closed);
+    void add_door(Coord cell, bool open, uint_least8_t cost_open,
+                  uint_least8_t cost_closed);
 
   private:
     friend class Map;
-    suncatcher::util::Grid<uint8_t> data;
+    suncatcher::util::Grid<uint_least8_t> data;
     std::map<const Coord, Door> doors;
 };
 

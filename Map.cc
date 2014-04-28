@@ -20,12 +20,12 @@ using suncatcher::util::Grid;
 using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
 
-MapBuilder::MapBuilder(Coord size, uint8_t cost)
+MapBuilder::MapBuilder(Coord size, uint_least8_t cost)
 : data(size, cost),
   doors() { }
 
-void MapBuilder::add_door(Coord cell, bool open, uint8_t cost_open,
-                          uint8_t cost_closed) {
+void MapBuilder::add_door(Coord cell, bool open, uint_least8_t cost_open,
+                          uint_least8_t cost_closed) {
   assert(doors.find(cell) == doors.end());
   doors[cell] = {open, cost_open, cost_closed, {}};
   data.at(cell) = open ? cost_open : cost_closed;
@@ -66,7 +66,7 @@ void Map::print_map(std::ostream& os, const Path& path) const {
 void Map::print_components(std::ostream& os) const {
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
-      uint32_t c = component.at(j, i);
+      uint_least32_t c = component.at(j, i);
       auto door = doors.find({j, i});
       if (door != doors.end()) {
         if (doors.find({j, i})->second.open) {
@@ -255,7 +255,7 @@ void Map::clear_cache() {
     }
   };
 
-  component = Grid<uint32_t>(size(), COMPONENT_UNKNOWN);
+  component = Grid<uint_least32_t>(size(), COMPONENT_UNKNOWN);
   component.fill(COMPONENT_UNKNOWN);
 
   // Temporarily mark doors as having multiple components. We do this so we
@@ -267,7 +267,7 @@ void Map::clear_cache() {
   // Identify connected components, stopping at walls and doors. We also mark
   // doors and walls with the appropriate component value.
   uint16_t restart_row = 0;
-  uint32_t index = 0;
+  uint_least32_t index = 0;
   while (restart_row < size().row) {
     uint16_t restart_col = 0;
     while (restart_col < size().col) {

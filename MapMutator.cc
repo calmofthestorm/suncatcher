@@ -36,7 +36,7 @@ MapMutator& MapMutator::set_door_open(Coord door, bool state) {
 
 MapMutator& MapMutator::toggle_door_open(Coord door) {
   assert(map);
-  assert(map->get_doors() != map->get_doors().cend());
+  assert(map->get_doors().find(door) != map->get_doors().cend());
   assert(mutations.find(door) == mutations.end() ||
          mutations.at(door).kind == Mutation::Kind::UPDATE_DOOR);
   mutations[door] = {Mutation::Kind::UPDATE_DOOR, true,
@@ -46,8 +46,8 @@ MapMutator& MapMutator::toggle_door_open(Coord door) {
 
 MapMutator& MapMutator::set_door_open_cost(Coord door, uint_least8_t cost) {
   assert(map);
-  assert(map->get_doors() != map->get_doors().cend());
-  assert(door_it != map->get_doors().cend());
+  assert(map->get_doors().find(door) != map->get_doors().cend());
+  assert(map->get_doors().find(door) != map->get_doors().cend());
   assert(cost != PATH_COST_INFINITE);
   assert(mutations.find(door) == mutations.end() ||
          mutations.at(door).kind == Mutation::Kind::UPDATE_DOOR);

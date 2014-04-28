@@ -98,13 +98,13 @@ int main(int argc, char** argv) {
         }
 
       case 'd':
-        uint32_t door;
+        uint_least32_t door;
         std::cin >> door;
         if (door >= door_index_to_coords.size()) {
           std::cout << "There are only " << door_index_to_coords.size() << " doors." << std::endl;
         } else {
           Coord door_coord = door_index_to_coords.at(door);
-          // my_map.set_door(door_coord, !my_map.get_door(door_coord));
+          my_map.mutate(std::move(my_map.get_mutator().toggle_door_open(door_coord)));
         }
         break;
 
