@@ -1,10 +1,10 @@
 9 13
-             
+         dddd
  **d **d dddd
  * D * d dddd
  **d **d dddd
-             
- DDd DDd     
- D D D d     
- DDd DDD     
+         dddd
+ DDd DDd  ddd
+ D D D d   dd
+ DDd DDD    d
              

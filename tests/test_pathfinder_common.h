@@ -144,6 +144,13 @@ class DynamicMicroMapTest : public DynamicMapTest {
     }
 };
 
+class DynamicDoorlandMapTest : public DynamicMapTest {
+  protected:
+    virtual void SetUp() final override {
+      make_map_copy(MapTest::doorland_map_builder);
+    }
+};
+
 class DynamicEmptyMapTest : public DynamicMapTest {
   protected:
     virtual void SetUp() final override {

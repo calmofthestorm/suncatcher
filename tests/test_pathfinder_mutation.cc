@@ -517,7 +517,7 @@ TEST_F(DynamicMicroMapTest, DoorDisconnectsDiagonalComponents) {
 }
 
 
-TEST_F(DynamicMicroMapTest, DISABLED_MultipleDoorsDisconnectingComponents) {
+TEST_F(DynamicMicroMapTest, MultipleDoorsDisconnectingComponents) {
   std::array<Coord, 3> doors{Coord{10, 6}, Coord{11, 6}, Coord{12, 6}};
   Coord outer{9, 7};
   Coord inner{11, 5};
@@ -541,28 +541,107 @@ TEST_F(DynamicMicroMapTest, DISABLED_MultipleDoorsDisconnectingComponents) {
   // 101
   ASSERT_FALSE((bool)map->path(outer, inner));
 
-  // map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
-  // // 100
-  // ASSERT_FALSE((bool)map->path(outer, inner));
+  map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
+  // 100
+  ASSERT_FALSE((bool)map->path(outer, inner));
 
-  // mutator = map->get_mutator();
-  // for (const Coord& door : doors) {
-  //   mutator.toggle_door_open(door);
-  // }
-  // map->mutate(std::move(mutator));
-  // // 011
-  // ASSERT_TRUE((bool)map->path(outer, inner));
-  //
-  // map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
-  // // 010
-  // ASSERT_TRUE((bool)map->path(outer, inner));
-  //
-  // map->mutate(std::move(map->get_mutator().toggle_door_open(doors[1])));
-  // map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
-  // // 001
-  // ASSERT_FALSE((bool)map->path(outer, inner));
-  //
-  // map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
-  // // 000
-  // ASSERT_FALSE((bool)map->path(outer, inner));
+  mutator = map->get_mutator();
+  for (const Coord& door : doors) {
+    mutator.toggle_door_open(door);
+  }
+  map->mutate(std::move(mutator));
+  // 011
+  ASSERT_TRUE((bool)map->path(outer, inner));
+
+  map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
+  // 010
+  ASSERT_TRUE((bool)map->path(outer, inner));
+
+  map->mutate(std::move(map->get_mutator().toggle_door_open(doors[1])));
+  map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
+  // 001
+  ASSERT_FALSE((bool)map->path(outer, inner));
+
+  map->mutate(std::move(map->get_mutator().toggle_door_open(doors[0])));
+  // 000
+  ASSERT_FALSE((bool)map->path(outer, inner));
+}
+
+
+TEST_F(DynamicDoorlandMapTest, DoorTunnelExpensiveSides) {
+  auto easy = map->path({0, 10}, {5, 3});
+  ASSERT_NEAR(easy.get_length(), 9.071, 0.1);
+  ASSERT_EQ(8, easy.get_path().size());
+  for (uint16_t i = 0; i < 5; ++i) {
+    map->mutate(std::move(map->get_mutator().set_door_open_cost({i, 9}, 100)));
+    map->mutate(std::move(map->get_mutator().set_door_open_cost({i, 11}, 100)));
+  }
+  auto hard = map->path({0, 10}, {5, 3});
+  ASSERT_NEAR(hard.get_length(), 12.243, 0.1);
+  ASSERT_EQ(12, hard.get_path().size());
+}
+
+
+TEST_F(DynamicDoorlandMapTest, DoorTunnelClosedSides) {
+  auto easy = map->path({0, 10}, {5, 3});
+  ASSERT_NEAR(easy.get_length(), 9.071, 0.1);
+  ASSERT_EQ(8, easy.get_path().size());
+  map->mutate(std::move(map->get_mutator().set_door_open_cost({4, 10}, 100)));
+  for (uint16_t i = 0; i < 5; ++i) {
+    map->mutate(std::move(map->get_mutator().toggle_door_open({i, 9})));
+    map->mutate(std::move(map->get_mutator().toggle_door_open({i, 11})));
+  }
+  auto hard = map->path({0, 10}, {5, 3});
+  ASSERT_NEAR(hard.get_length(), 111.243, 0.1);
+  ASSERT_EQ(12, hard.get_path().size());
+}
+
+
+TEST_F(DynamicDoorlandMapTest, DoorlandItsATrap) {
+  Coord start{3, 11};
+  Coord finish{7, 12};
+  auto escape = map->path(start, finish);
+  ASSERT_NEAR(escape.get_length(), 4.414, 0.1);
+  ASSERT_EQ(5, escape.get_path().size());
+
+  // Spring all but last "wall"
+  map->mutate(std::move(map->get_mutator().toggle_door_open({2, 10})));
+  map->mutate(std::move(map->get_mutator().toggle_door_open({2, 11})));
+  map->mutate(std::move(map->get_mutator().toggle_door_open({2, 12})));
+  map->mutate(std::move(map->get_mutator().toggle_door_open({3, 12})));
+  map->mutate(std::move(map->get_mutator().toggle_door_open({4, 10})));
+  map->mutate(std::move(map->get_mutator().toggle_door_open({4, 11})));
+  map->mutate(std::move(map->get_mutator().toggle_door_open({4, 12})));
+
+  // Can still escape but route is longer!
+  escape = map->path(start, finish);
+  ASSERT_NEAR(escape.get_length(), 6.657, 0.1);
+  ASSERT_EQ(6, escape.get_path().size());
+
+  // Last one
+  map->mutate(std::move(map->get_mutator().toggle_door_open({3, 10})));
+
+  // Too late!
+  ASSERT_FALSE(map->path(start, finish));
+}
+
+
+TEST_F(DynamicMainMapTest, AdjacentDoorsInCorridor) {
+  Coord upper{68, 71};
+  Coord top_door{69, 71};
+  Coord bot_door{70, 71};
+  Coord lower{71, 71};
+  assert(map->is_door(top_door));
+  assert(map->is_door(bot_door));
+
+  ASSERT_EQ(map->path(top_door, bot_door).get_length(), 1);
+  ASSERT_EQ(map->path(upper, lower).get_length(), 3);
+
+  map->mutate(std::move(map->get_mutator().toggle_door_open(top_door)));
+  ASSERT_FALSE(map->path(top_door, bot_door));
+  ASSERT_NEAR(map->path(upper, lower).get_length(), 88.657, 0.5);
+  map->mutate(std::move(map->get_mutator().toggle_door_open(top_door)));
+  ASSERT_EQ(map->path(upper, lower).get_length(), 3);
+  map->mutate(std::move(map->get_mutator().toggle_door_open(bot_door)));
+  ASSERT_NEAR(map->path(upper, lower).get_length(), 88.657, 0.5);
 }

@@ -234,3 +234,9 @@ TEST_F(MapTest, DoorlandOpenDoorWall) {
   ASSERT_TRUE((bool)doorland_map->path(inside, {2, 7}));
   ASSERT_TRUE((bool)doorland_map->path(inside, {3, 7}));
 }
+
+
+TEST_F(MapTest, DoorlandPathThroughDoors) {
+  ASSERT_TRUE((bool)doorland_map->path({1, 9}, {3, 12}));
+  ASSERT_TRUE((bool)doorland_map->path({1, 12}, {6, 6}));
+}
