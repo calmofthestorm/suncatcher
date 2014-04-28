@@ -645,3 +645,38 @@ TEST_F(DynamicMainMapTest, AdjacentDoorsInCorridor) {
   map->mutate(std::move(map->get_mutator().toggle_door_open(bot_door)));
   ASSERT_NEAR(map->path(upper, lower).get_length(), 88.657, 0.5);
 }
+
+
+TEST_F(DynamicMainMapTest, OneDoorFiveColors) {
+  Coord door{68, 64};
+  std::array<Coord, 4> cells{Coord{67, 64}, Coord{69, 64}, Coord{68, 63}, Coord{68, 65}};
+
+  for (auto it = cells.begin(); it != cells.end(); ++it) {
+    ASSERT_TRUE((bool)map->path(door, *it));
+    ASSERT_TRUE((bool)map->path(*it, door));
+    for (auto jt = it + 1; jt != cells.end(); ++jt) {
+      ASSERT_TRUE((bool)map->path(*it, *jt));
+      ASSERT_TRUE((bool)map->path(*jt, *it));
+    }
+  }
+
+  map->mutate(std::move(map->get_mutator().toggle_door_open(door)));
+
+  for (auto it = cells.begin(); it != cells.end(); ++it) {
+    for (auto jt = it + 1; jt != cells.end(); ++jt) {
+      ASSERT_FALSE(map->path(*it, *jt));
+      ASSERT_FALSE(map->path(*jt, *it));
+    }
+  }
+
+  map->mutate(std::move(map->get_mutator().toggle_door_open(door)));
+
+  for (auto it = cells.begin(); it != cells.end(); ++it) {
+    ASSERT_TRUE((bool)map->path(door, *it));
+    ASSERT_TRUE((bool)map->path(*it, door));
+    for (auto jt = it + 1; jt != cells.end(); ++jt) {
+      ASSERT_TRUE((bool)map->path(*it, *jt));
+      ASSERT_TRUE((bool)map->path(*jt, *it));
+    }
+  }
+}
