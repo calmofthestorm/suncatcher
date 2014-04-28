@@ -25,10 +25,13 @@ class MicropatherGraph : public micropather::Graph {
         void* state, MP_VECTOR< micropather::StateCost > *adjacent
       ) const {
       auto cur = decode(state);
+      assert(graph->is_passable(cur));
       for (const auto& n : graph->get_data().get_adjacent(cur)) {
-        float cost = graph->move_cost(cur, n);
-        if (cost != -1) {
-          adjacent->push_back({encode(n), cost});
+        if (graph->is_passable(n) && graph->is_passable(cur)) {
+          float cost = graph->move_cost(cur, n);
+          if (cost != -1) {
+            adjacent->push_back({encode(n), cost});
+          }
         }
       }
     }
