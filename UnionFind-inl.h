@@ -11,7 +11,7 @@ UnionFind<T>::UnionFind ()
 
 template <typename T>
 UnionFind<T>::UnionFind(
-    std::initializer_list<typename std::vector<T>::value_type> l
+    std::initializer_list<typename std::deque<T>::value_type> l
   )
 : rank(l.size()),
   parent(l.size()),
@@ -94,6 +94,13 @@ T& UnionFind<T>::union_sets(const T& elem1, const T& elem2) {
   size_t id2 = handle_to_id.at(elem2);
   uf.union_set(id1, id2);
   return id_to_handle.at(uf.find_set(id1));
+}
+
+template <typename T>
+void UnionFind<T>::disconnect_all_sets() {
+  for (size_t i = 0; i < id_to_handle.size(); ++i) {
+    uf.make_set(i);
+  }
 }
 
 template <typename T>
