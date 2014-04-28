@@ -34,7 +34,8 @@ class Grid {
     inline const T& at(uint16_t row, uint16_t col) const;
 
     inline std::vector<suncatcher::pathfinder::Coord> get_adjacent(
-        const suncatcher::pathfinder::Coord cell
+        const suncatcher::pathfinder::Coord cell,
+        bool include_diagonals=true
       ) const;
 
     inline bool check_bounds(const suncatcher::pathfinder::Coord cell) const;

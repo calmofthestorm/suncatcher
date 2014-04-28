@@ -15,6 +15,7 @@ inline void DynamicDisjointSets<T>::add_component(T label) {
 template <typename T>
 inline void DynamicDisjointSets<T>::add_edge(T label1, T label2) {
   ++weights[{label1, label2}];
+  uf.union_sets(label1, label2);
 }
 
 

@@ -117,7 +117,11 @@ int main(int argc, char** argv) {
         break;
 
       case 'c':
-        my_path = Path();
+        my_map.print_components(std::cout);
+        break;
+
+      case 'e':
+        my_map.print_equivalence_classes(std::cout);
         break;
     }
 

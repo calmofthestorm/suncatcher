@@ -50,12 +50,13 @@ inline bool Map::is_transparent(Coord cell) const {
 }
 
 inline bool Map::is_door(Coord cell) const {
-  return is_door(component.at(cell));
+  uint_least32_t c = component.at(cell);
+  return (c != COMPONENT_IMPASSABLE && is_door(c));
 }
 
 
 inline bool Map::is_door(uint_least32_t static_component) const {
-  return static_component >=door_base_component;
+  return static_component >= door_base_component;
 }
 
 
