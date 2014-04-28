@@ -33,9 +33,9 @@ namespace pathfinder {
 
 const uint_least8_t PATH_COST_INFINITE = (uint_least8_t)-1;
 
-const uint_least32_t COMPONENT_MULTIPLE = (uint_least32_t)-1;
-const uint_least32_t COMPONENT_UNKNOWN = (uint_least32_t)-2;
-const uint_least32_t COMPONENT_IMPASSABLE = (uint_least32_t)-3;
+const uint_least32_t COLOR_MULTIPLE = (uint_least32_t)-1;
+const uint_least32_t COLOR_UNKNOWN = (uint_least32_t)-2;
+const uint_least32_t COLOR_IMPASSABLE = (uint_least32_t)-3;
 
 class MapBuilder;
 
@@ -94,9 +94,11 @@ class Map {
     // return true/false based on state).
     inline bool is_passable(Coord cell) const;
 
-    // True iff the cell/static component is a door.
+    // True iff the cell/static component is a door. We can take either a
+    // coordinate or a (valid) color, since all doors have their own color.
+    // Both are constant time.
     inline bool is_door(Coord cell) const;
-    inline bool is_door(uint_least32_t static_component) const;
+    inline bool is_door(uint_least32_t color) const;
 
     // True iff the cell is always passable to all movement modes and factions.
     // Thus, returns false for doors regardless of state.
@@ -115,7 +117,7 @@ class Map {
 
     // Useful debugging features -- dump a simple representation of aspects
     // of the map to a stream.
-    void print_components(std::ostream& os) const;
+    void print_colors(std::ostream& os) const;
     void print_equivalence_classes(std::ostream& os) const;
     void print_map(std::ostream& os, const Path& path={}) const;
 
@@ -140,11 +142,16 @@ class Map {
     // Cost to traverse terrain.
     suncatcher::util::Grid<uint_least8_t> data;
 
-    // All registered doors, and the static components they bridge.
+    // All registered doors.
     std::map<const Coord, Door> doors;
 
-    // Which static component the cell is a member of.
-    suncatcher::util::Grid<uint_least32_t> component;
+    // The map is divided into "colors" -- areas connected by purely transparent
+    // terrain along Manhattan directions. Colors are handles into static
+    // components (thus, we can union two colors in constant time at the price
+    // of a small indirect lookup table). Typically there will be anywhere from
+    // 1-5 colors per door on the map, plus one for each isolated walled off
+    // region.
+    suncatcher::util::Grid<uint_least32_t> color;
 
     // Dynamic component tracking -- organizes static components (rooms) into
     // dynamic components (reachability). This lets us minimize expensive
@@ -152,11 +159,13 @@ class Map {
     // the frequent ones on a simplified graph.
     util::DynamicDisjointSets<uint_least32_t> dynamic_component;
 
+    // Whether dynamic updates are enabled. If false, the Map will reinitialize
+    // after every mutation. The MapBuilder sets this.
     bool dynamic_updates;
 
-    // All components less than door_base are non-doors. Any component >=
+    // All colors less than door_base are non-doors. Any color >=
     // door_base, if valid, is a door.
-    uint_least32_t door_base_component;
+    uint_least32_t door_base_color;
 };
 
 class MapBuilder {

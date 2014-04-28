@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
         break;
 
       case 'c':
-        my_map.print_components(std::cout);
+        my_map.print_colors(std::cout);
         break;
 
       case 'e':

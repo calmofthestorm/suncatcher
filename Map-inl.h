@@ -32,13 +32,13 @@ inline float Map::move_cost(Coord start, Coord finish) const {
 
 inline bool Map::is_passable(Coord cell) const {
   assert(data.check_bounds(cell));
-  assert(component.at(cell) != COMPONENT_UNKNOWN);
+  assert(color.at(cell) != COLOR_UNKNOWN);
   bool rval = (data.at(cell) != PATH_COST_INFINITE);
   #ifndef NDEBUG
     if (is_door(cell)) {
       assert(rval == doors.at(cell).open);
     } else {
-      assert((component.at(cell) != COMPONENT_IMPASSABLE) == rval);
+      assert((color.at(cell) != COLOR_IMPASSABLE) == rval);
     }
     #endif
   return rval;
@@ -50,13 +50,13 @@ inline bool Map::is_transparent(Coord cell) const {
 }
 
 inline bool Map::is_door(Coord cell) const {
-  uint_least32_t c = component.at(cell);
-  return (c != COMPONENT_IMPASSABLE && is_door(c));
+  uint_least32_t c = color.at(cell);
+  return (c != COLOR_IMPASSABLE && is_door(c));
 }
 
 
-inline bool Map::is_door(uint_least32_t static_component) const {
-  return static_component >= door_base_component;
+inline bool Map::is_door(uint_least32_t color) const {
+  return color >= door_base_color;
 }
 
 

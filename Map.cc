@@ -63,10 +63,10 @@ void Map::print_map(std::ostream& os, const Path& path) const {
   }
 }
 
-void Map::print_components(std::ostream& os) const {
+void Map::print_colors(std::ostream& os) const {
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
-      uint_least32_t c = component.at(j, i);
+      uint_least32_t c = color.at(j, i);
       auto door = doors.find({j, i});
       if (door != doors.end()) {
         if (doors.find({j, i})->second.open) {
@@ -88,10 +88,10 @@ void Map::print_components(std::ostream& os) const {
 void Map::print_equivalence_classes(std::ostream& os) const {
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
-      if (component.at(j, i) == COMPONENT_IMPASSABLE) {
+      if (color.at(j, i) == COLOR_IMPASSABLE) {
         os << ' ';
       } else {
-        uint_least32_t c = dynamic_component.lookup(component.at(j, i));
+        uint_least32_t c = dynamic_component.lookup(color.at(j, i));
         if (c < 25) {
           os << (char)(c + 'A');
         } else {
@@ -105,7 +105,7 @@ void Map::print_equivalence_classes(std::ostream& os) const {
 
 bool Map::path_exists(Coord a, Coord b) const {
   return (is_passable(a) && is_passable(b) &&
-          dynamic_component.equivalent(component.at(a), component.at(b)));
+          dynamic_component.equivalent(color.at(a), color.at(b)));
 }
 
 Path Map::path(Coord src, Coord dst) const {
@@ -183,7 +183,7 @@ Map::Map(MapBuilder&& builder)
   data(std::move(builder.data)),
   doors(std::move(builder.doors)),
   dynamic_updates(builder.dynamic_updates),
-  door_base_component(0) {
+  door_base_color(0) {
 
   clear_cache();
 }
@@ -236,7 +236,7 @@ void Map::mutate(MapMutator&& mutation) {
           dirty = true;
         }
         // else -- either PATH_COST_INFINITE -> PATH_COST_INFINITE (nop)
-        // or passable value to passable value -- components are not affected
+        // or passable value to passable value -- color are not affected
         // (even though path cost might be).
 
         data.at(it.first) = it.second.cost;
@@ -262,16 +262,16 @@ void Map::mutate(MapMutator&& mutation) {
         // Maintain links if door changed state.
         if (it.second.state) {
           if (door_iter->second.open) {
-            uint_least32_t door_component = component.at(it.first);
+            uint_least32_t door_color = color.at(it.first);
             for (const auto& n : data.get_adjacent(it.first, false)) {
-              if (component.at(n) != COMPONENT_IMPASSABLE &&
+              if (color.at(n) != COLOR_IMPASSABLE &&
                   (!is_door(n) || (doors.find(n)->second.open && n < it.first))) {
-                dynamic_component.add_edge(component.at(n), door_component);
+                dynamic_component.add_edge(color.at(n), door_color);
               }
             }
           } else {
-            uint_least32_t door_component = component.at(it.first);
-            dynamic_component.isolate_component(door_component);
+            uint_least32_t door_color = color.at(it.first);
+            dynamic_component.isolate_component(door_color);
           }
         }
         break;
@@ -291,68 +291,69 @@ void Map::mutate(MapMutator&& mutation) {
 void Map::clear_cache() {
   dynamic_component = decltype(dynamic_component)();
   auto is_transparent = [this] (Coord cell) {
-    if (component.at(cell) == COMPONENT_MULTIPLE) {
+    if (color.at(cell) == COLOR_MULTIPLE) {
       return false;
     } else {
       return data.at(cell) != PATH_COST_INFINITE;
     }
   };
 
-  component = Grid<uint_least32_t>(size(), COMPONENT_UNKNOWN);
-  component.fill(COMPONENT_UNKNOWN);
+  color = Grid<uint_least32_t>(size(), COLOR_UNKNOWN);
+  color.fill(COLOR_UNKNOWN);
 
-  // Temporarily mark doors as having multiple components. We do this so we
+  // Temporarily mark doors as having multiple colors. We do this so we
   // can quickly detect if a cell is a door without having to search.
   for (const auto& door : doors) {
-    component.at(door.first) = COMPONENT_MULTIPLE;
+    color.at(door.first) = COLOR_MULTIPLE;
   }
 
-  // Identify connected components, stopping at walls and doors. We also mark
-  // doors and walls with the appropriate component value.
+  // Identify colors (components connected by Manhattan-adjacent transparant
+  // squares), stopping at walls and doors. We also mark walls with the
+  // appropriate color value (COLOR_IMPASSABLE)
   uint16_t restart_row = 0;
   uint_least32_t index = 0;
   while (restart_row < size().row) {
     uint16_t restart_col = 0;
     while (restart_col < size().col) {
-      if (component.at(restart_row, restart_col) == COMPONENT_UNKNOWN &&
+      if (color.at(restart_row, restart_col) == COLOR_UNKNOWN &&
           is_transparent({restart_row, restart_col})) {
-        // Flood fill component.
+        // Flood fill colors.
         std::stack<Coord> todo;
         todo.push({restart_row, restart_col});
-        dynamic_component.add_component(component.at(restart_row, restart_col) = index++);
+        dynamic_component.add_component(color.at(restart_row, restart_col) = index++);
 
         while (!todo.empty()) {
           auto cur = todo.top();
           todo.pop();
           // Explore neighbors, but only Manhattan adjacent ones.
           for (const auto& n : data.get_adjacent(cur, false)) {
-            if (is_transparent(n) && component.at(n) == COMPONENT_UNKNOWN) {
+            if (is_transparent(n) && color.at(n) == COLOR_UNKNOWN) {
               todo.push(n);
-              component.at(n) = component.at(cur);
+              color.at(n) = color.at(cur);
             }
           }
         }
-      } else if (component.at({restart_row, restart_col}) != COMPONENT_MULTIPLE &&
+      } else if (color.at({restart_row, restart_col}) != COLOR_MULTIPLE &&
                  !is_transparent({restart_row, restart_col})) {
-        component.at(restart_row, restart_col) = COMPONENT_IMPASSABLE;
+        color.at(restart_row, restart_col) = COLOR_IMPASSABLE;
       }
       ++restart_col;
     }
     ++restart_row;
   }
 
-  // Each door is its own connected component.
-  door_base_component = index;
+  // Each door is its own color.
+  door_base_color = index;
   for (const auto& door : doors) {
-    dynamic_component.add_component(component.at(door.first) = index++);
+    dynamic_component.add_component(color.at(door.first) = index++);
   }
 
   #ifndef NDEBUG
   for (size_t j = 0;j < size().row; ++j) {
     for (size_t i = 0; i < size().col; ++i) {
       assert(
-          component.at(j, i) < index ||
-          component.at(j, i) == COMPONENT_IMPASSABLE
+          color.at(j, i) < index ||
+          color.at(j, i) == COLOR_IMPASSABLE
         );
     }
   }
@@ -362,11 +363,11 @@ void Map::clear_cache() {
   for (auto& door : doors) {
     door.second.adjacent_components.clear();
     if (door.second.open) {
-      uint_least32_t door_component = component.at(door.first);
+      uint_least32_t door_color = color.at(door.first);
       for (const auto& n : data.get_adjacent(door.first, false)) {
-        if (component.at(n) != COMPONENT_IMPASSABLE &&
+        if (color.at(n) != COLOR_IMPASSABLE &&
             (!is_door(n) || (doors.find(n)->second.open && n < door.first))) {
-          dynamic_component.add_edge(component.at(n), door_component);
+          dynamic_component.add_edge(color.at(n), door_color);
         }
       }
     }
