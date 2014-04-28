@@ -109,8 +109,8 @@ bool Map::path_exists(Coord a, Coord b) const {
 }
 
 Path Map::path(Coord src, Coord dst) const {
-  Grid<int> expanded(size().row, size().col, 0);
-  Grid<Coord> previous(size().row, size().col, {(uint16_t)-1, (uint16_t)-1});
+  Grid<uint_fast8_t> expanded(size(), 0);
+  Grid<Coord> previous(size(), {(uint16_t)-1, (uint16_t)-1});
   size_t num_expanded = 0;
 
   if (!data.check_bounds(src) || !data.check_bounds(dst)) {
@@ -128,7 +128,7 @@ Path Map::path(Coord src, Coord dst) const {
     return Path(std::vector<Coord>{src}, 0);
   }
 
-  Grid<float> distance(size().row, size().col, INFINITY);
+  Grid<float> distance(size(), INFINITY);
   distance.at(src) = 0;
 
   struct Entry {
@@ -310,17 +310,17 @@ void Map::clear_cache() {
   // Identify colors (components connected by Manhattan-adjacent transparant
   // squares), stopping at walls and doors. We also mark walls with the
   // appropriate color value (COLOR_IMPASSABLE)
-  uint16_t restart_row = 0;
+  Coord restart{0, 0};
   uint_least32_t index = 0;
-  while (restart_row < size().row) {
-    uint16_t restart_col = 0;
-    while (restart_col < size().col) {
-      if (color.at(restart_row, restart_col) == COLOR_UNKNOWN &&
-          is_transparent({restart_row, restart_col})) {
+  while (restart.row < size().row) {
+    restart.col = 0;
+    while (restart.col < size().col) {
+      if (color.at(restart) == COLOR_UNKNOWN &&
+          is_transparent(restart)) {
         // Flood fill colors.
         std::stack<Coord> todo;
-        todo.push({restart_row, restart_col});
-        dynamic_component.add_component(color.at(restart_row, restart_col) = index++);
+        todo.push(restart);
+        dynamic_component.add_component(color.at(restart) = index++);
 
         while (!todo.empty()) {
           auto cur = todo.top();
@@ -333,13 +333,13 @@ void Map::clear_cache() {
             }
           }
         }
-      } else if (color.at({restart_row, restart_col}) != COLOR_MULTIPLE &&
-                 !is_transparent({restart_row, restart_col})) {
-        color.at(restart_row, restart_col) = COLOR_IMPASSABLE;
+      } else if (color.at(restart) != COLOR_MULTIPLE &&
+                 !is_transparent(restart)) {
+        color.at(restart) = COLOR_IMPASSABLE;
       }
-      ++restart_col;
+      ++restart.col;
     }
-    ++restart_row;
+    ++restart.row;
   }
 
   // Each door is its own color.
@@ -378,23 +378,24 @@ MapBuilder::MapBuilder(std::istream& is) {
   std::vector<Coord> door_index_to_coords;
 
   std::string line;
-  size_t rows, cols;
-  is >> rows >> cols;
+  Coord size;
+  is >> size.row >> size.col;
   std::getline(is, line);
   assert(is);
-  *this = MapBuilder({(uint16_t)rows, (uint16_t)cols}, 1);
-  for (uint16_t row = 0; row < rows; ++row) {
+  *this = MapBuilder(size, 1);
+  for (uint16_t row = 0; row < size.row; ++row) {
     std::getline(is, line);
     assert(is);
-    assert(line.size() >= cols);
-    for (uint16_t col = 0; col < cols; ++col) {
-      cost({row, col}) = (line[col] == '*' ? suncatcher::pathfinder::PATH_COST_INFINITE : 1);
+    assert(line.size() >= size.col);
+    for (uint16_t col = 0; col < size.col; ++col) {
+      Coord cell{row, col};
+      cost(cell) = (line[col] == '*' ? suncatcher::pathfinder::PATH_COST_INFINITE : 1);
       if (line[col] == 'd') {
-        add_door({row, col}, true, 1, suncatcher::pathfinder::PATH_COST_INFINITE);
-        door_index_to_coords.push_back({row, col});
+        add_door(cell, true, 1, suncatcher::pathfinder::PATH_COST_INFINITE);
+        door_index_to_coords.push_back(cell);
       } else if (line[col] == 'D') {
-        add_door({row, col}, false, 1, suncatcher::pathfinder::PATH_COST_INFINITE);
-        door_index_to_coords.push_back({row, col});
+        add_door(cell, false, 1, suncatcher::pathfinder::PATH_COST_INFINITE);
+        door_index_to_coords.push_back(cell);
       }
     }
   }
