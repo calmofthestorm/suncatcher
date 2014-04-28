@@ -115,10 +115,10 @@ int main(int, char**  argv) {
     }
 
     MPWrapper mpw(mpdmt.map.get());
-    for (size_t j = 0;j < df.map->size().row; ++j) {
-      for (size_t i = 0; i < df.map->size().col; ++i) {
-        for (size_t j2 = 0; j2 < df.map->size().row; ++j2) {
-          for (size_t i2 = 0; i2 < df.map->size().col; ++i2) {
+    for (uint16_t j = 0;j < df.map->size().row; ++j) {
+      for (uint16_t i = 0; i < df.map->size().col; ++i) {
+        for (uint16_t j2 = 0; j2 < df.map->size().row; ++j2) {
+          for (uint16_t i2 = 0; i2 < df.map->size().col; ++i2) {
             auto actual = df.map->path({j, i}, {j2, i2});
             auto expected = mpw.path({j, i}, {j2, i2});
             auto expected2 = mpdmt.map->path({j, i}, {j2, i2});
@@ -126,7 +126,7 @@ int main(int, char**  argv) {
               std::cout << "(" << j << ", " << i << ") -> (" << j2 << ", " << i2 << ")" << std::endl;
               df.map->print_map(std::cout, actual);
               std::cout << std::endl;
-              df.map->print_components(std::cout);
+              df.map->print_colors(std::cout);
               std::cout << std::endl;
               df.map->print_equivalence_classes(std::cout);
               std::cout << std::endl;
@@ -134,7 +134,7 @@ int main(int, char**  argv) {
               std::cout << actual << std::endl;
               mpdmt.map->print_map(std::cout, expected);
               std::cout << std::endl;
-              mpdmt.map->print_components(std::cout);
+              mpdmt.map->print_colors(std::cout);
               std::cout << std::endl;
               mpdmt.map->print_equivalence_classes(std::cout);
               std::cout << std::endl;
