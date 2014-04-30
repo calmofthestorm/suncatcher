@@ -120,8 +120,12 @@ int main(int argc, char** argv) {
         my_map.print_colors(std::cout);
         break;
 
+      case 'E':
+        my_map.print_static_components(std::cout);
+        break;
+
       case 'e':
-        my_map.print_equivalence_classes(std::cout);
+        my_map.print_dynamic_components(std::cout);
         break;
 
       default:
