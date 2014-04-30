@@ -58,15 +58,17 @@ class UnionFind {
     // Get element, adding it as a singleton set if it does not exist.
     T& operator[] (const T& elem);
     T& operator[] (T&& elem);
+    const T& operator[] (const T& elem) const;
 
     // Access element, throwing std::out_of_range if it does not exist.
     T& at (const T& elem);
+    const T& at (const T& elem) const;
 
     // Union the two sets. Throws std::out_of_range if either does not exist.
     T& union_sets(const T& elem1, const T& elem2);
 
     // Get the number of SETS.
-    size_t count_sets();
+    size_t count_sets() const;
 
     void disconnect_all_sets();
 
@@ -78,10 +80,10 @@ class UnionFind {
 
   private:
     friend const T& test::union_find_lookup_no_compress<T>(const UnionFind<T>& uf, const T& elem);
-    std::vector<size_t> rank, parent;
+    mutable std::vector<size_t> rank, parent;
     std::deque<T> id_to_handle;
     std::unordered_map<T, size_t> handle_to_id;
-    boost::disjoint_sets<size_t*, size_t*> uf;
+    mutable boost::disjoint_sets<size_t*, size_t*> uf;
 
     bool grow();
 };

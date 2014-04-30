@@ -84,7 +84,17 @@ T& UnionFind<T>::operator[] (const T& elem) {
 }
 
 template <typename T>
+const T& UnionFind<T>::operator[] (const T& elem) const {
+  return this->operator[] (T(elem));
+}
+
+template <typename T>
 T& UnionFind<T>::at(const T& elem) {
+  return id_to_handle.at(uf.find_set(handle_to_id.at(elem)));
+}
+
+template <typename T>
+const T& UnionFind<T>::at(const T& elem) const {
   return id_to_handle.at(uf.find_set(handle_to_id.at(elem)));
 }
 
@@ -118,7 +128,7 @@ bool UnionFind<T>::grow() {
 }
 
 template <typename T>
-size_t UnionFind<T>::count_sets() {
+size_t UnionFind<T>::count_sets() const {
   if (id_to_handle.empty()) {
     return 0;
   } else {

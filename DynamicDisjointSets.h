@@ -82,9 +82,7 @@ class DynamicDisjointSets {
     friend class test::DeltaMap;
     void rebuild();
 
-    // lookup needs to be const for const to mean anything in the scope of the
-    // wider program. So here we are:/
-    mutable UnionFind<T> uf;
+    UnionFind<T> uf;
     std::unordered_map<std::pair<T, T>, unsigned int> weights;
 };
 
