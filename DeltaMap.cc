@@ -1,7 +1,7 @@
 #include "DeltaMap.h"
 
 #include "Map.h"
-
+#include "UnionFind.h"
 
 namespace {
   using suncatcher::pathfinder::Coord;
@@ -15,6 +15,16 @@ namespace {
 namespace suncatcher {
 namespace test {
 
+
+
+template <typename T>
+const T& union_find_lookup_no_compress(const util::UnionFind<T>& uf, const T& elem) {
+  size_t key = uf.handle_to_id.at(elem);
+  while (uf.parent[key] != key) {
+    key = uf.parent[key];
+  }
+  return uf.id_to_handle[key];
+}
 
 
 DeltaMutator::DeltaMutator(MapMutator&& m1_i, MapMutator&& m2_i)
@@ -72,8 +82,53 @@ DeltaMap::DeltaMap(MapBuilder mb) {
 }
 
 
-void DeltaMap::check_invariant() {
-  
+void DeltaMap::check_invariant() const {
+  assert(simple_map->version == optimized_map->version);
+  assert(simple_map->outstanding_mutators == optimized_map->outstanding_mutators);
+  assert(simple_map->data == optimized_map->data);
+  assert(simple_map->doors == optimized_map->doors);
+
+  // Colors may vary provided that it's isomorphic.
+  assert(simple_map->color.size() == optimized_map->color.size());
+  std::map<uint_least32_t, uint_least32_t> cmapping, dmapping;
+  for (size_t j = 0; j < simple_map->color.size().row; ++j) {
+    for (size_t i = 0; i < simple_map->color.size().col; ++i) {
+      uint_least32_t scolor = simple_map->color.at(j, i);
+      uint_least32_t ocolor = optimized_map->color.at(j, i);
+      if (scolor == pathfinder::COLOR_IMPASSABLE) {
+        assert(ocolor == scolor);
+      } else {
+        auto c = cmapping.find(ocolor);
+        if (c != cmapping.end()) {
+          assert(c->second == scolor);
+        } else {
+          // Door base color may differ, but doorliness should be preserved.
+          assert(simple_map->is_door(scolor) == optimized_map->is_door(ocolor));
+          cmapping[ocolor] = scolor;
+        }
+      }
+    }
+  }
+
+  // Similar idea for dynamic components.
+  for (const auto& it : cmapping) {
+    uint_least32_t sdcomponent = union_find_lookup_no_compress(
+        simple_map->dynamic_component.uf,
+        it.second
+      );
+
+    uint_least32_t odcomponent = union_find_lookup_no_compress(
+        optimized_map->dynamic_component.uf,
+        it.first
+      );
+
+    auto c = dmapping.find(odcomponent);
+    if (c != dmapping.end()) {
+      assert(c->second == sdcomponent);
+    } else  {
+      cmapping[odcomponent] = sdcomponent;
+    }
+  }
 }
 
 
@@ -107,7 +162,6 @@ void DeltaMap::mutate(DeltaMutator&& mutator) {
 const std::map<const Coord, suncatcher::pathfinder::Door>& DeltaMap::get_doors() const {
   return optimized_map->get_doors();
 }
-
 
 
 const util::Grid<uint8_t>& DeltaMap::get_data() const {

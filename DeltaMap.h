@@ -56,7 +56,7 @@ class DeltaMap {
     explicit DeltaMap(pathfinder::MapBuilder mb);
 
     // Verifies both maps have the same cached data.
-    void check_invariant();
+    void check_invariant() const;
 
     // Find a path.
     pathfinder::Path path(pathfinder::Coord start, pathfinder::Coord finish) const;
