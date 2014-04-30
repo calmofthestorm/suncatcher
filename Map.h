@@ -54,7 +54,6 @@ struct Door {
   bool open;
   uint_least8_t cost_open; // cost to walk through when open
   uint_least8_t cost_closed; // cost to walk through when closed
-  std::vector<uint_least32_t> adjacent_components;
 };
 
 class Map {

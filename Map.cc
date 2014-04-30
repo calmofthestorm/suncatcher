@@ -28,7 +28,7 @@ MapBuilder::MapBuilder(Coord size, uint_least8_t default_cost)
 void MapBuilder::add_door(Coord cell, bool open, uint_least8_t cost_open,
                           uint_least8_t cost_closed) {
   assert(doors.find(cell) == doors.end());
-  doors[cell] = {open, cost_open, cost_closed, {}};
+  doors[cell] = {open, cost_open, cost_closed};
   data.at(cell) = open ? cost_open : cost_closed;
 }
 
@@ -207,7 +207,7 @@ void Map::mutate(MapMutator&& mutation) {
         dirty = true;
         assert(door_iter == doors.end());
         assert(it.second.cost != PATH_COST_INFINITE);
-        doors[it.first] = Door{it.second.state, it.second.cost, PATH_COST_INFINITE, {}};
+        doors[it.first] = Door{it.second.state, it.second.cost, PATH_COST_INFINITE};
         if (it.second.state) {
           data.at(it.first) = it.second.cost;
         } else {
@@ -365,7 +365,6 @@ void Map::clear_cache() {
 
   // Dynamically union all open doors with their neighbors.
   for (auto& door : doors) {
-    door.second.adjacent_components.clear();
     if (door.second.open) {
       uint_least32_t door_color = color.at(door.first);
       for (const auto& n : data.get_adjacent(door.first, false)) {
