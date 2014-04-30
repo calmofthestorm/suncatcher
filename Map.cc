@@ -248,19 +248,39 @@ void Map::mutate(MapMutator&& mutation) {
         // Removing a wall.
         if (data.at(it.first) == PATH_COST_INFINITE &&
             it.second.cost != PATH_COST_INFINITE) {
-          // TODO: union static components
-          dirty = true;
+          assert(color.at(it.first) == COLOR_IMPASSABLE);
+
+          // Set its color to the first transparent neighbor (Manhattan) found.
+          // For the rest, union the static components.
+          for (const auto& n : data.get_adjacent(it.first, false)) {
+            if (is_transparent(n)) {
+              if (color.at(it.first) == COLOR_IMPASSABLE) {
+                // Not yet chosen the former wall's new color
+                color.at(it.first) = color.at(n);
+              } else {
+                // Former wall has a color, merge them.
+                static_component.union_sets(color.at(it.first), color.at(n));
+              }
+            }
+          }
+
+          // Wall was surrounded by walls (or other doors, etc -- anything
+          // that we can't merge with the new square). Allocate it a new
+          // color, and thus a new static component and dynamic component.
+          if (color.at(it.first) == COLOR_IMPASSABLE) {
+            dynamic_component.add_component(static_component[next_component_color]);
+            color.at(it.first) = next_component_color++;
+          }
         } else if (data.at(it.first) != PATH_COST_INFINITE &&
                    it.second.cost == PATH_COST_INFINITE) {
           // Building a wall. Flood fill required.
           // TODO: neighborhood optimization
           dirty = true;
         }
+        data.at(it.first) = it.second.cost;
         // else -- either PATH_COST_INFINITE -> PATH_COST_INFINITE (nop)
         // or passable value to passable value -- colors are not affected
         // (even though path cost might be).
-
-        data.at(it.first) = it.second.cost;
         break;
 
       case MapMutator::Mutation::Kind::UPDATE_DOOR:
@@ -369,6 +389,7 @@ void Map::clear_cache() {
     }
     ++restart.row;
   }
+  next_component_color = index;
 
   // Each door is its own color.
   index = -1;
@@ -377,6 +398,7 @@ void Map::clear_cache() {
     dynamic_component.add_component(static_component[index]);
     --index;
   }
+  next_door_color = index;
 
   // Dynamically union all open doors with their neighbors.
   for (auto& door : doors) {
@@ -386,7 +408,9 @@ void Map::clear_cache() {
         if (color.at(n) != COLOR_IMPASSABLE &&
             (!is_door(n) || (doors.find(n)->second.open && n < door.first))) {
           dynamic_component.add_edge(
-              static_component.at(color.at(n)), door_static_component);
+              static_component.at(color.at(n)),
+              door_static_component
+            );
         }
       }
     }

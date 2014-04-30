@@ -170,6 +170,11 @@ class Map {
     // Whether dynamic updates are enabled. If false, the Map will reinitialize
     // after every mutation. The MapBuilder sets this.
     bool dynamic_updates;
+
+    // The color of the next door/component to assign. Components grow up;
+    // doors grow down.
+    int_least32_t next_component_color;
+    int_least32_t next_door_color;
 };
 
 class MapBuilder {

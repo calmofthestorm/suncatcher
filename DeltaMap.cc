@@ -88,11 +88,16 @@ void DeltaMap::check_invariant() const {
   assert(simple_map->data == optimized_map->data);
   assert(simple_map->doors == optimized_map->doors);
 
-  // Colors may vary provided that it's isomorphic.
   assert(simple_map->color.size() == optimized_map->color.size());
-  std::map<int_least32_t, int_least32_t> cmapping, dmapping;
+  std::map<int_least32_t, int_least32_t> cmapping, smapping, dmapping;
+  // simple_map->print_colors(std::cout);
+  // optimized_map->print_colors(std::cout);
+  // simple_map->print_static_components(std::cout);
+  // optimized_map->print_static_components(std::cout);
   for (size_t j = 0; j < simple_map->color.size().row; ++j) {
     for (size_t i = 0; i < simple_map->color.size().col; ++i) {
+      // Check color. Colors may vary provided that it's many-to-one from
+      // optimized to simple.
       int_least32_t scolor = simple_map->color.at(j, i);
       int_least32_t ocolor = optimized_map->color.at(j, i);
       if (scolor == pathfinder::COLOR_IMPASSABLE) {
@@ -107,26 +112,28 @@ void DeltaMap::check_invariant() const {
           cmapping[ocolor] = scolor;
         }
       }
-    }
-  }
 
-  // Similar idea for dynamic components.
-  for (const auto& it : cmapping) {
-    int_least32_t sdcomponent = union_find_lookup_no_compress(
-        simple_map->dynamic_component.uf,
-        it.second
-      );
+      if (scolor != pathfinder::COLOR_IMPASSABLE) {
+        // Check static components. These must be isomorphic.
+        int_least32_t sstatic = simple_map->static_component.at(scolor);
+        int_least32_t ostatic = optimized_map->static_component.at(ocolor);
+        auto c = smapping.find(ostatic);
+        if (c != smapping.end()) {
+          assert(c->second == sstatic);
+        } else {
+          smapping[ostatic] = sstatic;
+        }
 
-    int_least32_t odcomponent = union_find_lookup_no_compress(
-        optimized_map->dynamic_component.uf,
-        it.first
-      );
-
-    auto c = dmapping.find(odcomponent);
-    if (c != dmapping.end()) {
-      assert(c->second == sdcomponent);
-    } else  {
-      cmapping[odcomponent] = sdcomponent;
+        // Check dynamic components. These must be isomorphic.
+        int_least32_t sdynamic = simple_map->dynamic_component.lookup(sstatic);
+        int_least32_t odynamic = optimized_map->dynamic_component.lookup(ostatic);
+        c = dmapping.find(odynamic);
+        if (c != dmapping.end()) {
+          assert(c->second == sdynamic);
+        } else {
+          dmapping[odynamic] = sdynamic;
+        }
+      }
     }
   }
 }
