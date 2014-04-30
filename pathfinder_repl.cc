@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
         }
 
       case 'd':
-        uint_least32_t door;
+        int_least32_t door;
         std::cin >> door;
         if (door >= door_index_to_coords.size()) {
           std::cout << "There are only " << door_index_to_coords.size() << " doors." << std::endl;

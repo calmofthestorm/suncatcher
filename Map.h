@@ -39,9 +39,10 @@ namespace pathfinder {
 
 const uint_least8_t PATH_COST_INFINITE = (uint_least8_t)-1;
 
-const uint_least32_t COLOR_MULTIPLE = (uint_least32_t)-1;
-const uint_least32_t COLOR_UNKNOWN = (uint_least32_t)-2;
-const uint_least32_t COLOR_IMPASSABLE = (uint_least32_t)-3;
+const int_least32_t COLOR_MULTIPLE = std::numeric_limits<int_least32_t>::min();
+const int_least32_t COLOR_UNKNOWN = COLOR_MULTIPLE + 1;
+const int_least32_t COLOR_IMPASSABLE = COLOR_UNKNOWN + 1;
+const int_least32_t COLOR_LOWEST_VALID = COLOR_IMPASSABLE + 1;
 
 class MapBuilder;
 
@@ -94,7 +95,7 @@ class Map {
     // coordinate or a (valid) color, since all doors have their own color.
     // Both are constant time.
     inline bool is_door(Coord cell) const;
-    inline bool is_door(uint_least32_t cell_color) const;
+    inline bool is_door(int_least32_t cell_color) const;
 
     // True iff the cell is always passable to all movement modes and factions.
     // Thus, returns false for doors regardless of state.
@@ -152,27 +153,23 @@ class Map {
     // of a small indirect lookup table). Typically there will be anywhere from
     // 1-5 colors per door on the map, plus one for each isolated walled off
     // region.
-    suncatcher::util::Grid<uint_least32_t> color;
+    suncatcher::util::Grid<int_least32_t> color;
 
     // Static component -- represent the same areas as colors, but there may
     // be a many-to-one mapping of colors to static components -- for example,
     // if we remove a door, the three areas (two rooms and door itself) retain
     // their colors but would all map to the same static component.
-    util::UnionFind<uint_least32_t> static_component;
+    util::UnionFind<int_least32_t> static_component;
 
     // Dynamic component tracking -- organizes static components (rooms) into
     // dynamic components (reachability). This lets us minimize expensive
     // operations such as DFS to determine connected components by performing
     // the frequent ones on a simplified graph.
-    util::DynamicDisjointSets<uint_least32_t> dynamic_component;
+    util::DynamicDisjointSets<int_least32_t> dynamic_component;
 
     // Whether dynamic updates are enabled. If false, the Map will reinitialize
     // after every mutation. The MapBuilder sets this.
     bool dynamic_updates;
-
-    // All colors less than door_base are non-doors. Any color >=
-    // door_base, if valid, is a door.
-    uint_least32_t door_base_color;
 };
 
 class MapBuilder {

@@ -90,11 +90,11 @@ void DeltaMap::check_invariant() const {
 
   // Colors may vary provided that it's isomorphic.
   assert(simple_map->color.size() == optimized_map->color.size());
-  std::map<uint_least32_t, uint_least32_t> cmapping, dmapping;
+  std::map<int_least32_t, int_least32_t> cmapping, dmapping;
   for (size_t j = 0; j < simple_map->color.size().row; ++j) {
     for (size_t i = 0; i < simple_map->color.size().col; ++i) {
-      uint_least32_t scolor = simple_map->color.at(j, i);
-      uint_least32_t ocolor = optimized_map->color.at(j, i);
+      int_least32_t scolor = simple_map->color.at(j, i);
+      int_least32_t ocolor = optimized_map->color.at(j, i);
       if (scolor == pathfinder::COLOR_IMPASSABLE) {
         assert(ocolor == scolor);
       } else {
@@ -112,12 +112,12 @@ void DeltaMap::check_invariant() const {
 
   // Similar idea for dynamic components.
   for (const auto& it : cmapping) {
-    uint_least32_t sdcomponent = union_find_lookup_no_compress(
+    int_least32_t sdcomponent = union_find_lookup_no_compress(
         simple_map->dynamic_component.uf,
         it.second
       );
 
-    uint_least32_t odcomponent = union_find_lookup_no_compress(
+    int_least32_t odcomponent = union_find_lookup_no_compress(
         optimized_map->dynamic_component.uf,
         it.first
       );

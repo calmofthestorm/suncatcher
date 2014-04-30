@@ -66,7 +66,7 @@ void Map::print_map(std::ostream& os, const Path& path_to_show) const {
 void Map::print_colors(std::ostream& os) const {
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
-      uint_least32_t c = color.at(j, i);
+      int_least32_t c = color.at(j, i);
       auto door = doors.find({j, i});
       if (door != doors.end()) {
         if (doors.find({j, i})->second.open) {
@@ -91,7 +91,7 @@ void Map::print_static_components(std::ostream& os) const {
       if (color.at(j, i) == COLOR_IMPASSABLE) {
         os << ' ';
       } else {
-        uint_least32_t c = static_component.at(color.at(j, i));
+        int_least32_t c = static_component.at(color.at(j, i));
         if (c < 25) {
           os << (char)(c + 'A');
         } else {
@@ -109,7 +109,7 @@ void Map::print_dynamic_components(std::ostream& os) const {
       if (color.at(j, i) == COLOR_IMPASSABLE) {
         os << ' ';
       } else {
-        uint_least32_t c = dynamic_component.lookup(static_component.at(color.at(j, i)));
+        int_least32_t c = dynamic_component.lookup(static_component.at(color.at(j, i)));
         if (c < 25) {
           os << (char)(c + 'A');
         } else {
@@ -203,8 +203,7 @@ Map::Map(MapBuilder&& builder)
   outstanding_mutators(0),
   data(std::move(builder.data)),
   doors(std::move(builder.doors)),
-  dynamic_updates(builder.dynamic_updates),
-  door_base_color(0) {
+  dynamic_updates(builder.dynamic_updates) {
 
   clear_cache();
 }
@@ -284,7 +283,7 @@ void Map::mutate(MapMutator&& mutation) {
         // Maintain links if door changed state.
         if (it.second.state) {
           if (door_iter->second.open) {
-            uint_least32_t door_static_component = static_component.at(color.at(it.first));
+            int_least32_t door_static_component = static_component.at(color.at(it.first));
             for (const auto& n : data.get_adjacent(it.first, false)) {
               if (color.at(n) != COLOR_IMPASSABLE &&
                   (!is_door(n) || (doors.find(n)->second.open && n < it.first))) {
@@ -294,7 +293,7 @@ void Map::mutate(MapMutator&& mutation) {
               }
             }
           } else {
-            uint_least32_t door_static_component = static_component.at(color.at(it.first));
+            int_least32_t door_static_component = static_component.at(color.at(it.first));
             dynamic_component.isolate_component(door_static_component);
           }
         }
@@ -325,7 +324,7 @@ void Map::clear_cache() {
     }
   };
 
-  color = Grid<uint_least32_t>(size(), COLOR_UNKNOWN);
+  color = Grid<int_least32_t>(size(), COLOR_UNKNOWN);
   color.fill(COLOR_UNKNOWN);
 
   // Temporarily mark doors as having multiple colors. We do this so we
@@ -338,7 +337,7 @@ void Map::clear_cache() {
   // squares), stopping at walls and doors. We also mark walls with the
   // appropriate color value (COLOR_IMPASSABLE)
   Coord restart{0, 0};
-  uint_least32_t index = 0;
+  int_least32_t index = 0;
   while (restart.row < size().row) {
     restart.col = 0;
     while (restart.col < size().col) {
@@ -372,28 +371,17 @@ void Map::clear_cache() {
   }
 
   // Each door is its own color.
-  door_base_color = index;
+  index = -1;
   for (const auto& door : doors) {
     color.at(door.first) = index;
     dynamic_component.add_component(static_component[index]);
-    ++index;
+    --index;
   }
-
-  #ifndef NDEBUG
-  for (size_t j = 0;j < size().row; ++j) {
-    for (size_t i = 0; i < size().col; ++i) {
-      assert(
-          color.at(j, i) < index ||
-          color.at(j, i) == COLOR_IMPASSABLE
-        );
-    }
-  }
-  #endif
 
   // Dynamically union all open doors with their neighbors.
   for (auto& door : doors) {
     if (door.second.open) {
-      uint_least32_t door_static_component = static_component.at(color.at(door.first));
+      int_least32_t door_static_component = static_component.at(color.at(door.first));
       for (const auto& n : data.get_adjacent(door.first, false)) {
         if (color.at(n) != COLOR_IMPASSABLE &&
             (!is_door(n) || (doors.find(n)->second.open && n < door.first))) {
