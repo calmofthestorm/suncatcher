@@ -58,13 +58,13 @@ class MapMutator {
     MapMutator()
     : map(nullptr) { }
 
-    ~MapMutator();
+    ~MapMutator() noexcept;
 
     MapMutator(const MapMutator& other) = delete;
     MapMutator& operator=(const MapMutator& other) = delete;
 
-    MapMutator& operator=(MapMutator&& other) = default;
-    MapMutator(MapMutator&& other) = default;
+    MapMutator& operator=(MapMutator&& other) noexcept;
+    MapMutator(MapMutator&& other) noexcept;
 
 
   private:

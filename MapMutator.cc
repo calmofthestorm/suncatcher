@@ -7,6 +7,8 @@
 namespace suncatcher {
 namespace pathfinder {
 
+
+
 MapMutator::MapMutator(Map* map_in, size_t version_in)
 : map(map_in),
   version(0) {
@@ -16,11 +18,29 @@ MapMutator::MapMutator(Map* map_in, size_t version_in)
   }
 }
 
-MapMutator::~MapMutator() {
+
+MapMutator::~MapMutator() noexcept {
   if (map) {
     map->notify_mutator_destroyed();
   }
 }
+
+
+MapMutator& MapMutator::operator=(MapMutator&& other) noexcept {
+  std::swap(map, other.map);
+  std::swap(version, other.version);
+  std::swap(mutations, other.mutations);
+  return *this;
+}
+
+
+MapMutator::MapMutator(MapMutator&& other) noexcept {
+  map = nullptr;
+  std::swap(map, other.map);
+  std::swap(version, other.version);
+  std::swap(mutations, other.mutations);
+}
+
 
 MapMutator& MapMutator::set_door_open(Coord door, bool state) {
   assert(map);

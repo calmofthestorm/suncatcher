@@ -29,6 +29,11 @@
 
 
 namespace suncatcher {
+
+namespace test {
+  class DeltaMap;
+}  // namespace test
+
 namespace pathfinder {
 
 const uint_least8_t PATH_COST_INFINITE = (uint_least8_t)-1;
@@ -56,13 +61,16 @@ class Map {
   public:
     // See MapBuilder for construction information.
     Map(MapBuilder&& builder);
-    ~Map();
+    ~Map() noexcept;
 
+    // Disabling copy due to large + why would you want to + nontrivial to
+    // handle the linked mutator logic.
     Map& operator= (const Map& other) = delete;
     Map(const Map& other) = delete;
 
-    Map& operator= (Map&& other) = default;
-    Map(Map&& other) = default;
+    // Since mutators store a pointer to maps, moves are illegal.
+    Map& operator= (Map&& other) = delete;
+    Map(Map&& other) = delete;
 
     // Compute the shortest path between two points if one exists. Returns false
     // path on failure (out of bounds, no path, impassable src/dest, etc).
@@ -129,11 +137,15 @@ class Map {
     // calling notify_mutator_destroyed and notify_mutator_created.
     // TODO: better design?
     friend class MapMutator;
+    friend class test::DeltaMap;
 
     // Notifies the Map that the mutator was destroyed/copied, so the
     // outstanding mutator reference count can be updated.
-    inline void notify_mutator_destroyed() { --outstanding_mutators; }
-    inline void notify_mutator_created() { ++outstanding_mutators;};
+    inline void notify_mutator_destroyed() noexcept {
+      assert(outstanding_mutators > 0);
+      --outstanding_mutators;
+    }
+    inline void notify_mutator_created() noexcept { ++outstanding_mutators;};
 
     // Mutator synchronization state
     size_t version;

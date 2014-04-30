@@ -21,12 +21,14 @@ using suncatcher::pathfinder::MicropatherGraph;
 #endif
 
 #include "Coord.h"
+#include "DeltaMap.h"
 #include "Map.h"
 #include "MapMutator.h"
 #include "util.h"
 
 using suncatcher::util::manhattan;
 using suncatcher::pathfinder::Map;
+using suncatcher::test::DeltaMap;
 using suncatcher::pathfinder::MapMutator;
 using suncatcher::pathfinder::MapBuilder;
 using suncatcher::pathfinder::Path;
@@ -36,7 +38,7 @@ using suncatcher::pathfinder::PATH_COST_INFINITE;
 #ifdef MICROPATHER_DELTA_TEST
 class MPWrapper {
   public:
-    MPWrapper(const Map* map) {
+    MPWrapper(const DeltaMap* map) {
       my_map = map;
       mpg.reset(new MicropatherGraph(map));
     }
@@ -72,7 +74,7 @@ class MPWrapper {
     }
 
   private:
-    const Map* my_map;
+    const DeltaMap* my_map;
     std::unique_ptr<MicropatherGraph> mpg;
     std::unique_ptr<micropather::MicroPather> mp;
 };
@@ -85,22 +87,22 @@ class MapTest : public ::testing::Test {
       {
         std::ifstream is("maps/open.txt");
         empty_map_builder.reset(new MapBuilder(is));
-        empty_map.reset(new Map(MapBuilder(*empty_map_builder.get())));
+        empty_map.reset(new DeltaMap(MapBuilder(*empty_map_builder.get())));
       }
       {
         std::ifstream is("maps/map.txt");
         main_map_builder.reset(new MapBuilder(is));
-        main_map.reset(new Map(MapBuilder(*main_map_builder.get())));
+        main_map.reset(new DeltaMap(MapBuilder(*main_map_builder.get())));
       }
       {
         std::ifstream is("maps/micro.txt");
         micro_map_builder.reset(new MapBuilder(is));
-        micro_map.reset(new Map(MapBuilder(*micro_map_builder.get())));
+        micro_map.reset(new DeltaMap(MapBuilder(*micro_map_builder.get())));
       }
       {
         std::ifstream is("maps/doorland.txt");
         doorland_map_builder.reset(new MapBuilder(is));
-        doorland_map.reset(new Map(MapBuilder(*doorland_map_builder.get())));
+        doorland_map.reset(new DeltaMap(MapBuilder(*doorland_map_builder.get())));
       }
       #ifdef MICROPATHER_DELTA_TEST
         empty_mp.reset(new MPWrapper(empty_map.get()));
@@ -110,7 +112,7 @@ class MapTest : public ::testing::Test {
 
   public:
     static std::unique_ptr<const MapBuilder> empty_map_builder, main_map_builder, micro_map_builder, doorland_map_builder;
-    static std::unique_ptr<const Map> empty_map, main_map, micro_map, doorland_map;
+    static std::unique_ptr<const DeltaMap> empty_map, main_map, micro_map, doorland_map;
     #ifdef MICROPATHER_DELTA_TEST
       static std::unique_ptr<MPWrapper> empty_mp, main_mp, micro_mp, doorland_mp;
     #endif
@@ -123,7 +125,7 @@ class MapTest : public ::testing::Test {
 class DynamicMapTest : public ::testing::Test {
   protected:
     void make_map_copy(const std::unique_ptr<const MapBuilder>& mb) {
-      map.reset(new Map(MapBuilder(*mb)));
+      map.reset(new DeltaMap(MapBuilder(*mb)));
       #ifdef MICROPATHER_DELTA_TEST
         micro.reset(new MPWrapper(map.get()));
       #endif
@@ -134,7 +136,7 @@ class DynamicMapTest : public ::testing::Test {
     }
 
   public:
-    std::unique_ptr<Map> map;
+    std::unique_ptr<DeltaMap> map;
     #ifdef MICROPATHER_DELTA_TEST
       std::unique_ptr<MPWrapper> micro;
     #endif

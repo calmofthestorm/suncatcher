@@ -197,6 +197,7 @@ MapMutator Map::get_mutator() {
 // Changes the world immediately, doing all necessary computations.
 void Map::mutate(MapMutator&& mutation) {
   assert(mutation.version == version);
+  assert(mutation.map == this);
   ++version;
   bool dirty = false;
   for (const auto& it : mutation.mutations) {
