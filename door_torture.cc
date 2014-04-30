@@ -124,22 +124,6 @@ int main(int, char**  argv) {
             auto expected2 = mpdmt.map->path({j, i}, {j2, i2});
             if (std::abs(actual.get_length() - expected.get_length()) >= 0.1) {
               std::cout << "(" << j << ", " << i << ") -> (" << j2 << ", " << i2 << ")" << std::endl;
-              df.map->print_map(std::cout, actual);
-              std::cout << std::endl;
-              df.map->print_colors(std::cout);
-              std::cout << std::endl;
-              df.map->print_equivalence_classes(std::cout);
-              std::cout << std::endl;
-              std::cout << std::endl;
-              std::cout << actual << std::endl;
-              mpdmt.map->print_map(std::cout, expected);
-              std::cout << std::endl;
-              mpdmt.map->print_colors(std::cout);
-              std::cout << std::endl;
-              mpdmt.map->print_equivalence_classes(std::cout);
-              std::cout << std::endl;
-              std::cout << std::endl;
-              std::cout << expected << std::endl;
             }
             assert(std::abs(actual.get_length() - expected.get_length()) < 0.1);
             assert(std::abs(actual.get_length() - expected2.get_length()) < 0.1);

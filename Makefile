@@ -35,7 +35,7 @@ depend: .depend
 	$(CXX) $(CPPFLAGS) -MM $^>>./.depend;
 
 clean:
-	$(RM) $(TEST_OBJS) $(OBJS) pathfinder_repl.o pathfinder_repl test_main tests/test_main.o
+	$(RM) $(TEST_OBJS) $(OBJS) pathfinder_repl.o pathfinder_repl test_main tests/test_main.o door_torture.o
 
 dist-clean: clean
 	$(RM) *~ .dependtool
