@@ -32,6 +32,17 @@
 #include <boost/iterator/counting_iterator.hpp>
 
 namespace suncatcher {
+
+namespace util {
+  template <typename T>
+  class UnionFind;
+}  // namespace util
+
+namespace test {
+  template <typename T>
+  T& union_find_lookup_no_compress(const util::UnionFind<T>& uf, const T& elem);
+}  // namespace test
+
 namespace util {
 
 template <typename T>
@@ -66,6 +77,7 @@ class UnionFind {
     inline const std::deque<T>& get_elements() const { return id_to_handle; }
 
   private:
+    friend T& test::union_find_lookup_no_compress<T>(const UnionFind<T>& uf, const T& elem);
     std::vector<size_t> rank, parent;
     std::deque<T> id_to_handle;
     std::unordered_map<T, size_t> handle_to_id;
