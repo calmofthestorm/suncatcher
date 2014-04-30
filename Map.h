@@ -24,6 +24,7 @@
 
 #include "Grid.h"
 #include "Path.h"
+#include "Door.h"
 #include "MapMutator.h"
 #include "DynamicDisjointSets.h"
 
@@ -43,18 +44,6 @@ const uint_least32_t COLOR_UNKNOWN = (uint_least32_t)-2;
 const uint_least32_t COLOR_IMPASSABLE = (uint_least32_t)-3;
 
 class MapBuilder;
-
-// Not necessarily a door; represents any point that is expected to change
-// between passable and impassible during normal play. This could be used to
-// represent anything, including possibly an in-construction wall being converted
-// to an open door any time between queueing and completed construction, then
-// "closed" and removed in constant time when the wall is completed.
-
-struct Door {
-  bool open;
-  uint_least8_t cost_open; // cost to walk through when open
-  uint_least8_t cost_closed; // cost to walk through when closed
-};
 
 class Map {
   public:
