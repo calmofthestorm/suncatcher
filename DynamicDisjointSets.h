@@ -23,6 +23,11 @@ struct hash<std::pair<T1, T2>> {
 }
 
 namespace suncatcher {
+
+namespace test {
+  class DeltaMap;
+}  // namespace test
+
 namespace util {
 
 // The DynamicDisjointSets is used to maintain the connections between
@@ -74,6 +79,7 @@ class DynamicDisjointSets {
     inline bool equivalent(T label1, T label2) const;
 
   private:
+    friend class test::DeltaMap;
     void rebuild();
 
     // lookup needs to be const for const to mean anything in the scope of the
