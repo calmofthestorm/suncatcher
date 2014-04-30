@@ -175,6 +175,8 @@ class Map {
     // doors grow down.
     int_least32_t next_component_color;
     int_least32_t next_door_color;
+
+    void wall_to_transparent(Coord cell);
 };
 
 class MapBuilder {

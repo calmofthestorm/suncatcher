@@ -214,6 +214,35 @@ MapMutator Map::get_mutator() {
 }
 
 
+// Caller's responsibility to set the newly transparent cell's cost AFTER
+// the call.
+void Map::wall_to_transparent(Coord cell) {
+  assert(color.at(cell) == COLOR_IMPASSABLE);
+
+  // Set its color to the first transparent neighbor (Manhattan) found.
+  // For the rest, union the static components.
+  for (const auto& n : data.get_adjacent(cell, false)) {
+    if (is_transparent(n)) {
+      if (color.at(cell) == COLOR_IMPASSABLE) {
+        // Not yet chosen the former wall's new color
+        color.at(cell) = color.at(n);
+      } else {
+        // Former wall has a color, merge them.
+        static_component.union_sets(color.at(cell), color.at(n));
+      }
+    }
+  }
+
+  // Wall was surrounded by walls (or other doors, etc -- anything
+  // that we can't merge with the new square). Allocate it a new
+  // color, and thus a new static component and dynamic component.
+  if (color.at(cell) == COLOR_IMPASSABLE) {
+    dynamic_component.add_component(static_component[next_component_color]);
+    color.at(cell) = next_component_color++;
+  }
+}
+
+
 // Changes the world immediately, doing all necessary computations.
 void Map::mutate(MapMutator&& mutation) {
   assert(mutation.version == version);
@@ -248,29 +277,7 @@ void Map::mutate(MapMutator&& mutation) {
         // Removing a wall.
         if (data.at(it.first) == PATH_COST_INFINITE &&
             it.second.cost != PATH_COST_INFINITE) {
-          assert(color.at(it.first) == COLOR_IMPASSABLE);
-
-          // Set its color to the first transparent neighbor (Manhattan) found.
-          // For the rest, union the static components.
-          for (const auto& n : data.get_adjacent(it.first, false)) {
-            if (is_transparent(n)) {
-              if (color.at(it.first) == COLOR_IMPASSABLE) {
-                // Not yet chosen the former wall's new color
-                color.at(it.first) = color.at(n);
-              } else {
-                // Former wall has a color, merge them.
-                static_component.union_sets(color.at(it.first), color.at(n));
-              }
-            }
-          }
-
-          // Wall was surrounded by walls (or other doors, etc -- anything
-          // that we can't merge with the new square). Allocate it a new
-          // color, and thus a new static component and dynamic component.
-          if (color.at(it.first) == COLOR_IMPASSABLE) {
-            dynamic_component.add_component(static_component[next_component_color]);
-            color.at(it.first) = next_component_color++;
-          }
+          wall_to_transparent(it.first);
         } else if (data.at(it.first) != PATH_COST_INFINITE &&
                    it.second.cost == PATH_COST_INFINITE) {
           // Building a wall. Flood fill required.
