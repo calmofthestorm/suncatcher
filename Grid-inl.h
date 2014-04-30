@@ -98,7 +98,7 @@ inline const suncatcher::pathfinder::Coord& Grid<T>::size() const {
 
 template <typename T>
 inline bool Grid<T>::operator==(const Grid<T>& other) const {
-  return (other.size == size && other.backing == backing);
+  return (other.size() == size() && other.backing == backing);
 }
 
 
