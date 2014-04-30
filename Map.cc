@@ -85,13 +85,31 @@ void Map::print_colors(std::ostream& os) const {
   os << std::endl;
 }
 
-void Map::print_equivalence_classes(std::ostream& os) const {
+void Map::print_static_components(std::ostream& os) const {
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
       if (color.at(j, i) == COLOR_IMPASSABLE) {
         os << ' ';
       } else {
-        uint_least32_t c = dynamic_component.lookup(color.at(j, i));
+        uint_least32_t c = static_component.at(color.at(j, i));
+        if (c < 25) {
+          os << (char)(c + 'A');
+        } else {
+          os << ' ' << c << ' ';
+        }
+      }
+    }
+    os << std::endl;
+  }
+}
+
+void Map::print_dynamic_components(std::ostream& os) const {
+  for (uint16_t j = 0; j < size().row; ++j) {
+    for (uint16_t i = 0; i < size().col; ++i) {
+      if (color.at(j, i) == COLOR_IMPASSABLE) {
+        os << ' ';
+      } else {
+        uint_least32_t c = dynamic_component.lookup(static_component.at(color.at(j, i)));
         if (c < 25) {
           os << (char)(c + 'A');
         } else {
@@ -105,7 +123,10 @@ void Map::print_equivalence_classes(std::ostream& os) const {
 
 bool Map::path_exists(Coord a, Coord b) const {
   return (is_passable(a) && is_passable(b) &&
-          dynamic_component.equivalent(color.at(a), color.at(b)));
+          dynamic_component.equivalent(
+              static_component.at(color.at(a)),
+              static_component.at(color.at(b))
+            ));
 }
 
 Path Map::path(Coord src, Coord dst) const {
@@ -237,7 +258,7 @@ void Map::mutate(MapMutator&& mutation) {
           dirty = true;
         }
         // else -- either PATH_COST_INFINITE -> PATH_COST_INFINITE (nop)
-        // or passable value to passable value -- color are not affected
+        // or passable value to passable value -- colors are not affected
         // (even though path cost might be).
 
         data.at(it.first) = it.second.cost;
@@ -263,16 +284,18 @@ void Map::mutate(MapMutator&& mutation) {
         // Maintain links if door changed state.
         if (it.second.state) {
           if (door_iter->second.open) {
-            uint_least32_t door_color = color.at(it.first);
+            uint_least32_t door_static_component = static_component.at(color.at(it.first));
             for (const auto& n : data.get_adjacent(it.first, false)) {
               if (color.at(n) != COLOR_IMPASSABLE &&
                   (!is_door(n) || (doors.find(n)->second.open && n < it.first))) {
-                dynamic_component.add_edge(color.at(n), door_color);
+                dynamic_component.add_edge(
+                    static_component.at(color.at(n)),
+                    door_static_component);
               }
             }
           } else {
-            uint_least32_t door_color = color.at(it.first);
-            dynamic_component.isolate_component(door_color);
+            uint_least32_t door_static_component = static_component.at(color.at(it.first));
+            dynamic_component.isolate_component(door_static_component);
           }
         }
         break;
@@ -324,7 +347,9 @@ void Map::clear_cache() {
         // Flood fill colors.
         std::stack<Coord> todo;
         todo.push(restart);
-        dynamic_component.add_component(color.at(restart) = index++);
+        color.at(restart) = index;
+        dynamic_component.add_component(static_component[index]);
+        ++index;
 
         while (!todo.empty()) {
           auto cur = todo.top();
@@ -349,7 +374,9 @@ void Map::clear_cache() {
   // Each door is its own color.
   door_base_color = index;
   for (const auto& door : doors) {
-    dynamic_component.add_component(color.at(door.first) = index++);
+    color.at(door.first) = index;
+    dynamic_component.add_component(static_component[index]);
+    ++index;
   }
 
   #ifndef NDEBUG
@@ -366,11 +393,12 @@ void Map::clear_cache() {
   // Dynamically union all open doors with their neighbors.
   for (auto& door : doors) {
     if (door.second.open) {
-      uint_least32_t door_color = color.at(door.first);
+      uint_least32_t door_static_component = static_component.at(color.at(door.first));
       for (const auto& n : data.get_adjacent(door.first, false)) {
         if (color.at(n) != COLOR_IMPASSABLE &&
             (!is_door(n) || (doors.find(n)->second.open && n < door.first))) {
-          dynamic_component.add_edge(color.at(n), door_color);
+          dynamic_component.add_edge(
+              static_component.at(color.at(n)), door_static_component);
         }
       }
     }

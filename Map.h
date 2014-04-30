@@ -114,7 +114,8 @@ class Map {
     // Useful debugging features -- dump a simple representation of aspects
     // of the map to a stream.
     void print_colors(std::ostream& os) const;
-    void print_equivalence_classes(std::ostream& os) const;
+    void print_static_components(std::ostream& os) const;
+    void print_dynamic_components(std::ostream& os) const;
     void print_map(std::ostream& os, const Path& path={}) const;
 
     // Forces recomputation of all cached information.
@@ -152,6 +153,12 @@ class Map {
     // 1-5 colors per door on the map, plus one for each isolated walled off
     // region.
     suncatcher::util::Grid<uint_least32_t> color;
+
+    // Static component -- represent the same areas as colors, but there may
+    // be a many-to-one mapping of colors to static components -- for example,
+    // if we remove a door, the three areas (two rooms and door itself) retain
+    // their colors but would all map to the same static component.
+    util::UnionFind<uint_least32_t> static_component;
 
     // Dynamic component tracking -- organizes static components (rooms) into
     // dynamic components (reachability). This lets us minimize expensive
