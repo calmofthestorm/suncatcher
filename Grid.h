@@ -43,6 +43,8 @@ class Grid {
 
     inline const suncatcher::pathfinder::Coord& size() const;
 
+    inline bool operator==(const Grid<T>& other) const;
+
   private:
     suncatcher::pathfinder::Coord my_size;
     std::vector<T> backing;
