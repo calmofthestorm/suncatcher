@@ -11,8 +11,7 @@
 
 #include <gtest/gtest.h>
 
-// TODO: figure out why MP segfaults only under gtest in path-dependent ways:/
-// #define MICROPATHER_DELTA_TEST
+#include "platform.h"
 
 #ifdef MICROPATHER_DELTA_TEST
 #include "micropather/micropather.h"
@@ -72,62 +71,23 @@ class StaticMapTest : public ::testing::Test {
     const suncatcher::test::DeltaMap& map;
 };
 
-// //TODO: so not ok...figure out how to do this right
-// //TODO: still absurdly slow...figure out why (no it's not the map copy that's ~1k bytes taking 100 ms for the slow cases)
-// //TODO: relies on side effect of MapTest setup...this can't end well...
-// //the Builder.
-// class DynamicMapTest : public ::testing::Test {
-//   protected:
-//     void make_map_copy(const std::unique_ptr<const MapBuilder>& mb) {
-//       map.reset(new DeltaMap(MapBuilder(*mb)));
-//       #ifdef MICROPATHER_DELTA_TEST
-//         micro.reset(new MPWrapper(map.get()));
-//       #endif
-//     }
-//
-//     bool is_door(Coord c) {
-//       return (map->get_doors().find(c) != map->get_doors().end());
-//     }
-//
-//   public:
-//     std::unique_ptr<DeltaMap> map;
-//     #ifdef MICROPATHER_DELTA_TEST
-//       std::unique_ptr<MPWrapper> micro;
-//     #endif
-// };
-//
-// class DynamicMainMapTest : public DynamicMapTest {
-//   protected:
-//     virtual void SetUp() final override {
-//       make_map_copy(MapTest::main_map_builder);
-//     }
-// };
-//
-// class DynamicMicroMapTest : public DynamicMapTest {
-//   protected:
-//     virtual void SetUp() final override {
-//       make_map_copy(MapTest::micro_map_builder);
-//     }
-// };
-//
-// class DynamicDoorlandMapTest : public DynamicMapTest {
-//   protected:
-//     virtual void SetUp() final override {
-//       make_map_copy(MapTest::doorland_map_builder);
-//     }
-// };
-//
-// class DynamicEmptyMapTest : public DynamicMapTest {
-//   protected:
-//     virtual void SetUp() final override {
-//       make_map_copy(MapTest::empty_map_builder);
-//     }
-// };
-//
+// Base class for tests that modify the map. A new map will be constructed for
+// each test.
+template <const char* MAP>
+class MapTest : public ::testing::Test {
+  public:
+    MapTest()
+    : map(ResourceManager::get_builder(MAP)) { }
+
+    #ifdef MICROPATHER_DELTA_TEST
+      MPWrapper get_micropather() {
+        return MPWrapper(&map);
+      }
+    #endif
+
+  protected:
+    suncatcher::test::DeltaMap map;
+};
 
 }  // namespace test
 }  // namespace suncatcher
-
-
-
-

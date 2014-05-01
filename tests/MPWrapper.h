@@ -3,6 +3,7 @@
 
 #include "Path.h"
 #include "Coord.h"
+#include "../micropather/MicropatherGraph.h"
 
 namespace micropather {
   class MicroPather;
@@ -11,7 +12,6 @@ namespace micropather {
 namespace suncatcher {
 
 namespace pathfinder {
-  class MicropatherGraph;
   class Map;
 }  // namespace pathfinder
 

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <memory>
 
+#include "platform.h"
+
 #ifdef MICROPATHER_DELTA_TEST
   #include "MPWrapper.h"
 #endif

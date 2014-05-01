@@ -3,3 +3,5 @@
 #else
   #define NOEXCEPT noexcept
 #endif
+
+#define MICROPATHER_DELTA_TEST
