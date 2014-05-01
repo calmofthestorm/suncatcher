@@ -3,8 +3,8 @@ namespace util {
 
 template <typename T>
 UnionFind<T>::UnionFind ()
-: rank{0},
-  parent{0},
+: rank(1),
+  parent(1),
   id_to_handle(),
   handle_to_id(),
   uf(&rank[0], &parent[0]) { }
@@ -17,8 +17,8 @@ UnionFind<T>::UnionFind(
   parent(l.size()),
   id_to_handle(l),
   handle_to_id(),
-  uf(&rank[0], &parent[0])
-{
+  uf(&rank[0], &parent[0]) {
+
   for (size_t i = 0; i < id_to_handle.size(); ++i) {
     handle_to_id[id_to_handle[i]] = i;
     uf.make_set(i);

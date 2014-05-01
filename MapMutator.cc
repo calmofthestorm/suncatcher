@@ -19,14 +19,14 @@ MapMutator::MapMutator(Map* map_in, size_t version_in)
 }
 
 
-MapMutator::~MapMutator() noexcept {
+MapMutator::~MapMutator() NOEXCEPT {
   if (map) {
     map->notify_mutator_destroyed();
   }
 }
 
 
-MapMutator& MapMutator::operator=(MapMutator&& other) noexcept {
+MapMutator& MapMutator::operator=(MapMutator&& other) NOEXCEPT {
   std::swap(map, other.map);
   std::swap(version, other.version);
   std::swap(mutations, other.mutations);
@@ -34,7 +34,7 @@ MapMutator& MapMutator::operator=(MapMutator&& other) noexcept {
 }
 
 
-MapMutator::MapMutator(MapMutator&& other) noexcept {
+MapMutator::MapMutator(MapMutator&& other) NOEXCEPT {
   map = nullptr;
   std::swap(map, other.map);
   std::swap(version, other.version);

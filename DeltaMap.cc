@@ -32,6 +32,19 @@ DeltaMutator::DeltaMutator(MapMutator&& m1_i, MapMutator&& m2_i)
   m2(std::move(m2_i)) { }
 
 
+DeltaMutator::DeltaMutator(DeltaMutator&& other) {
+  std::swap(other.m1, m1);
+  std::swap(other.m2, m2);
+}
+
+
+DeltaMutator& DeltaMutator::operator=(DeltaMutator&& other) {
+  std::swap(other.m1, m1);
+    std::swap(other.m2, m2);
+    return *this;
+}
+
+
 DeltaMutator& DeltaMutator::set_door_open_cost(Coord door, uint_least8_t cost) {
   m1.set_door_open_cost(door, cost);
   m2.set_door_open_cost(door, cost);

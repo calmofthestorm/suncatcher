@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 
+#include "platform.h"
 #include "Grid.h"
 #include "Path.h"
 #include "Door.h"
@@ -50,7 +51,7 @@ class Map {
   public:
     // See MapBuilder for construction information.
     Map(MapBuilder&& builder);
-    ~Map() noexcept;
+    ~Map() NOEXCEPT;
 
     // Disabling copy due to large + why would you want to + nontrivial to
     // handle the linked mutator logic.
@@ -70,7 +71,7 @@ class Map {
     bool path_exists(
         pathfinder::Coord src,
         pathfinder::Coord dst
-        ) const ;
+      ) const ;
 
     // Returns the map's size, as a coordinate.
     inline Coord size() const { return data.size(); }
@@ -133,11 +134,11 @@ class Map {
 
     // Notifies the Map that the mutator was destroyed/copied, so the
     // outstanding mutator reference count can be updated.
-    inline void notify_mutator_destroyed() noexcept {
+    inline void notify_mutator_destroyed() NOEXCEPT {
       assert(outstanding_mutators > 0);
       --outstanding_mutators;
     }
-    inline void notify_mutator_created() noexcept { ++outstanding_mutators;};
+    inline void notify_mutator_created() NOEXCEPT { ++outstanding_mutators; };
 
     // Mutator synchronization state
     size_t version;

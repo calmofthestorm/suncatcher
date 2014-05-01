@@ -3,6 +3,7 @@
 
 #include <map>
 
+#include "platform.h"
 #include "Coord.h"
 
 namespace suncatcher {
@@ -58,13 +59,13 @@ class MapMutator {
     MapMutator()
     : map(nullptr) { }
 
-    ~MapMutator() noexcept;
+    ~MapMutator() NOEXCEPT;
 
     MapMutator(const MapMutator& other) = delete;
     MapMutator& operator=(const MapMutator& other) = delete;
 
-    MapMutator& operator=(MapMutator&& other) noexcept;
-    MapMutator(MapMutator&& other) noexcept;
+    MapMutator& operator=(MapMutator&& other) NOEXCEPT;
+    MapMutator(MapMutator&& other) NOEXCEPT;
 
 
   private:

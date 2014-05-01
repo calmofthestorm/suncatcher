@@ -1,7 +1,7 @@
 #ifndef PATH_a67c1237fbfa4e72b1668f3194e3ae50
 #define PATH_a67c1237fbfa4e72b1668f3194e3ae50
 
-const float EPSILON = 0.0001;
+const float EPSILON = (float)0.0001;
 
 namespace suncatcher {
 namespace pathfinder {

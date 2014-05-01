@@ -33,6 +33,13 @@ class DeltaMutator {
   public:
     DeltaMutator(pathfinder::MapMutator&& m1_i, pathfinder::MapMutator&& m2_i);
 
+    DeltaMutator(const DeltaMutator& other) = delete;
+    DeltaMutator& operator=(const DeltaMutator& other) = delete;
+
+    DeltaMutator(DeltaMutator&& other);
+
+    DeltaMutator& operator=(DeltaMutator&& other);
+
     DeltaMutator& set_door_open_cost(pathfinder::Coord door, uint_least8_t cost);
 
     DeltaMutator& set_door_open(pathfinder::Coord door, bool open);

@@ -32,7 +32,7 @@ void MapBuilder::add_door(Coord cell, bool open, uint_least8_t cost_open,
   data.at(cell) = open ? cost_open : cost_closed;
 }
 
-Map::~Map() {
+Map::~Map() NOEXCEPT {
   assert(outstanding_mutators == 0);
 }
 
