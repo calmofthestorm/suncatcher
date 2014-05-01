@@ -256,6 +256,19 @@ TEST_F(DynamicMicroMapTest, NormalCostTo4X) {
 }
 
 
+// Misc simple
+
+
+TEST_F(DynamicMicroMapTest, DoorToDoorTesseractService) {
+  Coord door1{14, 7};
+  Coord door2{0, 0};
+  Coord old{14, 2};
+  map->mutate(std::move(map->get_mutator().create_door(door1, true, 1)));
+  map->mutate(std::move(map->get_mutator().create_door(door2, true, 1)));
+  ASSERT_FALSE(map->path_exists(old, door2));
+}
+
+
 // Non-uniform cost pathfinding
 
 

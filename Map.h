@@ -123,6 +123,8 @@ class Map {
     void clear_cache();
 
   private:
+    typedef std::map<const Coord, Door>::iterator DoorIter;
+
     // CONTRACT: MapMutator MUST NOT use friendship for ANY PURPOSE except
     // calling notify_mutator_destroyed and notify_mutator_created.
     // TODO: better design?
@@ -177,13 +179,19 @@ class Map {
     int_least32_t next_door_color;
 
     void wall_to_transparent(Coord cell);
-    void closed_door_to_open_door(Coord cell);
+    void closed_door_to_open_door(Coord cell, DoorIter door_iter);
     void closed_door_to_wall(
         Coord cell,
-        std::map<const Coord, Door>::iterator door_iter,
+        DoorIter door_iter,
         uint8_t cost
       );
-    void open_door_to_closed_door(Coord cell, std::map<const Coord, Door>::iterator door_iter);
+    void open_door_to_closed_door(Coord cell, DoorIter door_iter);
+    void transparent_to_wall(Coord cell);
+    DoorIter wall_to_closed_door(
+        Coord cell,
+        uint8_t cost_closed,
+        uint8_t cost_open
+      );
 };
 
 class MapBuilder {
