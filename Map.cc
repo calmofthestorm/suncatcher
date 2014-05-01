@@ -434,7 +434,6 @@ void Map::clear_cache() {
         todo.push(restart);
         color.at(restart) = index;
         dynamic_component.add_component(static_component[index]);
-        ++index;
 
         while (!todo.empty()) {
           auto cur = todo.top();
@@ -443,10 +442,11 @@ void Map::clear_cache() {
           for (const auto& n : data.get_adjacent(cur, false)) {
             if (is_transparent_temporary(n) && color.at(n) == COLOR_UNKNOWN) {
               todo.push(n);
-              color.at(n) = color.at(cur);
+              color.at(n) = index;
             }
           }
         }
+        ++index;
       } else if (color.at(restart) != COLOR_MULTIPLE &&
                  !is_transparent_temporary(restart)) {
         color.at(restart) = COLOR_IMPASSABLE;
