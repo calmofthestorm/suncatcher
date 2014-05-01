@@ -6,10 +6,9 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "UnionFind.h"
-
 namespace suncatcher {
 namespace pathfinder {
+
 
 // POD class representing a position on the pathfinding map abstraction.
 class Coord {
@@ -41,8 +40,10 @@ inline std::ostream& operator<< (std::ostream& os, const pathfinder::Coord& c) {
   return os;
 }
 
+
 }  // namespace pathfinder
 }  // namespace suncatcher
+
 
 namespace std {
 
@@ -57,7 +58,6 @@ struct hash<suncatcher::pathfinder::Coord> {
 };
 
 }
-
 
 
 #endif  /* COORD_d0dcb74311134c19b0239c6c7238cfad */

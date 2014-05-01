@@ -1,9 +1,11 @@
 #ifndef MAPMUTATOR_fce1b7b2c66b4d5f90254ebb435a21c5
 #define MAPMUTATOR_fce1b7b2c66b4d5f90254ebb435a21c5
 
+#include <cstdint>
 #include <map>
 
 #include "platform.h"
+
 #include "Coord.h"
 
 namespace suncatcher {

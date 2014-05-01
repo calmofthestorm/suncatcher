@@ -1,6 +1,7 @@
 #ifndef PATH_a67c1237fbfa4e72b1668f3194e3ae50
 #define PATH_a67c1237fbfa4e72b1668f3194e3ae50
 
+#include <cstdlib>
 #include <iosfwd>
 #include <vector>
 

@@ -24,7 +24,7 @@ inline float Map::move_cost(Coord start, Coord finish) const {
 
   // Can only move diagonally if Manhattan squares are passable.
   if (is_passable({start.row, finish.col}) || is_passable({finish.row, start.col})) {
-    return data.at(finish) * (float)1.4142135623730951;;
+    return data.at(finish) * (float)1.4142135623730951;
   } else {
     return -1;
   }

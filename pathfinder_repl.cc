@@ -15,7 +15,7 @@
 
 #include "Coord.h"
 #include "Map.h"
-#include "util.h"
+#include "util/util.h"
 #include "micropather/MicropatherGraph.h"
 
 namespace {

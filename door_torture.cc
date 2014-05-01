@@ -9,16 +9,13 @@
 #include <string>
 #include <tuple>
 
-#include "DynamicDisjointSets.h"
-#include "UnionFind.h"
 #include "micropather/MicropatherGraph.h"
 #include "micropather/micropather.h"
 
 #include "Coord.h"
 #include "Map.h"
-#include "UnionFind.h"
 #include "MapMutator.h"
-#include "util.h"
+#include "util/util.h"
 
 using suncatcher::util::manhattan;
 using suncatcher::pathfinder::Map;

@@ -24,7 +24,7 @@ using suncatcher::pathfinder::MicropatherGraph;
 #include "DeltaMap.h"
 #include "Map.h"
 #include "MapMutator.h"
-#include "util.h"
+#include "util/util.h"
 #include "ResourceManager.h"
 
 namespace suncatcher {

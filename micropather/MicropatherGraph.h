@@ -3,10 +3,10 @@
 
 #include "micropather.h"
 
-#include "../Coord.h"
-#include "../Map.h"
+#include "Coord.h"
+#include "Map.h"
 
-#include "../util.h"
+#include "util/util.h"
 
 namespace suncatcher {
 namespace pathfinder {

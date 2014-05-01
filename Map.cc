@@ -11,7 +11,7 @@
 #include <string>
 #include <tuple>
 
-#include "util.h"
+#include "util/util.h"
 
 namespace suncatcher {
 namespace pathfinder {
@@ -20,29 +20,15 @@ using suncatcher::util::Grid;
 using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
 
-MapBuilder::MapBuilder()
-: data({0, 0}, 0),
-  dynamic_updates(true),
-  doors() { }
-
-MapBuilder::MapBuilder(Coord size, uint_least8_t default_cost)
-: data(size, default_cost),
-  dynamic_updates(true),
-  doors() { }
-
-void MapBuilder::add_door(Coord cell, bool open, uint_least8_t cost_open,
-                          uint_least8_t cost_closed) {
-  assert(doors.find(cell) == doors.end());
-  doors[cell] = {open, cost_open, cost_closed};
-  data.at(cell) = open ? cost_open : cost_closed;
-}
-
 Map::~Map() NOEXCEPT {
   assert(outstanding_mutators == 0);
 }
 
 void Map::print_map(std::ostream& os, const Path& path_to_show) const {
-  std::set<Coord> in_path(path_to_show.get_path().begin(), path_to_show.get_path().end());
+  std::set<Coord> in_path(
+      path_to_show.get_path().begin(),
+      path_to_show.get_path().end()
+    );
   size_t index = 0;
   for (uint16_t j = 0; j < size().row; ++j) {
     for (uint16_t i = 0; i < size().col; ++i) {
@@ -133,7 +119,8 @@ bool Map::path_exists(Coord a, Coord b) const {
           dynamic_component.equivalent(
               static_component.at(color.at(a)),
               static_component.at(color.at(b))
-            ));
+            )
+          );
 }
 
 Path Map::path(Coord src, Coord dst) const {
@@ -153,7 +140,7 @@ Path Map::path(Coord src, Coord dst) const {
 
   // Order intentional, if A is impassable there is no path from A to A.
   if (src == dst) {
-    return Path(std::vector<Coord>{src}, 0);
+    return Path(std::vector<Coord> {src}, 0);
   }
 
   Grid<float> distance(size(), INFINITY);
@@ -280,7 +267,6 @@ void Map::open_door_to_closed_door(Coord cell, DoorIter door_iter) {
   dynamic_component.isolate_component(static_component.at(color.at(cell)));
   door_iter->second.open = false;
 }
-
 
 void Map::transparent_to_wall(Coord cell) {
   // int_least32_t old_color = color.at(cell);

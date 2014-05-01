@@ -10,9 +10,14 @@
   #include "MPWrapper.h"
 #endif
 
-#include "Map.h"
+#include "MapBuilder.h"
 
 namespace suncatcher {
+
+namespace pathfinder {
+  class Map;
+}  // namespace PATH_COST_INFINITE
+
 namespace test {
 
 class DeltaMap;

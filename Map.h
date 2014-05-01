@@ -19,16 +19,19 @@
 // may need revisiting in the future.
 
 #include <iostream>
+#include <limits>
 #include <map>
 #include <vector>
 
+#include "util/DynamicDisjointSets.h"
+#include "util/Grid.h"
+#include "util/UnionFind.h"
+
 #include "platform.h"
-#include "Grid.h"
 #include "Path.h"
 #include "Door.h"
+#include "MapBuilder.h"
 #include "MapMutator.h"
-#include "DynamicDisjointSets.h"
-
 
 namespace suncatcher {
 
@@ -50,7 +53,7 @@ class MapBuilder;
 class Map {
   public:
     // See MapBuilder for construction information.
-    Map(MapBuilder&& builder);
+    explicit Map(MapBuilder&& builder);
     ~Map() NOEXCEPT;
 
     // Disabling copy due to large + why would you want to + nontrivial to
@@ -64,14 +67,14 @@ class Map {
 
     // Compute the shortest path between two points if one exists. Returns false
     // path on failure (out of bounds, no path, impassable src/dest, etc).
-    Path path(Coord src, Coord dst) const ;
+    Path path(Coord src, Coord dst) const;
 
     // Returns true if it is possible to path from src to dst. Unlike path,
     // this will always run in constant time. Invalid inputs result in false.
     bool path_exists(
         pathfinder::Coord src,
         pathfinder::Coord dst
-      ) const ;
+      ) const;
 
     // Returns the map's size, as a coordinate.
     inline Coord size() const { return data.size(); }
@@ -138,7 +141,7 @@ class Map {
       assert(outstanding_mutators > 0);
       --outstanding_mutators;
     }
-    inline void notify_mutator_created() NOEXCEPT { ++outstanding_mutators; };
+    inline void notify_mutator_created() NOEXCEPT { ++outstanding_mutators; }
 
     // Mutator synchronization state
     size_t version;
@@ -193,35 +196,6 @@ class Map {
         uint8_t cost_closed,
         uint8_t cost_open
       );
-};
-
-class MapBuilder {
-  public:
-    MapBuilder();
-    MapBuilder(Coord size, uint_least8_t default_cost);
-
-    // Load a MapBuilder from a simple text format. Intended mostly for
-    // tests and debugging.
-    MapBuilder(std::istream& is);
-
-    // Set/get the cost of the specified cell. Can't do this to a door.
-    inline const uint_least8_t& cost(Coord cell) const { return data.at(cell); }
-    inline uint_least8_t& cost(Coord cell) {
-      assert(doors.find(cell) == doors.end());
-      return data.at(cell);
-    }
-
-    void enable_dynamic_updates(bool enabled) { dynamic_updates = enabled; }
-
-    // Add a door to the given cell.
-    void add_door(Coord cell, bool open, uint_least8_t cost_open,
-                  uint_least8_t cost_closed);
-
-  private:
-    friend class Map;
-    suncatcher::util::Grid<uint_least8_t> data;
-    bool dynamic_updates;
-    std::map<const Coord, Door> doors;
 };
 
 }  // namespace pathfinder

@@ -1,7 +1,7 @@
 #include "DeltaMap.h"
 
 #include "Map.h"
-#include "UnionFind.h"
+#include "util/UnionFind.h"
 
 namespace {
   using suncatcher::pathfinder::Coord;

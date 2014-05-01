@@ -1,9 +1,10 @@
 #ifndef DOOR_9d946b6074164accb5974a3808196f91
 #define DOOR_9d946b6074164accb5974a3808196f91
 
+#include <cstdint>
+
 namespace suncatcher {
 namespace pathfinder {
-
 
 
 // Not necessarily a door; anything that changes between between passable and
@@ -23,7 +24,6 @@ class Door {
               other.cost_closed == cost_closed);
     }
 };
-
 
 
 }  // namespace pathfinder

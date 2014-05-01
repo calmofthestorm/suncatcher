@@ -11,8 +11,7 @@
 #include "MapMutator.h"
 #include "Path.h"
 #include "Coord.h"
-#include "Grid.h"
-
+#include "util/Grid.h"
 
 namespace suncatcher {
 
