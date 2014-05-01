@@ -13,7 +13,7 @@ LDFLAGS=-pthread -gstabs -g -ggdb
 LDLIBS=
 
 SRCS=Map.cc micropather/micropather.cc MapMutator.cc
-TEST_SRCS=DeltaMap.cc tests/test_main.cc tests/test_pathfinder_static.cc tests/test_pathfinder_common.cc
+TEST_SRCS=tests/DeltaMap.cc tests/ResourceManager.cc tests/MPWrapper.cc tests/test_main.cc tests/test_pathfinder_static.cc tests/test_pathfinder_common.cc tests/test_pathfinder_mutation.cc
 OBJS=$(subst .cc,.o,$(SRCS))
 TEST_OBJS=$(subst .cc,.o,$(TEST_SRCS))
 

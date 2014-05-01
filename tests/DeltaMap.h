@@ -76,6 +76,15 @@ class DeltaMap {
     DeltaMutator get_mutator();
     void mutate(DeltaMutator&& mutator);
 
+    // Get map access
+    const pathfinder::Map& get_simple() const {
+      return *simple_map;
+    }
+
+    const pathfinder::Map& get_optimized() const {
+      return *optimized_map;
+    }
+
     const std::map<const pathfinder::Coord, pathfinder::Door>& get_doors() const;
 
     const util::Grid<uint8_t>& get_data() const;

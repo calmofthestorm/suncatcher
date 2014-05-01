@@ -1,7 +1,9 @@
 #include "test_pathfinder_common.h"
 
+using namespace suncatcher::test;
+
 // Really simple tests for basic functionality.
-class StaticSanity : public StaticMapTest<test::MAP_OPEN> { };
+class StaticSanity : public StaticMapTest<MAP_OPEN> { };
 
 TEST_F(StaticSanity, OpenMapOOB1) {
   ASSERT_FALSE(map.path({0, 0}, {100, 100}));
@@ -68,14 +70,14 @@ TEST_F(StaticSanity, OpenMapLongPath) {
 
   // Delta test this one against MicroPather.
   #ifdef MICROPATHER_DELTA_TEST
-    auto expected = empty_mp->path(start, finish);
+    auto expected = get_micropather().path(start, finish);
     ASSERT_NEAR(expected.get_length(), actual.get_length(), 0.5);
     ASSERT_EQ(expected.get_path().size(), actual.get_path().size());
   #endif
 }
 
 // Invalid cases involving walls
-class StaticInvalidWall : public StaticMapTest<test::MAP_MAIN> { };
+class StaticInvalidWall : public StaticMapTest<MAP_MAIN> { };
 
 TEST_F(StaticInvalidWall, ToSelf) {
   ASSERT_FALSE(map.path({0, 0}, {0, 0}));
@@ -98,7 +100,7 @@ TEST_F(StaticInvalidWall, ToOOB2) {
 }
 
 // More interesting terrain-based tests.
-class StaticTerrainPathing : public StaticMapTest<test::MAP_MAIN> { };
+class StaticTerrainPathing : public StaticMapTest<MAP_MAIN> { };
 
 // Upper left to just outside great hall.
 TEST_F(StaticTerrainPathing, ULToJustOutsideGreatHall) {
@@ -169,7 +171,7 @@ TEST_F(StaticTerrainPathing, DiagonalTube) {
 }
 
 // Static door tests (open ones are pathable, closed are not.)
-class StaticDoorSanity : public StaticMapTest<test::MAP_MAIN> { };
+class StaticDoorSanity : public StaticMapTest<MAP_MAIN> { };
 
 TEST_F(StaticDoorSanity, OpenToSelf) {
   auto actual = map.path({8, 28}, {8, 28});
@@ -216,7 +218,7 @@ TEST_F(StaticDoorSanity, SpaceToClosed) {
 }
 
 // Welcome to Doorland
-class StaticDoorland : public StaticMapTest<test::MAP_DOORLAND> { };
+class StaticDoorland : public StaticMapTest<MAP_DOORLAND> { };
 
 TEST_F(StaticDoorland, LockedDoorWall) {
   Coord inside{2, 2};

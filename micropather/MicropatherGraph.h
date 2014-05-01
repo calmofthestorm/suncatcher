@@ -1,3 +1,6 @@
+#ifndef MICROPATHERGRAPH_0b8eae0922b042fe860d049a997b4c28
+#define MICROPATHERGRAPH_0b8eae0922b042fe860d049a997b4c28
+
 #include "micropather.h"
 
 #include "../Coord.h"
@@ -56,3 +59,5 @@ class MicropatherGraph : public micropather::Graph {
 
 }  // namespace pathfinder
 }  // namespace suncatcher
+
+#endif  /* MICROPATHERGRAPH_0b8eae0922b042fe860d049a997b4c28 */

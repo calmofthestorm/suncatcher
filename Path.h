@@ -1,6 +1,11 @@
 #ifndef PATH_a67c1237fbfa4e72b1668f3194e3ae50
 #define PATH_a67c1237fbfa4e72b1668f3194e3ae50
 
+#include <iosfwd>
+#include <vector>
+
+#include "Coord.h"
+
 const float EPSILON = (float)0.0001;
 
 namespace suncatcher {
