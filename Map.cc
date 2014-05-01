@@ -250,41 +250,66 @@ void Map::mutate(MapMutator&& mutation) {
   ++version;
   bool dirty = false;
   for (const auto& it : mutation.mutations) {
-    auto door_iter = doors.find(it.first);
+    bool state = it.second.state;
+    uint8_t cost = it.second.cost;
+    Coord cell = it.first;
+    auto door_iter = doors.find(cell);
     switch(it.second.kind) {
       case MapMutator::Mutation::Kind::CREATE_DOOR:
         dirty = true;
         assert(door_iter == doors.end());
-        assert(it.second.cost != PATH_COST_INFINITE);
-        doors[it.first] = Door{it.second.state, it.second.cost, PATH_COST_INFINITE};
-        if (it.second.state) {
-          data.at(it.first) = it.second.cost;
+        assert(cost != PATH_COST_INFINITE);
+        doors[cell] = Door{state, cost, PATH_COST_INFINITE};
+        if (state) {
+          data.at(cell) = cost;
         } else {
-          data.at(it.first) = PATH_COST_INFINITE;
+          data.at(cell) = PATH_COST_INFINITE;
         }
         break;
 
       case MapMutator::Mutation::Kind::REMOVE_DOOR:
-        dirty = true;
         assert(door_iter != doors.end());
-        doors.erase(door_iter);
-        data.at(it.first) = it.second.cost;
+        if (door_iter->second.open) {
+          if (cost == PATH_COST_INFINITE) {
+            // Open door to wall.
+            dirty = true;
+            doors.erase(door_iter);
+            data.at(cell) = cost;
+          } else {
+            // Open door to transparent.
+            dirty = true;
+            doors.erase(door_iter);
+            data.at(cell) = cost;
+          }
+        } else {
+          if (cost == PATH_COST_INFINITE) {
+            // Closed door to wall.
+            dirty = true;
+            doors.erase(door_iter);
+            data.at(cell) = cost;
+          } else {
+            // Closed door to transparent.
+            dirty = true;
+            doors.erase(door_iter);
+            data.at(cell) = cost;
+          }
+        }
         break;
 
       case MapMutator::Mutation::Kind::SET_COST:
         assert(door_iter == doors.end());
 
         // Removing a wall.
-        if (data.at(it.first) == PATH_COST_INFINITE &&
-            it.second.cost != PATH_COST_INFINITE) {
-          wall_to_transparent(it.first);
-        } else if (data.at(it.first) != PATH_COST_INFINITE &&
-                   it.second.cost == PATH_COST_INFINITE) {
+        if (data.at(cell) == PATH_COST_INFINITE &&
+            cost != PATH_COST_INFINITE) {
+          wall_to_transparent(cell);
+        } else if (data.at(cell) != PATH_COST_INFINITE &&
+                   cost == PATH_COST_INFINITE) {
           // Building a wall. Flood fill required.
           // TODO: neighborhood optimization
           dirty = true;
         }
-        data.at(it.first) = it.second.cost;
+        data.at(cell) = cost;
         // else -- either PATH_COST_INFINITE -> PATH_COST_INFINITE (nop)
         // or passable value to passable value -- colors are not affected
         // (even though path cost might be).
@@ -292,35 +317,35 @@ void Map::mutate(MapMutator&& mutation) {
 
       case MapMutator::Mutation::Kind::UPDATE_DOOR:
         assert(door_iter != doors.end());
-        door_iter->second.open ^= it.second.state;
+        door_iter->second.open ^= state;
 
         // Internally we use PATH_COST_INFINITE to represent the current value.
         // Only MapMutator::*door* and Map::mutate need to know this.
-        if (it.second.cost != PATH_COST_INFINITE) {
-          door_iter->second.cost_open = it.second.cost;
+        if (cost != PATH_COST_INFINITE) {
+          door_iter->second.cost_open = cost;
         }
 
         // Update map costs.
         if (door_iter->second.open) {
-          data.at(it.first) = door_iter->second.cost_open;
+          data.at(cell) = door_iter->second.cost_open;
         } else {
-          data.at(it.first) = PATH_COST_INFINITE;
+          data.at(cell) = PATH_COST_INFINITE;
         }
 
         // Maintain links if door changed state.
-        if (it.second.state) {
+        if (state) {
           if (door_iter->second.open) {
-            int_least32_t door_static_component = static_component.at(color.at(it.first));
-            for (const auto& n : data.get_adjacent(it.first, false)) {
+            int_least32_t door_static_component = static_component.at(color.at(cell));
+            for (const auto& n : data.get_adjacent(cell, false)) {
               if (color.at(n) != COLOR_IMPASSABLE &&
-                  (!is_door(n) || (doors.find(n)->second.open && n < it.first))) {
+                  (!is_door(n) || (doors.find(n)->second.open && n < cell))) {
                 dynamic_component.add_edge(
                     static_component.at(color.at(n)),
                     door_static_component);
               }
             }
           } else {
-            int_least32_t door_static_component = static_component.at(color.at(it.first));
+            int_least32_t door_static_component = static_component.at(color.at(cell));
             dynamic_component.isolate_component(door_static_component);
           }
         }
