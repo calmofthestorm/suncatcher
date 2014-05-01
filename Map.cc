@@ -242,6 +242,34 @@ void Map::wall_to_transparent(Coord cell) {
   }
 }
 
+void Map::closed_door_to_open_door(Coord cell) {
+  int_least32_t door_static_component = static_component.at(color.at(cell));
+  for (const auto& n : data.get_adjacent(cell, false)) {
+    if (color.at(n) != COLOR_IMPASSABLE &&
+        (!is_door(n) || (doors.find(n)->second.open && n < cell))) {
+      dynamic_component.add_edge(
+          static_component.at(color.at(n)),
+          door_static_component
+        );
+    }
+  }
+}
+
+void Map::closed_door_to_wall(
+    Coord cell,
+    std::map<const Coord, Door>::iterator door_iter,
+    uint8_t cost
+  ) {
+  color.at(cell) = COLOR_IMPASSABLE;
+  doors.erase(door_iter);
+  data.at(cell) = cost;
+}
+
+
+void Map::open_door_to_closed_door(Coord cell, std::map<const Coord, Door>::iterator door_iter) {
+  dynamic_component.isolate_component(static_component.at(color.at(cell)));
+  door_iter->second.open = false;
+}
 
 // Changes the world immediately, doing all necessary computations.
 void Map::mutate(MapMutator&& mutation) {
@@ -272,25 +300,40 @@ void Map::mutate(MapMutator&& mutation) {
         if (door_iter->second.open) {
           if (cost == PATH_COST_INFINITE) {
             // Open door to wall.
-            dirty = true;
-            doors.erase(door_iter);
-            data.at(cell) = cost;
+
+            // Close the door.
+            open_door_to_closed_door(cell, door_iter);
+
+            // Turn the closed door into a wall.
+            closed_door_to_wall(cell, door_iter, cost);
           } else {
             // Open door to transparent.
-            dirty = true;
-            doors.erase(door_iter);
+
+            // Close it
+            open_door_to_closed_door(cell, door_iter);
+
+            // Turn it into a wall.
+            closed_door_to_wall(cell, door_iter, cost);
+
+            // Remove the wall.
+            wall_to_transparent(cell);
             data.at(cell) = cost;
           }
         } else {
           if (cost == PATH_COST_INFINITE) {
             // Closed door to wall.
-            dirty = true;
+            // Nothing to do besides remove the door entry and update
+            // the component.
+            color.at(cell) = COLOR_IMPASSABLE;
             doors.erase(door_iter);
             data.at(cell) = cost;
           } else {
             // Closed door to transparent.
-            dirty = true;
+            // Turn it into a wall, then remove the wall.
+            color.at(cell) = COLOR_IMPASSABLE;
+            data.at(cell) = PATH_COST_INFINITE;
             doors.erase(door_iter);
+            wall_to_transparent(cell);
             data.at(cell) = cost;
           }
         }
@@ -335,18 +378,9 @@ void Map::mutate(MapMutator&& mutation) {
         // Maintain links if door changed state.
         if (state) {
           if (door_iter->second.open) {
-            int_least32_t door_static_component = static_component.at(color.at(cell));
-            for (const auto& n : data.get_adjacent(cell, false)) {
-              if (color.at(n) != COLOR_IMPASSABLE &&
-                  (!is_door(n) || (doors.find(n)->second.open && n < cell))) {
-                dynamic_component.add_edge(
-                    static_component.at(color.at(n)),
-                    door_static_component);
-              }
-            }
+            closed_door_to_open_door(cell);
           } else {
-            int_least32_t door_static_component = static_component.at(color.at(cell));
-            dynamic_component.isolate_component(door_static_component);
+            open_door_to_closed_door(cell, door_iter);
           }
         }
         break;

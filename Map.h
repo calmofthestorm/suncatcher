@@ -177,6 +177,13 @@ class Map {
     int_least32_t next_door_color;
 
     void wall_to_transparent(Coord cell);
+    void closed_door_to_open_door(Coord cell);
+    void closed_door_to_wall(
+        Coord cell,
+        std::map<const Coord, Door>::iterator door_iter,
+        uint8_t cost
+      );
+    void open_door_to_closed_door(Coord cell, std::map<const Coord, Door>::iterator door_iter);
 };
 
 class MapBuilder {
