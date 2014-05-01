@@ -11,16 +11,17 @@ namespace pathfinder {
 // including possibly an in-construction wall being converted to an open door
 // any time between queueing and completed construction, then "closed" and
 // removed in constant time when the wall is completed.
-struct Door {
-  bool open;
-  uint_least8_t cost_open; // cost to walk through when open
-  uint_least8_t cost_closed; // cost to walk through when closed
+class Door {
+  public:
+    bool open;
+    uint_least8_t cost_open; // cost to walk through when open
+    uint_least8_t cost_closed; // cost to walk through when closed
 
-  bool operator==(const Door& other) const {
-    return (other.open == open &&
-            other.cost_open == cost_open &&
-            other.cost_closed == cost_closed);
-  }
+    bool operator==(const Door& other) const {
+      return (other.open == open &&
+              other.cost_open == cost_open &&
+              other.cost_closed == cost_closed);
+    }
 };
 
 

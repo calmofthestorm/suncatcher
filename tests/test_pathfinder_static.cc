@@ -37,14 +37,14 @@ TEST_F(MapTest, OpenMapVertPath) {
 
 TEST_F(MapTest, OpenMapDiagPath) {
   ASSERT_EQ(
-      Path({{1, 1}, {2, 2}, {3, 3}}, 2.8284271247461903),
+      Path({{1, 1}, {2, 2}, {3, 3}}, (float)2.8284271247461903),
       MapTest::empty_map->path({1, 1}, {3, 3})
     );
 }
 
 TEST_F(MapTest, OpenMapKnightPath1) {
   // Two equally good choices for this one.
-  auto expected = Path({{1, 1}, {1, 2}, {3, 2}}, 2.414213562373095);
+  auto expected = Path({{1, 1}, {1, 2}, {3, 2}}, (float)2.414213562373095);
   auto actual = MapTest::empty_map->path({1, 1}, {3, 2});
   ASSERT_NEAR(expected.get_length(), actual.get_length(), 0.001);
   ASSERT_EQ(expected.get_path().size(), actual.get_path().size());
@@ -52,7 +52,7 @@ TEST_F(MapTest, OpenMapKnightPath1) {
 
 TEST_F(MapTest, OpenMapKnightPath2) {
   // Two equally good choices for this one.
-  auto expected = Path({{5, 4}, {4, 4}, {3, 3}}, 2.414213562373095);
+  auto expected = Path({{5, 4}, {4, 4}, {3, 3}}, (float)2.414213562373095);
   auto actual = MapTest::empty_map->path({5, 4}, {3, 3});
   ASSERT_NEAR(expected.get_length(), actual.get_length(), 0.001);
   ASSERT_EQ(expected.get_path().size(), actual.get_path().size());
@@ -130,7 +130,7 @@ TEST_F(MapTest, IsolatedInternalNoPath) {
 TEST_F(MapTest, DiagonalWallHug) {
   ASSERT_EQ(
       Path({{4, 51}, {5, 52}, {6, 53}, {7, 54}, {8, 55}, {9, 56}, {10, 57},
-            {11, 58}, {12, 59}, {11, 60}, {10, 59}}, 14.142135623730951),
+            {11, 58}, {12, 59}, {11, 60}, {10, 59}}, (float)14.142135623730951),
       MapTest::main_map->path({4, 51}, {10, 59})
     );
 }

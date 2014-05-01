@@ -12,27 +12,28 @@ namespace suncatcher {
 namespace pathfinder {
 
 // POD class representing a position on the pathfinding map abstraction.
-struct Coord {
-  uint16_t row, col;
+class Coord {
+  public:
+    uint16_t row, col;
 
-  inline bool operator!= (const Coord& other) const {
-    return row != other.row || col != other.col;
-  }
+    inline bool operator!= (const Coord& other) const {
+      return row != other.row || col != other.col;
+    }
 
-  inline bool operator== (const Coord& other) const {
-    return row == other.row && col == other.col;
-  }
+    inline bool operator== (const Coord& other) const {
+      return row == other.row && col == other.col;
+    }
 
-  inline bool operator< (const Coord& other) const {
-    return (row < other.row || (row == other.row && col < other.col));
-  }
+    inline bool operator< (const Coord& other) const {
+      return (row < other.row || (row == other.row && col < other.col));
+    }
 
-  inline Coord operator+ (const Coord& other) const {
-    Coord r(*this);
-    r.row += other.row;
-    r.col += other.col;
-    return r;
-  }
+    inline Coord operator+ (const Coord& other) const {
+      Coord r(*this);
+      r.row += other.row;
+      r.col += other.col;
+      return r;
+    }
 };
 
 inline std::ostream& operator<< (std::ostream& os, const pathfinder::Coord& c) {

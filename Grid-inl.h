@@ -67,7 +67,7 @@ inline std::vector<suncatcher::pathfinder::Coord> Grid<T>::get_adjacent(
 
   std::vector<suncatcher::pathfinder::Coord> neighbors;
 
-  for (size_t i = 0; i < (include_diagonals ? 8 : 4); ++i) {
+  for (size_t i = 0; i < (size_t)(include_diagonals ? 8 : 4); ++i) {
     auto n = ADJ_DELTA[i] + cell;
     if (check_bounds(n)) {
       neighbors.push_back(n);

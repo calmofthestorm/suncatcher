@@ -176,7 +176,7 @@ Path Map::path(Coord src, Coord dst) const {
     if (cur.pos == dst) {
       // TODO: unnecessary copy
       std::vector<Coord> rval{dst};
-      rval.reserve((distance.at(dst) + 1));
+      rval.reserve((unsigned int)(distance.at(dst) + 1));
       while (rval.back() != src) {
         rval.push_back(previous.at(rval.back()));
       }
