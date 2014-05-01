@@ -20,6 +20,11 @@ using suncatcher::util::Grid;
 using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
 
+MapBuilder::MapBuilder()
+: data({0, 0}, 0),
+  dynamic_updates(true),
+  doors() { }
+
 MapBuilder::MapBuilder(Coord size, uint_least8_t default_cost)
 : data(size, default_cost),
   dynamic_updates(true),

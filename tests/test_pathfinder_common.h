@@ -35,6 +35,13 @@ using suncatcher::pathfinder::Path;
 using suncatcher::pathfinder::Coord;
 using suncatcher::pathfinder::PATH_COST_INFINITE;
 
+namespace test {
+  extern const char MAP_OPEN[];
+  extern const char MAP_MAIN[];
+  extern const char MAP_DOORLAND[];
+  extern const char MAP_MICRO[];
+}  // namespace test
+
 #ifdef MICROPATHER_DELTA_TEST
 class MPWrapper {
   public:
@@ -80,93 +87,111 @@ class MPWrapper {
 };
 #endif
 
-// TODO: ugh
-class MapTest : public ::testing::Test {
-  protected:
-    static void SetUpTestCase() {
-      {
-        std::ifstream is("maps/open.txt");
-        empty_map_builder.reset(new MapBuilder(is));
-        empty_map.reset(new DeltaMap(MapBuilder(*empty_map_builder.get())));
-      }
-      {
-        std::ifstream is("maps/map.txt");
-        main_map_builder.reset(new MapBuilder(is));
-        main_map.reset(new DeltaMap(MapBuilder(*main_map_builder.get())));
-      }
-      {
-        std::ifstream is("maps/micro.txt");
-        micro_map_builder.reset(new MapBuilder(is));
-        micro_map.reset(new DeltaMap(MapBuilder(*micro_map_builder.get())));
-      }
-      {
-        std::ifstream is("maps/doorland.txt");
-        doorland_map_builder.reset(new MapBuilder(is));
-        doorland_map.reset(new DeltaMap(MapBuilder(*doorland_map_builder.get())));
-      }
-      #ifdef MICROPATHER_DELTA_TEST
-        empty_mp.reset(new MPWrapper(empty_map.get()));
-        main_mp.reset(new MPWrapper(main_map.get()));
-      #endif
-    }
-
+class ResourceManager {
   public:
-    static std::unique_ptr<const MapBuilder> empty_map_builder, main_map_builder, micro_map_builder, doorland_map_builder;
-    static std::unique_ptr<const DeltaMap> empty_map, main_map, micro_map, doorland_map;
+    static const suncatcher::pathfinder::MapBuilder& get_builder(std::string fn) {
+      if (get_me().builder_cache.find(fn) == get_me().builder_cache.end()) {
+        std::ifstream is(std::string("maps/" + fn + ".txt"));
+        get_me().builder_cache[fn] = MapBuilder(is);
+      }
+      return get_me().builder_cache[fn];
+    }
+
+    static const DeltaMap& get_map(std::string fn) {
+      if (get_me().map_cache.find(fn) == get_me().map_cache.end()) {
+        get_me().map_cache[fn].reset(new DeltaMap(suncatcher::pathfinder::MapBuilder(get_builder(fn))));
+      }
+      return *get_me().map_cache[fn];
+    }
+
     #ifdef MICROPATHER_DELTA_TEST
-      static std::unique_ptr<MPWrapper> empty_mp, main_mp, micro_mp, doorland_mp;
+      static const MPWrapper& get_micropather(std::string fn) {
+        return MPWrapper(&get_map(fn));
+      }
     #endif
+
+  private:
+    static ResourceManager& get_me() {
+      static ResourceManager self;
+      return self;
+    }
+
+    ResourceManager() {};
+    std::map<const std::string, suncatcher::pathfinder::MapBuilder> builder_cache;
+    std::map<const std::string, std::unique_ptr<DeltaMap>> map_cache;
 };
 
-//TODO: so not ok...figure out how to do this right
-//TODO: still absurdly slow...figure out why (no it's not the map copy that's ~1k bytes taking 100 ms for the slow cases)
-//TODO: relies on side effect of MapTest setup...this can't end well...
-//the Builder.
-class DynamicMapTest : public ::testing::Test {
-  protected:
-    void make_map_copy(const std::unique_ptr<const MapBuilder>& mb) {
-      map.reset(new DeltaMap(MapBuilder(*mb)));
-      #ifdef MICROPATHER_DELTA_TEST
-        micro.reset(new MPWrapper(map.get()));
-      #endif
-    }
 
-    bool is_door(Coord c) {
-      return (map->get_doors().find(c) != map->get_doors().end());
-    }
-
+// Base class for tests that don't modify their map (and thus don't need their
+// own copy). Note one thing: the use of union-finds internally marked as
+// mutable means that *bitwise* const is not preserved, *logical* const is.  If
+// we give this up, we basically lose const for everything since nearly all
+// functions need to look up equivalence classes, so it is unfortunate but
+// necessary -- I'd rather have const safety and one small lie than give it
+// up entirely or mess with const_cast at the API level.
+//
+// As far as testing goes, the non-optimized maps will regenerate all
+// union finds after every mutation, so the delta test should catch any issues
+// arising from this.
+template <const char* MAP>
+class StaticMapTest : public ::testing::Test {
   public:
-    std::unique_ptr<DeltaMap> map;
-    #ifdef MICROPATHER_DELTA_TEST
-      std::unique_ptr<MPWrapper> micro;
-    #endif
-};
+    StaticMapTest()
+    : map(ResourceManager::get_map(MAP)) { }
 
-class DynamicMainMapTest : public DynamicMapTest {
   protected:
-    virtual void SetUp() final override {
-      make_map_copy(MapTest::main_map_builder);
-    }
+    const suncatcher::test::DeltaMap& map;
 };
 
-class DynamicMicroMapTest : public DynamicMapTest {
-  protected:
-    virtual void SetUp() final override {
-      make_map_copy(MapTest::micro_map_builder);
-    }
-};
-
-class DynamicDoorlandMapTest : public DynamicMapTest {
-  protected:
-    virtual void SetUp() final override {
-      make_map_copy(MapTest::doorland_map_builder);
-    }
-};
-
-class DynamicEmptyMapTest : public DynamicMapTest {
-  protected:
-    virtual void SetUp() final override {
-      make_map_copy(MapTest::empty_map_builder);
-    }
-};
-
+// //TODO: so not ok...figure out how to do this right
+// //TODO: still absurdly slow...figure out why (no it's not the map copy that's ~1k bytes taking 100 ms for the slow cases)
+// //TODO: relies on side effect of MapTest setup...this can't end well...
+// //the Builder.
+// class DynamicMapTest : public ::testing::Test {
+//   protected:
+//     void make_map_copy(const std::unique_ptr<const MapBuilder>& mb) {
+//       map.reset(new DeltaMap(MapBuilder(*mb)));
+//       #ifdef MICROPATHER_DELTA_TEST
+//         micro.reset(new MPWrapper(map.get()));
+//       #endif
+//     }
+//
+//     bool is_door(Coord c) {
+//       return (map->get_doors().find(c) != map->get_doors().end());
+//     }
+//
+//   public:
+//     std::unique_ptr<DeltaMap> map;
+//     #ifdef MICROPATHER_DELTA_TEST
+//       std::unique_ptr<MPWrapper> micro;
+//     #endif
+// };
+//
+// class DynamicMainMapTest : public DynamicMapTest {
+//   protected:
+//     virtual void SetUp() final override {
+//       make_map_copy(MapTest::main_map_builder);
+//     }
+// };
+//
+// class DynamicMicroMapTest : public DynamicMapTest {
+//   protected:
+//     virtual void SetUp() final override {
+//       make_map_copy(MapTest::micro_map_builder);
+//     }
+// };
+//
+// class DynamicDoorlandMapTest : public DynamicMapTest {
+//   protected:
+//     virtual void SetUp() final override {
+//       make_map_copy(MapTest::doorland_map_builder);
+//     }
+// };
+//
+// class DynamicEmptyMapTest : public DynamicMapTest {
+//   protected:
+//     virtual void SetUp() final override {
+//       make_map_copy(MapTest::empty_map_builder);
+//     }
+// };
+//
