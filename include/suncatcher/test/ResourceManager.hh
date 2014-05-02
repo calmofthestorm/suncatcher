@@ -4,13 +4,13 @@
 #include <iostream>
 #include <memory>
 
-#include "suncatcher/platform.h"
+#include "suncatcher/platform.hh"
 
 #ifdef MICROPATHER_DELTA_TEST
-  #include "suncatcher/test/MPWrapper.h"
+  #include "suncatcher/test/MPWrapper.hh"
 #endif
 
-#include "suncatcher/MapBuilder.h"
+#include "suncatcher/MapBuilder.hh"
 
 namespace suncatcher {
 

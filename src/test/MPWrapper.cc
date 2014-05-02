@@ -1,9 +1,9 @@
-#include "suncatcher/test/MPWrapper.h"
+#include "suncatcher/test/MPWrapper.hh"
 
-#include "suncatcher/test/DeltaMap.h"
-#include "suncatcher/Path.h"
-#include "suncatcher/micropather/MicropatherGraph.h"
-#include "suncatcher/Coord.h"
+#include "suncatcher/test/DeltaMap.hh"
+#include "suncatcher/Path.hh"
+#include "suncatcher/micropather/MicropatherGraph.hh"
+#include "suncatcher/Coord.hh"
 
 namespace suncatcher {
 namespace test {

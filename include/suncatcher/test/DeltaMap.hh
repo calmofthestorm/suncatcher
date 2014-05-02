@@ -8,11 +8,11 @@
 #include <map>
 #include <memory>
 
-#include "suncatcher/util/Grid.h"
+#include "suncatcher/util/Grid.hh"
 
-#include "suncatcher/MapMutator.h"
-#include "suncatcher/Path.h"
-#include "suncatcher/Coord.h"
+#include "suncatcher/MapMutator.hh"
+#include "suncatcher/Path.hh"
+#include "suncatcher/Coord.hh"
 
 namespace suncatcher {
 

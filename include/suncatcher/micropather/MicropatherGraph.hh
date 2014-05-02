@@ -1,12 +1,12 @@
 #ifndef MICROPATHERGRAPH_0b8eae0922b042fe860d049a997b4c28
 #define MICROPATHERGRAPH_0b8eae0922b042fe860d049a997b4c28
 
-#include "suncatcher/micropather/micropather.h"
+#include "suncatcher/micropather/micropather.hh"
 
-#include "suncatcher/Coord.h"
-#include "suncatcher/Map.h"
+#include "suncatcher/Coord.hh"
+#include "suncatcher/Map.hh"
 
-#include "suncatcher/util/util.h"
+#include "suncatcher/util/util.hh"
 
 namespace suncatcher {
 namespace pathfinder {

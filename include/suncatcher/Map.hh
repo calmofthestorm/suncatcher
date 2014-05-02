@@ -23,15 +23,15 @@
 #include <map>
 #include <vector>
 
-#include "suncatcher/util/DynamicDisjointSets.h"
-#include "suncatcher/util/Grid.h"
-#include "suncatcher/util/UnionFind.h"
+#include "suncatcher/util/DynamicDisjointSets.hh"
+#include "suncatcher/util/Grid.hh"
+#include "suncatcher/util/UnionFind.hh"
 
-#include "platform.h"
-#include "suncatcher/Path.h"
-#include "suncatcher/Door.h"
-#include "suncatcher/MapBuilder.h"
-#include "suncatcher/MapMutator.h"
+#include "platform.hh"
+#include "suncatcher/Path.hh"
+#include "suncatcher/Door.hh"
+#include "suncatcher/MapBuilder.hh"
+#include "suncatcher/MapMutator.hh"
 
 namespace suncatcher {
 
@@ -201,6 +201,6 @@ class Map {
 }  // namespace pathfinder
 }  // namespace suncatcher
 
-#include "Map-inl.h"
+#include "Map-inl.hh"
 
 #endif  /* PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a */

@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "suncatcher/Coord.h"
+#include "suncatcher/Coord.hh"
 
 namespace suncatcher {
 namespace util {
@@ -54,6 +54,6 @@ class Grid {
 }  // namespace util
 }  // namespace suncatcher
 
-#include "suncatcher/util/Grid-inl.h"
+#include "suncatcher/util/Grid-inl.hh"
 
 #endif  /* GRID_d99e6d99bd454e83ab91ad5a87f993dc */

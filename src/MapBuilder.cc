@@ -1,4 +1,4 @@
-#include "suncatcher/MapBuilder.h"
+#include "suncatcher/MapBuilder.hh"
 
 #include <fstream>
 #include <string>

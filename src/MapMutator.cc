@@ -1,8 +1,8 @@
 #ifndef MAPMUTATOR_4687638a8f5c4d2fb43b15d6274b78c7
 #define MAPMUTATOR_4687638a8f5c4d2fb43b15d6274b78c7
 
-#include "suncatcher/MapMutator.h"
-#include "suncatcher/Map.h"
+#include "suncatcher/MapMutator.hh"
+#include "suncatcher/Map.hh"
 
 namespace suncatcher {
 namespace pathfinder {

@@ -1,4 +1,4 @@
-#include "suncatcher/test/common.h"
+#include "suncatcher/test/common.hh"
 
 namespace suncatcher {
 namespace test {

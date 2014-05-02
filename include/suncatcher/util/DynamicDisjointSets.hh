@@ -7,7 +7,7 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "suncatcher/util/UnionFind.h"
+#include "suncatcher/util/UnionFind.hh"
 
 namespace std {
 
@@ -92,6 +92,6 @@ class DynamicDisjointSets {
 }  // namespace util
 }  // namespace suncatcher
 
-#include "suncatcher/util/DynamicDisjointSets-inl.h"
+#include "suncatcher/util/DynamicDisjointSets-inl.hh"
 
 #endif  /* DYNAMICDISJOINTSETS_aad82f09d61946839aa33f7c20060e92 */

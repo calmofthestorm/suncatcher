@@ -9,13 +9,13 @@
 #include <string>
 #include <tuple>
 
-#include "suncatcher/micropather/MicropatherGraph.h"
-#include "suncatcher/micropather/micropather.h"
+#include "suncatcher/micropather/MicropatherGraph.hh"
+#include "suncatcher/micropather/micropather.hh"
 
-#include "suncatcher/Coord.h"
-#include "suncatcher/Map.h"
-#include "suncatcher/MapMutator.h"
-#include "suncatcher/util/util.h"
+#include "suncatcher/Coord.hh"
+#include "suncatcher/Map.hh"
+#include "suncatcher/MapMutator.hh"
+#include "suncatcher/util/util.hh"
 
 using suncatcher::util::manhattan;
 using suncatcher::pathfinder::Map;

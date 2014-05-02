@@ -11,12 +11,12 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "suncatcher/micropather/micropather.h"
+#include "suncatcher/micropather/micropather.hh"
 
-#include "suncatcher/Coord.h"
-#include "suncatcher/Map.h"
-#include "suncatcher/util/util.h"
-#include "suncatcher/micropather/MicropatherGraph.h"
+#include "suncatcher/Coord.hh"
+#include "suncatcher/Map.hh"
+#include "suncatcher/util/util.hh"
+#include "suncatcher/micropather/MicropatherGraph.hh"
 
 namespace {
 

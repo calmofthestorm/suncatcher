@@ -11,21 +11,21 @@
 
 #include <gtest/gtest.h>
 
-#include "suncatcher/platform.h"
+#include "suncatcher/platform.hh"
 
 #ifdef MICROPATHER_DELTA_TEST
-#include "suncatcher/micropather/micropather.h"
-#include "suncatcher/micropather/MicropatherGraph.h"
-#include "suncatcher/test/MPWrapper.h"
+#include "suncatcher/micropather/micropather.hh"
+#include "suncatcher/micropather/MicropatherGraph.hh"
+#include "suncatcher/test/MPWrapper.hh"
 using suncatcher::pathfinder::MicropatherGraph;
 #endif
 
-#include "suncatcher/Coord.h"
-#include "suncatcher/test/DeltaMap.h"
-#include "suncatcher/Map.h"
-#include "suncatcher/MapMutator.h"
-#include "suncatcher/util/util.h"
-#include "suncatcher/test/ResourceManager.h"
+#include "suncatcher/Coord.hh"
+#include "suncatcher/test/DeltaMap.hh"
+#include "suncatcher/Map.hh"
+#include "suncatcher/MapMutator.hh"
+#include "suncatcher/util/util.hh"
+#include "suncatcher/test/ResourceManager.hh"
 
 namespace suncatcher {
 namespace test {

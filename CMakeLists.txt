@@ -35,8 +35,8 @@ endif()
 # used only for cpplint: adding a file still require modifing the CMakeLists.txt
 # so that CMake know that it should rebuild the project (and better practice)
 file(GLOB all_source_files
-    "${PROJECT_SOURCE_DIR}/src/*.h"
-    "${PROJECT_SOURCE_DIR}/src/*.cpp"
+    "${PROJECT_SOURCE_DIR}/src/*.hh"
+    "${PROJECT_SOURCE_DIR}/src/*.cc"
 )
 
 
@@ -105,15 +105,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 
 # Source for the library itself.
-file (GLOB suncatcher_srcs ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file (GLOB suncatcher_srcs ${PROJECT_SOURCE_DIR}/src/*.cc)
 
 # Source for the testing support code. (Common code and non-unit tests)
 file (GLOB test_srcs
-    ${PROJECT_SOURCE_DIR}/src/test/*.cpp
-    ${PROJECT_SOURCE_DIR}/src/test/micropather/*.cpp)
+    ${PROJECT_SOURCE_DIR}/src/test/*.cc
+    ${PROJECT_SOURCE_DIR}/src/test/micropather/*.cc)
 
 # Source for the unit tests. (The actual test cases for googletest)
-file (GLOB unittest_srcs ${PROJECT_SOURCE_DIR}/test/*.cpp)
+file (GLOB unittest_srcs ${PROJECT_SOURCE_DIR}/test/*.cc)
 
 # Only combine common objects once.
 add_library(suncatcher_objs OBJECT

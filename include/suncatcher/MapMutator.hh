@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <map>
 
-#include "platform.h"
+#include "platform.hh"
 
-#include "suncatcher/Coord.h"
+#include "suncatcher/Coord.hh"
 
 namespace suncatcher {
 namespace pathfinder {

@@ -5,7 +5,7 @@
 #include <iosfwd>
 #include <vector>
 
-#include "suncatcher/Coord.h"
+#include "suncatcher/Coord.hh"
 
 const float EPSILON = (float)0.0001;
 

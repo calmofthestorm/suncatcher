@@ -1,9 +1,9 @@
 #ifndef MPWRAPPER_616e1e92191d445dac0fe08e40c6429b
 #define MPWRAPPER_616e1e92191d445dac0fe08e40c6429b
 
-#include "suncatcher/Path.h"
-#include "suncatcher/Coord.h"
-#include "suncatcher/micropather/MicropatherGraph.h"
+#include "suncatcher/Path.hh"
+#include "suncatcher/Coord.hh"
+#include "suncatcher/micropather/MicropatherGraph.hh"
 
 namespace micropather {
   class MicroPather;

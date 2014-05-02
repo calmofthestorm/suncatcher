@@ -1,8 +1,8 @@
-#include "suncatcher/test/ResourceManager.h"
+#include "suncatcher/test/ResourceManager.hh"
 
 #include <fstream>
 
-#include "suncatcher/test/DeltaMap.h"
+#include "suncatcher/test/DeltaMap.hh"
 
 namespace suncatcher {
 namespace test {

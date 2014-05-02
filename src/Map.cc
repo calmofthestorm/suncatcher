@@ -1,4 +1,4 @@
-#include "suncatcher/Map.h"
+#include "suncatcher/Map.hh"
 
 #include <algorithm>
 #include <cassert>
@@ -11,7 +11,7 @@
 #include <string>
 #include <tuple>
 
-#include "suncatcher/util/util.h"
+#include "suncatcher/util/util.hh"
 
 namespace suncatcher {
 namespace pathfinder {

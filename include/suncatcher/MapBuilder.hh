@@ -5,10 +5,10 @@
 #include <iosfwd>
 #include <map>
 
-#include "suncatcher/util/Grid.h"
+#include "suncatcher/util/Grid.hh"
 
-#include "suncatcher/Door.h"
-#include "suncatcher/Coord.h"
+#include "suncatcher/Door.hh"
+#include "suncatcher/Coord.hh"
 
 namespace suncatcher {
 namespace pathfinder {

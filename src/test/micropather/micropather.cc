@@ -43,7 +43,7 @@ ALTERED: alex@aroper.net
 #include "../grinliz/gldebug.h"
 #endif
 
-#include "suncatcher/micropather/micropather.h"
+#include "suncatcher/micropather/micropather.hh"
 
 using namespace std;
 using namespace micropather;

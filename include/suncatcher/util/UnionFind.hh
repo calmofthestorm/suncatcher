@@ -91,6 +91,6 @@ class UnionFind {
 }  // namespace suncatcher
 }  // namespace util
 
-#include "suncatcher/util/UnionFind-inl.h"
+#include "suncatcher/util/UnionFind-inl.hh"
 
 #endif  /* UNIONFIND_0bb7b9ebeb3048f58090c09247502b31 */
