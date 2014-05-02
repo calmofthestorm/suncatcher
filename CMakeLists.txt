@@ -156,7 +156,7 @@ add_custom_target(cppcheck
 )
 
 # run unit tests after every build by default.
-add_custom_target(unittest
+add_test(unittest
     ALL
     COMMAND ${CMAKE_BINARY_DIR}/bin/run_unit_tests
 )

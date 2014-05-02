@@ -269,47 +269,47 @@ void Map::open_door_to_closed_door(Coord cell, DoorIter door_iter) {
 }
 
 void Map::transparent_to_wall(Coord cell) {
-  // int_least32_t old_color = color.at(cell);
-  // data.at(cell) = PATH_COST_INFINITE;
-  // color.at(cell) = COLOR_IMPASSABLE;
-  // for (const auto& seed : data.get_adjacent(cell, false)) {
-  //   if (color.at(seed) == old_color && is_transparent(seed)) {
-  //     std::stack<Coord> todo;
-  //     todo.push(seed);
-  //     dynamic_component.add_component(static_component[next_component_color]);
-  //     color.at(seed) = next_component_color;
-  //
-  //     while (!todo.empty()) {
-  //       auto cur = todo.top();
-  //       todo.pop();
-  //       // Explore neighbors, but only Manhattan adjacent ones.
-  //       for (const auto& n : data.get_adjacent(cur, false)) {
-  //         if (is_transparent(n) && color.at(n) == old_color) {
-  //           todo.push(n);
-  //           color.at(n) = next_component_color;
-  //         }
-  //       }
-  //     }
-  //     ++next_component_color;
-  //   }
-  // }
-  //
-  // // Recalculate dynamic components.
-  // dynamic_component.isolate_component(static_component.at(old_color));
-  // for (const auto& door : doors) {
-  //   if (door.second.open) {
-  //     int_least32_t door_static_component = static_component.at(color.at(cell));
-  //     for (const auto& n : data.get_adjacent(door.first, false)) {
-  //       if (color.at(n) != COLOR_IMPASSABLE &&
-  //           (!is_door(n) || (doors.find(n)->second.open && n < door.first))) {
-  //         dynamic_component.add_edge(
-  //             static_component.at(color.at(n)),
-  //             door_static_component
-  //           );
-  //       }
-  //     }
-  //   }
-  // }
+  int_least32_t old_color = color.at(cell);
+  data.at(cell) = PATH_COST_INFINITE;
+  color.at(cell) = COLOR_IMPASSABLE;
+  for (const auto& seed : data.get_adjacent(cell, false)) {
+    if (color.at(seed) == old_color && is_transparent(seed)) {
+      std::stack<Coord> todo;
+      todo.push(seed);
+      dynamic_component.add_component(static_component[next_component_color]);
+      color.at(seed) = next_component_color;
+
+      while (!todo.empty()) {
+        auto cur = todo.top();
+        todo.pop();
+        // Explore neighbors, but only Manhattan adjacent ones.
+        for (const auto& n : data.get_adjacent(cur, false)) {
+          if (is_transparent(n) && color.at(n) == old_color) {
+            todo.push(n);
+            color.at(n) = next_component_color;
+          }
+        }
+      }
+      ++next_component_color;
+    }
+  }
+
+  // Recalculate dynamic components.
+  dynamic_component.isolate_component(static_component.at(old_color));
+  for (const auto& door : doors) {
+    if (door.second.open) {
+      int_least32_t door_static_component = static_component.at(color.at(door.first));
+      for (const auto& n : data.get_adjacent(door.first, false)) {
+        if (color.at(n) != COLOR_IMPASSABLE &&
+            (!is_door(n) || (doors.find(n)->second.open && n < door.first))) {
+          dynamic_component.add_edge(
+              static_component.at(color.at(n)),
+              door_static_component
+            );
+        }
+      }
+    }
+  }
 }
 
 
@@ -330,7 +330,6 @@ void Map::mutate(MapMutator&& mutation) {
   assert(mutation.version == version);
   assert(mutation.map == this);
   ++version;
-  bool dirty = false;
   for (const auto& it : mutation.mutations) {
     bool state = it.second.state;
     uint8_t cost = it.second.cost;
@@ -345,7 +344,6 @@ void Map::mutate(MapMutator&& mutation) {
         // Create a wall, if cell is not already one.
         if (data.at(cell) != PATH_COST_INFINITE) {
           transparent_to_wall(cell);
-          dirty = true;
         }
 
         // Convert wall into closed door.
@@ -411,15 +409,14 @@ void Map::mutate(MapMutator&& mutation) {
       case MapMutator::Mutation::Kind::SET_COST:
         assert(door_iter == doors.end());
 
-        // Removing a wall.
         if (data.at(cell) == PATH_COST_INFINITE &&
             cost != PATH_COST_INFINITE) {
+          // Removing a wall.
           wall_to_transparent(cell);
         } else if (data.at(cell) != PATH_COST_INFINITE &&
                    cost == PATH_COST_INFINITE) {
           // Building a wall. Flood fill required.
           transparent_to_wall(cell);
-          dirty = true;
         }
         data.at(cell) = cost;
         // else -- either PATH_COST_INFINITE -> PATH_COST_INFINITE (nop)
@@ -456,12 +453,11 @@ void Map::mutate(MapMutator&& mutation) {
 
       default:
         assert(0);
-
     }
   }
 
-  if (dirty || !dynamic_updates) {
-    clear_cache(); // TODO: lol dynamic is the whole point;)
+  if (!dynamic_updates) {
+    clear_cache();
   }
 }
 

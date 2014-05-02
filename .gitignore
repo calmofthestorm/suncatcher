@@ -3,6 +3,7 @@ Release
 build
 
 bin/
+lib/
 
 CMakeCache.txt
 CMakeFiles
@@ -22,3 +23,8 @@ doc
 core
 *ipch
 .settings/
+
+build.ninja
+.ninja_deps
+.ninja_log
+rules.ninja
