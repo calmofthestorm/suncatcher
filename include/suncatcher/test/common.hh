@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -59,7 +60,10 @@ template <const char* MAP>
 class StaticMapTest : public ::testing::Test {
   public:
     StaticMapTest()
-    : map(ResourceManager::get_map(MAP)) { }
+    : map(ResourceManager::get_map(MAP)) {
+      char* slow = std::getenv("SLOWTEST");
+      enable_micropather = (!slow || !strcmp("1", slow));
+    }
 
     #ifdef MICROPATHER_DELTA_TEST
       MPWrapper get_micropather() {
@@ -68,6 +72,7 @@ class StaticMapTest : public ::testing::Test {
     #endif
 
   protected:
+    bool enable_micropather;
     const suncatcher::test::DeltaMap& map;
 };
 
@@ -77,7 +82,10 @@ template <const char* MAP>
 class MapTest : public ::testing::Test {
   public:
     MapTest()
-    : map(ResourceManager::get_builder(MAP)) { }
+    : map(ResourceManager::get_builder(MAP)) {
+      char* slow = std::getenv("SLOWTEST");
+      enable_micropather = (!slow || !strcmp("1", slow));
+    }
 
     #ifdef MICROPATHER_DELTA_TEST
       MPWrapper get_micropather() {
@@ -86,6 +94,7 @@ class MapTest : public ::testing::Test {
     #endif
 
   protected:
+    bool enable_micropather;
     suncatcher::test::DeltaMap map;
 };
 

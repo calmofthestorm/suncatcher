@@ -114,6 +114,7 @@ file (GLOB test_srcs
 
 # Source for the unit tests. (The actual test cases for googletest)
 file (GLOB unittest_srcs ${PROJECT_SOURCE_DIR}/test/*.cc)
+list(REMOVE_ITEM unittest_srcs ${PROJECT_SOURCE_DIR}/test/runner.cc)
 
 # Only combine common objects once.
 add_library(suncatcher_objs OBJECT
@@ -155,13 +156,17 @@ add_custom_target(cppcheck
     COMMAND cppcheck -j 4 cppcheck --enable=style --quiet ${CPPCHECK_ARG_TEMPLATE} ${PROJECT_SOURCE_DIR}/src
 )
 
-enable_testing()
-
-# run unit tests after every build by default.
+# run quick unit tests after every build by default.
 add_custom_target(unittest
     ALL
     DEPENDS run_unit_tests
-    COMMAND ${CMAKE_BINARY_DIR}/bin/run_unit_tests --output-on-failure
+    COMMAND ${CMAKE_BINARY_DIR}/test_runner.sh
+)
+
+# run all unit tests with complete invariant checking.
+add_custom_target(test
+    DEPENDS run_unit_tests_verbose
+    COMMAND ${CMAKE_BINARY_DIR}/bin/run_unit_tests_verbose --gtest_color=yes --gtest_shuffle
 )
 
 # add a Doxygen target to the "all" target
@@ -188,6 +193,11 @@ add_executable (run_unit_tests
     $<TARGET_OBJECTS:suncatcher_objs>
     $<TARGET_OBJECTS:test_objs>
     $<TARGET_OBJECTS:unittest_objs>)
+add_executable (run_unit_tests_verbose
+    $<TARGET_OBJECTS:suncatcher_objs>
+    $<TARGET_OBJECTS:test_objs>
+    $<TARGET_OBJECTS:unittest_objs>)
 target_link_libraries (run_unit_tests gtest_main ${SYSTEM_LIBRARIES})
+target_link_libraries (run_unit_tests_verbose gtest_main ${SYSTEM_LIBRARIES})
 
 set_target_properties(cpplint cppcheck doxygen  PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)

@@ -287,8 +287,10 @@ TEST_F(NonUniformCost, HillGoAround) {
   ASSERT_EQ(2, actual.get_length());
   ASSERT_EQ(3, actual.get_path().size());
   #ifdef MICROPATHER_DELTA_TEST
+  if (enable_micropather) {
     auto expected = get_micropather().path(src, dst);
     ASSERT_EQ(expected, actual);
+  }
   #endif
   for (uint16_t i = 6; i <= 8; ++i) {
     map.mutate(std::move(map.get_mutator().set_cost({6, i}, 200)));
@@ -297,8 +299,10 @@ TEST_F(NonUniformCost, HillGoAround) {
   ASSERT_NEAR(13.6569, actual.get_length(), 0.1);
   ASSERT_EQ(13, actual.get_path().size());
   #ifdef MICROPATHER_DELTA_TEST
-    expected = get_micropather().path(src, dst);
+  if (enable_micropather) {
+    auto expected = get_micropather().path(src, dst);
     ASSERT_EQ(expected, actual);
+  }
   #endif
 }
 
@@ -311,8 +315,10 @@ TEST_F(NonUniformCost, DeliciousHillYouMustClimbIt) {
   ASSERT_EQ(1, actual.get_length());
   ASSERT_EQ(2, actual.get_path().size());
   #ifdef MICROPATHER_DELTA_TEST
+  if (enable_micropather) {
     auto expected = get_micropather().path(src, dst);
     ASSERT_EQ(expected, actual);
+  }
   #endif
   for (uint16_t i = 6; i <= 8; ++i) {
     map.mutate(std::move(map.get_mutator().set_cost({6, i}, 200)));
@@ -321,8 +327,10 @@ TEST_F(NonUniformCost, DeliciousHillYouMustClimbIt) {
   ASSERT_NEAR(200, actual.get_length(), 0.1);
   ASSERT_EQ(2, actual.get_path().size());
   #ifdef MICROPATHER_DELTA_TEST
-    expected = get_micropather().path(src, dst);
+  if (enable_micropather) {
+    auto expected = get_micropather().path(src, dst);
     ASSERT_EQ(expected, actual);
+  }
   #endif
 }
 
@@ -335,8 +343,10 @@ TEST_F(NonUniformCost, HillStillShortestPath) {
   ASSERT_EQ(2, actual.get_length());
   ASSERT_EQ(3, actual.get_path().size());
   #ifdef MICROPATHER_DELTA_TEST
+  if (enable_micropather) {
     auto expected = get_micropather().path(src, dst);
     ASSERT_EQ(expected, actual);
+  }
   #endif
   for (uint16_t i = 6; i <= 8; ++i) {
     map.mutate(std::move(map.get_mutator().set_cost({6, i}, 3)));
@@ -345,8 +355,10 @@ TEST_F(NonUniformCost, HillStillShortestPath) {
   ASSERT_NEAR(4, actual.get_length(), 0.1);
   ASSERT_EQ(3, actual.get_path().size());
   #ifdef MICROPATHER_DELTA_TEST
-    expected = get_micropather().path(src, dst);
+  if (enable_micropather) {
+    auto expected = get_micropather().path(src, dst);
     ASSERT_EQ(expected, actual);
+  }
   #endif
 }
 
@@ -361,9 +373,11 @@ TEST_F(NonUniformCost, NonUniformExpensiveVsCheapDoor) {
   ASSERT_NEAR(8.243, actual.get_length(), 0.1);
   ASSERT_EQ(8, actual.get_path().size());
   #ifdef MICROPATHER_DELTA_TEST
+  if (enable_micropather) {
     auto expected = get_micropather().path(src, dst);
     ASSERT_NEAR(expected.get_length(), actual.get_length(), 0.1);
     ASSERT_EQ(expected.get_path().size(), actual.get_path().size());
+  }
   #endif
 }
 

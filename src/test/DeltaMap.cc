@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include "suncatcher/test/DeltaMap.hh"
 
 #include "suncatcher/Map.hh"
@@ -103,10 +105,6 @@ void DeltaMap::check_invariant() const {
 
   assert(simple_map->color.size() == optimized_map->color.size());
   std::map<int_least32_t, int_least32_t> cmapping, smapping, dmapping;
-  // simple_map->print_colors(std::cout);
-  // optimized_map->print_colors(std::cout);
-  // simple_map->print_static_components(std::cout);
-  // optimized_map->print_static_components(std::cout);
   for (size_t j = 0; j < simple_map->color.size().row; ++j) {
     for (size_t i = 0; i < simple_map->color.size().col; ++i) {
       // Check color. Colors may vary provided that it's many-to-one from
@@ -199,7 +197,11 @@ DeltaMutator DeltaMap::get_mutator() {
 void DeltaMap::mutate(DeltaMutator&& mutator) {
   optimized_map->mutate(std::move(mutator.m1));
   simple_map->mutate(std::move(mutator.m2));
-  check_invariant();
+
+  char* slow = std::getenv("SLOWTEST");
+  if (!slow || !strcmp("1", slow)) {
+    check_invariant();
+  }
 }
 
 

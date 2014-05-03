@@ -70,9 +70,11 @@ TEST_F(StaticSanity, OpenMapLongPath) {
 
   // Delta test this one against MicroPather.
   #ifdef MICROPATHER_DELTA_TEST
+  if (enable_micropather) {
     auto expected = get_micropather().path(start, finish);
     ASSERT_NEAR(expected.get_length(), actual.get_length(), 0.5);
     ASSERT_EQ(expected.get_path().size(), actual.get_path().size());
+  }
   #endif
 }
 
