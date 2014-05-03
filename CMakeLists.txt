@@ -155,12 +155,14 @@ add_custom_target(cppcheck
     COMMAND cppcheck -j 4 cppcheck --enable=style --quiet ${CPPCHECK_ARG_TEMPLATE} ${PROJECT_SOURCE_DIR}/src
 )
 
-# run unit tests after every build by default.
-add_test(unittest
-    ALL
-    COMMAND ${CMAKE_BINARY_DIR}/bin/run_unit_tests
-)
+enable_testing()
 
+# run unit tests after every build by default.
+add_custom_target(unittest
+    ALL
+    DEPENDS run_unit_tests
+    COMMAND ${CMAKE_BINARY_DIR}/bin/run_unit_tests --output-on-failure
+)
 
 # add a Doxygen target to the "all" target
 if (NOT DEFINED ENV{TRAVIS})
