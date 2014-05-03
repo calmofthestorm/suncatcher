@@ -135,18 +135,6 @@ void DeltaMap::check_invariant() const {
           smapping[ostatic] = sstatic;
         }
 
-        // Verify static connectivity.
-        // TODO: optimize
-        for (const auto& ait : smapping) {
-          for (const auto& bit : smapping) {
-            int_least32_t sarep = union_find_lookup_no_compress(simple_map->static_component, ait.second);
-            int_least32_t sbrep = union_find_lookup_no_compress(simple_map->static_component, bit.second);
-            int_least32_t oarep = union_find_lookup_no_compress(optimized_map->static_component, ait.first);
-            int_least32_t obrep = union_find_lookup_no_compress(optimized_map->static_component, bit.first);
-            assert((sarep == sbrep) == (oarep == obrep));
-          }
-        }
-
         // Check dynamic components. These must be isomorphic.
         int_least32_t sdynamic = simple_map->dynamic_component.lookup(sstatic);
         int_least32_t odynamic = optimized_map->dynamic_component.lookup(ostatic);
@@ -156,19 +144,29 @@ void DeltaMap::check_invariant() const {
         } else {
           dmapping[odynamic] = sdynamic;
         }
-
-        // Verify dynamic connectivity.
-        // TODO: optimize
-        for (const auto& ait : dmapping) {
-          for (const auto& bit : dmapping) {
-            int_least32_t sarep = union_find_lookup_no_compress(simple_map->static_component, ait.second);
-            int_least32_t sbrep = union_find_lookup_no_compress(simple_map->static_component, bit.second);
-            int_least32_t oarep = union_find_lookup_no_compress(optimized_map->static_component, ait.first);
-            int_least32_t obrep = union_find_lookup_no_compress(optimized_map->static_component, bit.first);
-            assert((sarep == sbrep) == (oarep == obrep));
-          }
-        }
       }
+    }
+  }
+
+  // Verify static connectivity.
+  for (const auto& ait : smapping) {
+    for (const auto& bit : smapping) {
+      int_least32_t sarep = union_find_lookup_no_compress(simple_map->static_component, ait.second);
+      int_least32_t sbrep = union_find_lookup_no_compress(simple_map->static_component, bit.second);
+      int_least32_t oarep = union_find_lookup_no_compress(optimized_map->static_component, ait.first);
+      int_least32_t obrep = union_find_lookup_no_compress(optimized_map->static_component, bit.first);
+      assert((sarep == sbrep) == (oarep == obrep));
+    }
+  }
+
+  // Verify dynamic connectivity.
+  for (const auto& ait : dmapping) {
+    for (const auto& bit : dmapping) {
+      int_least32_t sarep = union_find_lookup_no_compress(simple_map->static_component, ait.second);
+      int_least32_t sbrep = union_find_lookup_no_compress(simple_map->static_component, bit.second);
+      int_least32_t oarep = union_find_lookup_no_compress(optimized_map->static_component, ait.first);
+      int_least32_t obrep = union_find_lookup_no_compress(optimized_map->static_component, bit.first);
+      assert((sarep == sbrep) == (oarep == obrep));
     }
   }
 }
