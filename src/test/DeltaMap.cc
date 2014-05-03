@@ -125,7 +125,7 @@ void DeltaMap::check_invariant() const {
       }
 
       if (scolor != pathfinder::COLOR_IMPASSABLE) {
-        // Check static components. These must be isomorphic.
+        // Attempt to find an isomorphism for static components.
         int_least32_t sstatic = simple_map->static_component.at(scolor);
         int_least32_t ostatic = optimized_map->static_component.at(ocolor);
         auto c = smapping.find(ostatic);
@@ -135,7 +135,7 @@ void DeltaMap::check_invariant() const {
           smapping[ostatic] = sstatic;
         }
 
-        // Check dynamic components. These must be isomorphic.
+        // Attempt to find an isomorphism for dynamic components.
         int_least32_t sdynamic = simple_map->dynamic_component.lookup(sstatic);
         int_least32_t odynamic = optimized_map->dynamic_component.lookup(ostatic);
         c = dmapping.find(odynamic);
@@ -147,30 +147,7 @@ void DeltaMap::check_invariant() const {
       }
     }
   }
-
-  // Verify static connectivity.
-  for (const auto& ait : smapping) {
-    for (const auto& bit : smapping) {
-      int_least32_t sarep = union_find_lookup_no_compress(simple_map->static_component, ait.second);
-      int_least32_t sbrep = union_find_lookup_no_compress(simple_map->static_component, bit.second);
-      int_least32_t oarep = union_find_lookup_no_compress(optimized_map->static_component, ait.first);
-      int_least32_t obrep = union_find_lookup_no_compress(optimized_map->static_component, bit.first);
-      assert((sarep == sbrep) == (oarep == obrep));
-    }
-  }
-
-  // Verify dynamic connectivity.
-  for (const auto& ait : dmapping) {
-    for (const auto& bit : dmapping) {
-      int_least32_t sarep = union_find_lookup_no_compress(simple_map->static_component, ait.second);
-      int_least32_t sbrep = union_find_lookup_no_compress(simple_map->static_component, bit.second);
-      int_least32_t oarep = union_find_lookup_no_compress(optimized_map->static_component, ait.first);
-      int_least32_t obrep = union_find_lookup_no_compress(optimized_map->static_component, bit.first);
-      assert((sarep == sbrep) == (oarep == obrep));
-    }
-  }
 }
-
 
 bool DeltaMap::is_door(Coord start) const {
   return optimized_map->is_door(start);

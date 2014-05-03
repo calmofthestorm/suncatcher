@@ -192,7 +192,8 @@ include_directories ("${PROJECT_SOURCE_DIR}/thirdparty/gmock/include")
 add_executable (run_unit_tests
     $<TARGET_OBJECTS:suncatcher_objs>
     $<TARGET_OBJECTS:test_objs>
-    $<TARGET_OBJECTS:unittest_objs>)
+    $<TARGET_OBJECTS:unittest_objs>
+    ${PROJECT_SOURCE_DIR}/test/runner.cc)
 add_executable (run_unit_tests_verbose
     $<TARGET_OBJECTS:suncatcher_objs>
     $<TARGET_OBJECTS:test_objs>
