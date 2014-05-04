@@ -44,6 +44,10 @@ class Coord {
       return (row < other.row || (row == other.row && col < other.col));
     }
 
+    inline bool operator<= (const Coord& other) const {
+      return (row <= other.row || (row == other.row && col <= other.col));
+    }
+
     inline Coord operator+ (const Coord& other) const {
       Coord r(*this);
       r.row += other.row;
