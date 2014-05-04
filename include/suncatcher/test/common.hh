@@ -49,6 +49,8 @@ namespace suncatcher {
 namespace test {
 
 extern const char MAP_OPEN[];
+extern const char MAP_SMALL_OPEN[];
+extern const char MAP_CROSS[];
 extern const char MAP_MAIN[];
 extern const char MAP_DOORLAND[];
 extern const char MAP_MICRO[];
