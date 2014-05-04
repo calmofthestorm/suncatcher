@@ -199,6 +199,12 @@ class Map {
     int_least32_t next_component_color;
     int_least32_t next_door_color;
 
+    // Helpers for each mutate operation's cases.
+    void incremental_create_door(Coord cell, bool state, uint_least8_t cost);
+    void incremental_remove_door(Coord cell, bool state, uint_least8_t cost);
+    void incremental_set_cost(Coord cell, bool state, uint_least8_t cost);
+    void incremental_update_door(Coord cell, bool state, uint_least8_t cost);
+
     void wall_to_transparent(Coord cell);
     void closed_door_to_open_door(Coord cell, DoorIter door_iter);
     void closed_door_to_wall(
