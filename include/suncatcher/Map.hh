@@ -205,16 +205,18 @@ class Map {
     void incremental_set_cost(Coord cell, bool state, uint_least8_t cost);
     void incremental_update_door(Coord cell, bool state, uint_least8_t cost);
 
-    void wall_to_transparent(Coord cell);
-    void closed_door_to_open_door(Coord cell, DoorIter door_iter);
-    void closed_door_to_wall(
+    // Helpers for the incremental mutations -- most mutations can be
+    // decomposed into combinations of a few constant-time transformations.
+    void incremental_wall_to_transparent(Coord cell);
+    void incremental_closed_door_to_open_door(Coord cell, DoorIter door_iter);
+    void incremental_closed_door_to_wall(
         Coord cell,
         DoorIter door_iter,
         uint8_t cost
       );
-    void open_door_to_closed_door(Coord cell, DoorIter door_iter);
-    void transparent_to_wall(Coord cell);
-    DoorIter wall_to_closed_door(
+    void incremental_open_door_to_closed_door(Coord cell, DoorIter door_iter);
+    void incremental_transparent_to_wall(Coord cell);
+    DoorIter incremental_wall_to_closed_door(
         Coord cell,
         uint8_t cost_closed,
         uint8_t cost_open

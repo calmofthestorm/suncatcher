@@ -118,7 +118,9 @@ void Map::print_dynamic_components(std::ostream& os) const {
       if (color.at(j, i) == COLOR_IMPASSABLE) {
         os << ' ';
       } else {
-        int_least32_t c = dynamic_component.lookup(static_component.at(color.at(j, i)));
+        int_least32_t c = dynamic_component.lookup(
+            static_component.at(color.at(j, i))
+          );
         char start = c < 0 ? 'Z' : 'A';
         if (c < 25) {
           os << (char)(c + start);
@@ -227,7 +229,7 @@ MapMutator Map::get_mutator() {
 
 // Caller's responsibility to set the newly transparent cell's cost AFTER
 // the call.
-void Map::wall_to_transparent(Coord cell) {
+void Map::incremental_wall_to_transparent(Coord cell) {
   assert(color.at(cell) == COLOR_IMPASSABLE);
 
   // Set its color to the first transparent neighbor (Manhattan) found.
@@ -254,7 +256,7 @@ void Map::wall_to_transparent(Coord cell) {
 }
 
 
-void Map::closed_door_to_open_door(Coord cell, DoorIter door_iter) {
+void Map::incremental_closed_door_to_open_door(Coord cell, DoorIter door_iter) {
   int_least32_t door_static_component = static_component.at(color.at(cell));
   for (const auto& n : data.get_adjacent(cell, false)) {
     if (color.at(n) != COLOR_IMPASSABLE &&
@@ -269,7 +271,7 @@ void Map::closed_door_to_open_door(Coord cell, DoorIter door_iter) {
 }
 
 
-void Map::closed_door_to_wall(
+void Map::incremental_closed_door_to_wall(
     Coord cell,
     DoorIter door_iter,
     uint_least8_t cost
@@ -280,12 +282,12 @@ void Map::closed_door_to_wall(
 }
 
 
-void Map::open_door_to_closed_door(Coord cell, DoorIter door_iter) {
+void Map::incremental_open_door_to_closed_door(Coord cell, DoorIter door_iter) {
   dynamic_component.isolate_component(static_component.at(color.at(cell)));
   door_iter->second.open = false;
 }
 
-void Map::transparent_to_wall(Coord cell) {
+void Map::incremental_transparent_to_wall(Coord cell) {
   int_least32_t old_color = color.at(cell);
   data.at(cell) = PATH_COST_INFINITE;
   color.at(cell) = COLOR_IMPASSABLE;
@@ -330,7 +332,7 @@ void Map::transparent_to_wall(Coord cell) {
 }
 
 
-Map::DoorIter Map::wall_to_closed_door (
+Map::DoorIter Map::incremental_wall_to_closed_door (
     Coord cell,
     uint_least8_t cost_closed,
     uint_least8_t cost_open
@@ -338,7 +340,10 @@ Map::DoorIter Map::wall_to_closed_door (
   data.at(cell) = PATH_COST_INFINITE;
   dynamic_component.add_component(static_component[next_door_color]);
   color.at(cell) = next_door_color--;
-  return doors.insert(std::make_pair(cell, Door{false, cost_closed, cost_open})).first;
+  return doors.insert(std::make_pair(
+        cell,
+        Door{false, cost_closed, cost_open})
+      ).first;
 }
 
 
@@ -349,15 +354,19 @@ void Map::incremental_create_door(Coord cell, bool state, uint_least8_t cost) {
 
   // Create a wall, if cell is not already one.
   if (data.at(cell) != PATH_COST_INFINITE) {
-    transparent_to_wall(cell);
+    incremental_transparent_to_wall(cell);
   }
 
   // Convert wall into closed door.
-  auto door_iter = wall_to_closed_door(cell, PATH_COST_INFINITE, cost);
+  auto door_iter = incremental_wall_to_closed_door(
+      cell,
+      PATH_COST_INFINITE,
+      cost
+    );
 
   // If necessary, open it.
   if (state) {
-    closed_door_to_open_door(cell, door_iter);
+    incremental_closed_door_to_open_door(cell, door_iter);
   }
 
   doors[cell] = Door{state, cost, PATH_COST_INFINITE};
@@ -377,21 +386,21 @@ void Map::incremental_remove_door(Coord cell, bool state, uint_least8_t cost) {
       // Goal: Open door to wall.
 
       // Close the door.
-      open_door_to_closed_door(cell, door_iter);
+      incremental_open_door_to_closed_door(cell, door_iter);
 
       // Turn the closed door into a wall.
-      closed_door_to_wall(cell, door_iter, cost);
+      incremental_closed_door_to_wall(cell, door_iter, cost);
     } else {
       // Goal: Open door to transparent.
 
       // Close it
-      open_door_to_closed_door(cell, door_iter);
+      incremental_open_door_to_closed_door(cell, door_iter);
 
       // Turn it into a wall.
-      closed_door_to_wall(cell, door_iter, cost);
+      incremental_closed_door_to_wall(cell, door_iter, cost);
 
       // Remove the wall.
-      wall_to_transparent(cell);
+      incremental_wall_to_transparent(cell);
       data.at(cell) = cost;
     }
   } else {
@@ -408,7 +417,7 @@ void Map::incremental_remove_door(Coord cell, bool state, uint_least8_t cost) {
       color.at(cell) = COLOR_IMPASSABLE;
       data.at(cell) = PATH_COST_INFINITE;
       doors.erase(door_iter);
-      wall_to_transparent(cell);
+      incremental_wall_to_transparent(cell);
       data.at(cell) = cost;
     }
   }
@@ -421,11 +430,11 @@ void Map::incremental_set_cost(Coord cell, bool state, uint_least8_t cost) {
   if (data.at(cell) == PATH_COST_INFINITE &&
       cost != PATH_COST_INFINITE) {
     // Removing a wall.
-    wall_to_transparent(cell);
+    incremental_wall_to_transparent(cell);
   } else if (data.at(cell) != PATH_COST_INFINITE &&
       cost == PATH_COST_INFINITE) {
     // Building a wall. Flood fill required.
-    transparent_to_wall(cell);
+    incremental_transparent_to_wall(cell);
   }
   data.at(cell) = cost;
   // else -- either PATH_COST_INFINITE -> PATH_COST_INFINITE (nop)
@@ -454,9 +463,9 @@ void Map::incremental_update_door(Coord cell, bool state, uint_least8_t cost) {
   // Maintain links if door changed state.
   if (state) {
     if (door_iter->second.open) {
-      closed_door_to_open_door(cell, door_iter);
+      incremental_closed_door_to_open_door(cell, door_iter);
     } else {
-      open_door_to_closed_door(cell, door_iter);
+      incremental_open_door_to_closed_door(cell, door_iter);
     }
   }
 }
@@ -472,7 +481,7 @@ void Map::mutate(MapMutator&& mutation) {
     uint_least8_t cost = it.second.cost;
     Coord cell = it.first;
     auto door_iter = doors.find(cell);
-    switch(it.second.kind) {
+    switch (it.second.kind) {
       case MapMutator::Mutation::Kind::CREATE_DOOR:
         incremental_create_door(cell, state, cost);
         break;
@@ -498,6 +507,7 @@ void Map::mutate(MapMutator&& mutation) {
     clear_cache();
   }
 }
+
 
 // Forces recomputation of all cached information.
 void Map::clear_cache() {
