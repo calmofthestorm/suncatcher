@@ -77,7 +77,11 @@ flags = [
   '-isystem',
   '/usr/local/include',
   '-I',
-  'include'
+  'include',
+  '-isystem',
+  'thirdparty/gtest/include',
+  '-isystem',
+  'thirdparty/gmock/include',
 ]
 
 

@@ -1,4 +1,4 @@
-// This file is part of Suncatcher
+// t a load fromThis file is part of Suncatcher
 // Alex Roper <alex@aroper.net>
 //
 // Suncatcher is free software: you can redistribute it and/or modify it under
@@ -46,9 +46,25 @@ namespace test {
 class DeltaMap;
 
 
+// TODO: evaluate if polymorphism is appropriate for testing code mutators.
+//
+// DeltaMap is a wrapper class around two map implementations, one with
+// optimizations enabled and one with them disabled. Mutations are applied to
+// both maps. After each mutation, equivalents of the internal state between
+// the maps is tested to ensure that the optimizations did not diverge.
+//
+// When running in quick check mode (run automatically after every compile),
+// the Delta map simply passes commands along to an optimized map and does not
+// check against a simple map nor does it verify internal state.
+//
+//
 class DeltaMutator {
   public:
-    DeltaMutator(pathfinder::MapMutator&& m1_i, pathfinder::MapMutator&& m2_i);
+    DeltaMutator(
+        pathfinder::MapMutator&& m1_i,
+        pathfinder::MapMutator&& m2_i,
+        bool enable_delta_i
+      );
 
     DeltaMutator(const DeltaMutator& other) = delete;
     DeltaMutator& operator=(const DeltaMutator& other) = delete;
@@ -72,6 +88,7 @@ class DeltaMutator {
   private:
     friend class DeltaMap;
     pathfinder::MapMutator m1, m2;
+    bool enable_delta;
 };
 
 
@@ -106,7 +123,10 @@ class DeltaMap {
 
     const util::Grid<uint8_t>& get_data() const;
 
+    void clear_cache();
+
   private:
+    bool enable_delta;
     std::unique_ptr<pathfinder::Map> optimized_map, simple_map;
 };
 
