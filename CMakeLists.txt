@@ -160,7 +160,7 @@ add_custom_target(cppcheck
 add_custom_target(unittest
     ALL
     DEPENDS run_unit_tests
-    COMMAND ${CMAKE_BINARY_DIR}/test_runner.sh
+    COMMAND ${PROJECT_SOURCE_DIR}/thirdparty/gatherer/gatherer.py bin/run_unit_tests 4
 )
 
 # run all unit tests with complete invariant checking.
