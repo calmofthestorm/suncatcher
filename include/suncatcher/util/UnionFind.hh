@@ -1,25 +1,19 @@
-// Friendly boost disjoint_sets wrapper
-// Alex Roper
-// alex@aroper.net
+// This file is part of Suncatcher
+// Alex Roper <alex@aroper.net>
 //
+// Suncatcher is free software: you can redistribute it and/or modify it under
+// the terms of version 3 of the GNU General Public License as published by the
+// Free Software Foundation.
 //
-// This is a friendly wrapper around boost::disjoint_sets. The intent is to
-// create a container class with as easy to use (and hard to mess up) an
-// interface as possible, with performance as an acceptable cost. This is
-// accomplished by providing a class that manages all the union find internals
-// such as mapping from arbitrary keys to integers for disjoint_sets, resizing
-// as necessary, etc.
+// Suncatcher is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
 //
-// Boost functions with tricky semantics (eg, link vs union_set) are removed,
-// exceptions used for illegal operations, etc.
+// You should have received a copy of the GNU General Public License along with
+// Suncatcher.  If not, see <http://www.gnu.org/licenses/>.
 //
-// This comes at the cost of an indirection layer for all lookups, less
-// general backing than Boost allows, and unnecessary lookups in union_sets.
-//
-// Intended for use in coding competitions, where the slight performance hit
-// is well worth it for simpler semantics.
-//
-//
+// Copyright 2014 Alex Roper
 
 #ifndef UNIONFIND_0bb7b9ebeb3048f58090c09247502b31
 #define UNIONFIND_0bb7b9ebeb3048f58090c09247502b31
@@ -91,6 +85,6 @@ class UnionFind {
 }  // namespace suncatcher
 }  // namespace util
 
-#include "suncatcher/util/UnionFind-inl.hh"
+#include "suncatcher/util/UnionFind-inl.h"
 
 #endif  /* UNIONFIND_0bb7b9ebeb3048f58090c09247502b31 */
