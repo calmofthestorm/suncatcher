@@ -124,6 +124,7 @@ class DeltaMap {
     const util::Grid<uint8_t>& get_data() const;
 
     void clear_cache();
+    pathfinder::Coord size() const;
 
   private:
     bool enable_delta;

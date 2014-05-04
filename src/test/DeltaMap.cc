@@ -244,6 +244,11 @@ void DeltaMap::clear_cache() {
 }
 
 
+pathfinder::Coord DeltaMap::size() const {
+  optimized_map->size();
+}
+
+
 
 }  // namespace test
 }  // namespace suncatcher
