@@ -60,13 +60,13 @@ inline float MapImpl::move_cost(Coord start, Coord finish) const {
 
 inline bool MapImpl::is_passable(Coord cell) const {
   assert(get_data().check_bounds(cell));
-  assert(map->get_color().at(cell) != COLOR_UNKNOWN);
+  assert(get_color().at(cell) != COLOR_UNKNOWN);
   bool rval = (get_data().at(cell) != PATH_COST_INFINITE);
   #ifndef NDEBUG
     if (is_door(cell)) {
       assert(rval == doors.at(cell).open);
     } else {
-      assert((map->get_color().at(cell) != COLOR_IMPASSABLE) == rval);
+      assert((get_color().at(cell) != COLOR_IMPASSABLE) == rval);
     }
     #endif
   return rval;

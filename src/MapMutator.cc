@@ -26,6 +26,7 @@ namespace suncatcher {
 namespace pathfinder {
 
 
+
 MapMutator::MapMutator()
 : view(MapView()) { }
 
@@ -78,7 +79,12 @@ MapMutator& MapMutator::set_cost(Coord cell, uint_least8_t cost) {
 }
 
 
-MapMutator& MapMutator::create_door(Coord cell, bool open, uint_least8_t open_cost) {
+MapMutator& MapMutator::create_door(
+    Coord cell,
+    bool open,
+    uint_least8_t open_cost
+  ) {
+
   assert(open_cost != PATH_COST_INFINITE);
   assert(view.get_doors().find(cell) == view.get_doors().cend());
   mutations[cell] = {Mutation::Kind::CREATE_DOOR, open, open_cost};
@@ -96,8 +102,7 @@ MapMutator& MapMutator::remove_door(Coord cell, uint_least8_t new_cost) {
 
 
 MapView MapMutator::execute(bool incremental) const {
-  // TODO: all the things
-  return view;
+  return MapView(std::make_shared<MapImpl>(*this, incremental));
 }
 
 

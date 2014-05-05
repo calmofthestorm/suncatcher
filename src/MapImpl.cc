@@ -50,32 +50,42 @@ MapImpl::MapImpl(MapBuilder&& builder)
 }
 
 
-MapImpl::MapImpl(const MapMutator& mutation, bool incremental) {
+MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
+: doors(mutation.view.map->doors),
+  data(mutation.view.map->data),
+  color(mutation.view.map->color) {
+
   for (const auto& it : mutation.mutations) {
     bool state = it.second.state;
     uint_least8_t cost = it.second.cost;
     Coord cell = it.first;
     auto door_iter = doors.find(cell);
     switch (it.second.kind) {
-      case MapMutator::Mutation::Kind::CREATE_DOOR:
-        incremental_create_door(cell, state, cost);
-        break;
-
-      case MapMutator::Mutation::Kind::REMOVE_DOOR:
-        incremental_remove_door(cell, state, cost);
-        break;
-
+      // case MapMutator::Mutation::Kind::CREATE_DOOR:
+      //   doors[cell] = Door{state, cost, PATH_COST_INFINITE};
+      //   // incremental_create_door(cell, state, cost);
+      //   break;
+      //
+      // case MapMutator::Mutation::Kind::REMOVE_DOOR:
+      //   doors.erase(doors.find(cell));
+      //   // incremental_remove_door(cell, state, cost);
+      //   break;
+      //
       case MapMutator::Mutation::Kind::SET_COST:
-        incremental_set_cost(cell, state, cost);
+        data.at(cell) = cost;
+        // incremental_set_cost(cell, state, cost);
         break;
-
-      case MapMutator::Mutation::Kind::UPDATE_DOOR:
-        incremental_update_door(cell, state, cost);
-        break;
+      //
+      // case MapMutator::Mutation::Kind::UPDATE_DOOR:
+      //   doors.at(cell).cost_open = cost;
+      //   doors.at(cell).open = state;
+      //   // incremental_update_door(cell, state, cost);
+      //   break;
 
       default:
         assert(0);
     }
+    rebuild();
   }
 }
 
@@ -299,6 +309,7 @@ void MapImpl::incremental_set_cost(Coord cell, bool state, uint_least8_t cost) {
 
 void MapImpl::incremental_update_door(Coord cell, bool state, uint_least8_t cost) {
   auto door_iter = doors.find(cell);
+  assert(door_iter != doors.end());
   door_iter->second.open ^= state;
 
   // Internally we use PATH_COST_INFINITE to represent the current value.

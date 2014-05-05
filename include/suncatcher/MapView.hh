@@ -87,7 +87,7 @@ class MapView {
   private:
     std::shared_ptr<MapImpl> map;
 
-    friend class MapMutator;
+    friend class MapImpl;
     friend class test::DeltaMap;
 };
 
