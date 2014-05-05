@@ -53,7 +53,7 @@ inline bool CoordRange::iterator::operator!=(
 
 
 inline CoordRange::iterator CoordRange::begin() {
-  return iterator({0, 0}, size);
+  return iterator(Coord(0, 0), size);
 }
 
 
@@ -61,7 +61,7 @@ inline CoordRange::iterator CoordRange::end() {
   if (size.row == 0 || size.col == 0) {
     return begin();
   } else {
-    return iterator(Coord{size.row, 0}, size);
+    return iterator(Coord(size.row, 0), size);
   }
 }
 

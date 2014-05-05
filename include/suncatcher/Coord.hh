@@ -22,6 +22,8 @@
 #include <iostream>
 
 #include <boost/functional/hash.hpp>
+#include <limits>
+#include <type_traits>
 
 namespace suncatcher {
 namespace pathfinder {
@@ -30,29 +32,57 @@ namespace pathfinder {
 // POD class representing a position on the pathfinding map abstraction.
 class Coord {
   public:
-    uint16_t row, col;
+    inline Coord()
+    : row(0),
+      col(0),
+      layer(0) { }
+
+    inline Coord(uint16_t row_i, uint16_t col_i, uint16_t layer_i)
+    : row(row_i),
+      col(col_i),
+      layer(layer_i) { }
+
+    inline Coord(uint16_t row_i, uint16_t col_i)
+    : row(row_i),
+      col(col_i),
+      layer(0) { }
+
+    uint16_t row, col, layer;
 
     inline bool operator!= (const Coord& other) const {
-      return row != other.row || col != other.col;
+      return to_number() != other.to_number();
+      return row != other.row || col != other.col || layer != other.layer;
     }
 
     inline bool operator== (const Coord& other) const {
-      return row == other.row && col == other.col;
+      return to_number() == other.to_number();
     }
 
     inline bool operator< (const Coord& other) const {
-      return (row < other.row || (row == other.row && col < other.col));
+      return to_number() < other.to_number();
     }
 
     inline bool operator<= (const Coord& other) const {
-      return (row <= other.row || (row == other.row && col <= other.col));
+      return to_number() <= other.to_number();
     }
 
     inline Coord operator+ (const Coord& other) const {
       Coord r(*this);
       r.row += other.row;
       r.col += other.col;
+      r.layer += other.layer;
       return r;
+    }
+
+    inline uint64_t to_number() const {
+      // Make sure my logic works here.
+      static_assert(std::is_same<decltype(row), decltype(col)>::value, "");
+      static_assert(std::is_same<decltype(row), decltype(layer)>::value, "");
+      static_assert(sizeof(uint64_t) >= 3 * sizeof(decltype(row)), "");
+
+      static const uint64_t coord_max = std::numeric_limits<decltype(row)>::max();
+      return ((uint64_t)col + coord_max *
+              ((uint64_t)row + coord_max * (uint64_t)layer));
     }
 };
 
