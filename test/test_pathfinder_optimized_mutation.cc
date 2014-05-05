@@ -19,7 +19,6 @@
 
 #include "suncatcher/Coord.hh"
 #include "suncatcher/test/DeltaMap.hh"
-#include "suncatcher/Map.hh"
 #include "suncatcher/MapMutator.hh"
 #include "suncatcher/util/util.hh"
 #include "suncatcher/test/ResourceManager.hh"

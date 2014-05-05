@@ -31,9 +31,9 @@ using suncatcher::pathfinder::Map;
 using suncatcher::pathfinder::Path;
 using suncatcher::pathfinder::Coord;
 
-MPWrapper::MPWrapper(const DeltaMap* map) {
-  my_map = &map->get_simple();
-  mpg.reset(new MicropatherGraph(&map->get_simple()));
+MPWrapper::MPWrapper(pathfinder::MapView view_i)
+: view(view_i) {
+  mpg.reset(new MicropatherGraph(view_i));
 }
 
 void MPWrapper::new_pather() {
@@ -41,9 +41,9 @@ void MPWrapper::new_pather() {
 }
 
 Path MPWrapper::path(Coord start, Coord finish) {
-  if (!my_map->get_data().check_bounds(start) ||
-      !my_map->get_data().check_bounds(finish) ||
-      !my_map->is_passable(start) || !my_map->is_passable(finish)) {
+  if (!view.get_data().check_bounds(start) ||
+      !view.get_data().check_bounds(finish) ||
+      !view.is_passable(start) || !view.is_passable(finish)) {
     return Path({}, -1);
   }
   if (start == finish) {

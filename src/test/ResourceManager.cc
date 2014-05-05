@@ -20,33 +20,30 @@
 #include <fstream>
 
 #include "suncatcher/test/DeltaMap.hh"
+#include "suncatcher/MapBuilder.hh"
+#include "suncatcher/MapView.hh"
 
 namespace suncatcher {
 namespace test {
 
-const pathfinder::MapBuilder& ResourceManager::get_builder(std::string fn) {
-  if (get_me().builder_cache.find(fn) == get_me().builder_cache.end()) {
+const DeltaMap& ResourceManager::get_map(std::string fn) {
+  if (get_me().map_cache.find(fn) == get_me().map_cache.end()) {
     std::ifstream is(std::string("maps/" + fn + ".txt"));
     if (!is) {
       std::cerr << "Unable to find maps file. Run tests from project root." << std::endl;
       exit(-1);
     }
     assert(is);
-    get_me().builder_cache[fn] = pathfinder::MapBuilder(is);
+    auto builder = pathfinder::MapBuilder(is);
+    auto view = pathfinder::MapView(pathfinder::MapView(std::move(builder)));
+    get_me().map_cache[fn] = DeltaMap(view);
   }
-  return get_me().builder_cache[fn];
-}
-
-const DeltaMap& ResourceManager::get_map(std::string fn) {
-  if (get_me().map_cache.find(fn) == get_me().map_cache.end()) {
-    get_me().map_cache[fn].reset(new DeltaMap(pathfinder::MapBuilder(get_builder(fn))));
-  }
-  return *get_me().map_cache[fn];
+  return get_me().map_cache[fn];
 }
 
 #ifdef MICROPATHER_DELTA_TEST
   MPWrapper ResourceManager::get_micropather(std::string fn) {
-    return MPWrapper(&get_map(fn));
+    return MPWrapper(get_map(fn).get_simple());
   }
 #endif
 

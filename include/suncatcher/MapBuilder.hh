@@ -30,7 +30,7 @@
 namespace suncatcher {
 namespace pathfinder {
 
-class Map;
+class MapImpl;
 
 class MapBuilder {
   public:
@@ -57,7 +57,7 @@ class MapBuilder {
                   uint_least8_t cost_closed);
 
   private:
-    friend class Map;
+    friend class MapImpl;
     suncatcher::util::Grid<uint_least8_t> data;
     bool dynamic_updates;
     std::map<const Coord, Door> doors;

@@ -18,7 +18,7 @@
 #ifndef PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a
 #define PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a
 
-// Pathfinder abstraction of the map. The Map class maintains a simplified
+// Pathfinder abstraction of the map. The MapImpl class maintains a simplified
 // abstraction of the map, intended to support efficient pathfinding,
 // reachability, and updates in a dynamic world.
 //
@@ -45,10 +45,9 @@
 #include "suncatcher/util/UnionFind.hh"
 
 #include "platform.hh"
+#include "suncatcher.hh"
 #include "suncatcher/Path.hh"
 #include "suncatcher/Door.hh"
-#include "suncatcher/MapBuilder.hh"
-#include "suncatcher/MapMutator.hh"
 
 namespace suncatcher {
 
@@ -58,59 +57,29 @@ namespace test {
 
 namespace pathfinder {
 
-const uint_least8_t PATH_COST_INFINITE = (uint_least8_t)-1;
-
-const int_least32_t COLOR_MULTIPLE = std::numeric_limits<int_least32_t>::min();
-const int_least32_t COLOR_UNKNOWN = COLOR_MULTIPLE + 1;
-const int_least32_t COLOR_IMPASSABLE = COLOR_UNKNOWN + 1;
-const int_least32_t COLOR_LOWEST_VALID = COLOR_IMPASSABLE + 1;
-
 class MapBuilder;
+class MapMutator;
 
-class Map {
+class MapImpl {
   public:
-    // See MapBuilder for construction information.
-    explicit Map(MapBuilder&& builder);
-    ~Map() NOEXCEPT;
-
-    // Disabling copy due to large + why would you want to + nontrivial to
-    // handle the linked mutator logic.
-    Map& operator= (const Map& other) = delete;
-    Map(const Map& other) = delete;
-
-    // Since mutators store a pointer to maps, moves are illegal.
-    Map& operator= (Map&& other) = delete;
-    Map(Map&& other) = delete;
-
-    // Compute the shortest path between two points if one exists. Returns false
-    // path on failure (out of bounds, no path, impassable src/dest, etc).
-    Path path(Coord src, Coord dst) const;
-
-    // Returns true if it is possible to path from src to dst. Unlike path,
-    // this will always run in constant time. Invalid inputs result in false.
-    bool path_exists(
-        pathfinder::Coord src,
-        pathfinder::Coord dst
-      ) const;
+    explicit MapImpl(const MapMutator& mutator, bool incremental=true);
+    explicit MapImpl(MapBuilder&& builder);
 
     // Returns the map's size, as a coordinate.
-    inline Coord size() const { return data.size(); }
+    inline Coord get_size() const { return data.size(); }
 
     // Returns a constant reference to the mapping from coordinates to doors.
+    // TODO: fix
     const std::map<const Coord, Door>& get_doors() const { return doors; }
+
+    // Returns a constant reference to the underlying color.
+    // TODO: fix
+    const suncatcher::util::Grid<int_least32_t>& get_color() const { return color; }
 
     // Returns a constant reference to the underlying backing, for bounds
     // checks, direct access, etc.
+    // TODO: fix
     const suncatcher::util::Grid<uint_least8_t>& get_data() const { return data; }
-
-    // Returns the current cost to move from start to finish. The two must
-    // be adjacent (including diagonal). Start must be passable. Returns -1
-    // if the move is illegal. Asserts coordinates adjacent.
-    inline float move_cost(Coord start, Coord finish) const;
-
-    // True iff the cell is currently passable in its current state (eg, doors
-    // return true/false based on state).
-    inline bool is_passable(Coord cell) const;
 
     // True iff the cell/static component is a door. We can take either a
     // coordinate or a (valid) color, since all doors have their own color.
@@ -122,16 +91,20 @@ class Map {
     // Thus, returns false for doors regardless of state.
     inline bool is_transparent(Coord cell) const;
 
-    // Returns a mutator object, which can be used to describe desired changes
-    // in game world state. Note that destruction of a map with outstanding
-    // mutators results in assertion failure and, if assertions disabled,
-    // undefined behavior. These need to have their lifetimes managed by
-    // the PathManager.
-    MapMutator get_mutator();
+    // True if we can currently path into it.
+    inline bool is_passable(Coord cell) const;
 
-    // Changes the world immediately, doing all necessary computations. The
-    // mutator is cleared to clean state.
-    void mutate(MapMutator&& mutation);
+    // Returns the current cost to move from start to finish. The two must
+    // be adjacent (including diagonal). Start must be passable. Returns -1
+    // if the move is illegal. Asserts coordinates adjacent.
+    inline float move_cost(Coord start, Coord finish) const;
+
+    // Returns true if it is possible to path from src to dst. Unlike path,
+    // this will always run in constant time. Invalid inputs result in false.
+    inline bool path_exists(
+        pathfinder::Coord src,
+        pathfinder::Coord dst
+      ) const;
 
     // Useful debugging features -- dump a simple representation of aspects
     // of the map to a stream.
@@ -140,9 +113,6 @@ class Map {
     void print_dynamic_components(std::ostream& os) const;
     void print_map(std::ostream& os, const Path& path={}) const;
 
-    // Forces recomputation of all cached information.
-    void clear_cache();
-
   private:
     typedef std::map<const Coord, Door>::iterator DoorIter;
 
@@ -150,19 +120,8 @@ class Map {
     // calling notify_mutator_destroyed and notify_mutator_created.
     // TODO: better design?
     friend class MapMutator;
+    friend class MapManager;
     friend class test::DeltaMap;
-
-    // Notifies the Map that the mutator was destroyed/copied, so the
-    // outstanding mutator reference count can be updated.
-    inline void notify_mutator_destroyed() NOEXCEPT {
-      assert(outstanding_mutators > 0);
-      --outstanding_mutators;
-    }
-    inline void notify_mutator_created() NOEXCEPT { ++outstanding_mutators; }
-
-    // Mutator synchronization state
-    size_t version;
-    size_t outstanding_mutators;
 
     // Cost to traverse terrain.
     suncatcher::util::Grid<uint_least8_t> data;
@@ -190,10 +149,6 @@ class Map {
     // the frequent ones on a simplified graph.
     util::DynamicDisjointSets<int_least32_t> dynamic_component;
 
-    // Whether dynamic updates are enabled. If false, the Map will reinitialize
-    // after every mutation. The MapBuilder sets this.
-    bool dynamic_updates;
-
     // The color of the next door/component to assign. Components grow up;
     // doors grow down.
     int_least32_t next_component_color;
@@ -212,20 +167,24 @@ class Map {
     void incremental_closed_door_to_wall(
         Coord cell,
         DoorIter door_iter,
-        uint8_t cost
+        uint_least8_t cost
       );
     void incremental_open_door_to_closed_door(Coord cell, DoorIter door_iter);
     void incremental_transparent_to_wall(Coord cell);
     DoorIter incremental_wall_to_closed_door(
         Coord cell,
-        uint8_t cost_closed,
-        uint8_t cost_open
+        uint_least8_t cost_closed,
+        uint_least8_t cost_open
       );
+
+    // Shoutout to Sarah Northway, one of several sources of inspiration for
+    // this project! http://rebuildgame.com/
+    void rebuild();
 };
 
 }  // namespace pathfinder
 }  // namespace suncatcher
 
-#include "Map-inl.hh"
+#include "MapImpl-inl.hh"
 
 #endif  /* PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a */

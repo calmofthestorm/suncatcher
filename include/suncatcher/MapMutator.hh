@@ -25,14 +25,14 @@
 
 #include "suncatcher/Coord.hh"
 
+#include "suncatcher/MapView.hh"
+#include "suncatcher/MapBuilder.hh"
+
 namespace suncatcher {
 namespace pathfinder {
 
-class Map;
+class MapImpl;
 
-// To create a mutator, see Map's docs. Note that your mutator must not outlive
-// the map.
-//
 // You must do at most one of these groups to a given cell in a given Mutator.
 // * create_door
 // * remove_door
@@ -40,13 +40,19 @@ class Map;
 // * set_door_open_cost, set_door_open, toggle_door_open
 //
 // This restriction is in place due to the complexity of tracking changes and
-// lack of a compelling use case.
+// lack of a compelling use case. TODO: remove this restriction.
+//
+// All operations are deferred until execute is called.
 //
 // NOTE: currently multiple cell mutations are applied sequentially, which is
 // inefficient (IE, no advantage over one call to Map::mutate per affected
-// cell). I plan to fix this later.
+// cell). TODO: I plan to fix this later.
 class MapMutator {
   public:
+    MapMutator();
+    explicit MapMutator(MapBuilder&& builder);
+    explicit MapMutator(MapView view);
+
     // Sets/toggles a door's openness state Asserts cell is a door. Opening a
     // door is O(1). Closing a door is at worst O(num_doors_on_map). Open cost
     // must not (asserted) be PATH_COST_INFINITE.
@@ -73,23 +79,13 @@ class MapMutator {
     MapMutator& create_door(Coord cell, bool open, uint_least8_t open_cost);
     MapMutator& remove_door(Coord cell, uint_least8_t new_cost);
 
-
-  public:
-    MapMutator()
-    : map(nullptr) { }
-
-    ~MapMutator() NOEXCEPT;
-
-    MapMutator(const MapMutator& other) = delete;
-    MapMutator& operator=(const MapMutator& other) = delete;
-
-    MapMutator& operator=(MapMutator&& other) NOEXCEPT;
-    MapMutator(MapMutator&& other) NOEXCEPT;
-
+    // Creates a new MapView with the changes applied. These are copy on write
+    // with somewhat fine-grained granularity, so while mutation is still
+    // kinda pricey it's not absurd. TODO: the entire map is still one chunk.
+    MapView execute(bool incremental=true) const;
 
   private:
-    friend class Map;
-    MapMutator(Map* map_in, size_t version);
+    friend class MapImpl;
 
     struct Mutation {
       enum class Kind {UPDATE_DOOR, CREATE_DOOR, REMOVE_DOOR, SET_COST};
@@ -100,8 +96,7 @@ class MapMutator {
 
 
   private:
-    Map* map;
-    size_t version;
+    MapView view;
     std::map<Coord, Mutation> mutations;
 };
 

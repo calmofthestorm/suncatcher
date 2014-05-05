@@ -15,7 +15,7 @@
 //
 // Copyright 2014 Alex Roper
 
-#include "suncatcher/Map.hh"
+#include "suncatcher/MapImpl.hh"
 
 #include <algorithm>
 #include <cassert>
@@ -28,7 +28,10 @@
 #include <string>
 #include <tuple>
 
+#include "suncatcher.hh"
 #include "suncatcher/util/util.hh"
+#include "suncatcher/MapBuilder.hh"
+#include "suncatcher/MapMutator.hh"
 
 namespace suncatcher {
 namespace pathfinder {
@@ -37,199 +40,49 @@ using suncatcher::util::Grid;
 using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
 
-Map::~Map() NOEXCEPT {
-  assert(outstanding_mutators == 0);
+
+
+MapImpl::MapImpl(MapBuilder&& builder)
+: data(std::move(builder.data)),
+  doors(std::move(builder.doors)) {
+
+  rebuild();
 }
 
-void Map::print_map(std::ostream& os, const Path& path_to_show) const {
-  std::set<Coord> in_path(
-      path_to_show.get_path().begin(),
-      path_to_show.get_path().end()
-    );
-  size_t index = 0;
-  for (uint16_t j = 0; j < size().row; ++j) {
-    for (uint16_t i = 0; i < size().col; ++i) {
-      auto door = doors.find({j, i});
-      if (in_path.find({j, i}) != in_path.end()) {
-        if (door == doors.end()) {
-          os << '.';
-        } else {
-          ++index;
-          os << "\033[1m.\033[0m";
-        }
-      } else if (door != doors.end()) {
-        if (door->second.open) {
-          os << index++;
-        } else {
-          os << "\033[1m" << index++ << "\033[0m";
-        }
-      } else {
-        os << (data.at(j, i) == PATH_COST_INFINITE ? '*' : ' ');
-      }
-    }
-    os << std::endl;
-  }
-}
 
-void Map::print_colors(std::ostream& os) const {
-  for (uint16_t j = 0; j < size().row; ++j) {
-    for (uint16_t i = 0; i < size().col; ++i) {
-      int_least32_t c = color.at(j, i);
-      auto door = doors.find({j, i});
-      if (door != doors.end()) {
-        if (doors.find({j, i})->second.open) {
-          os << '_';
-        } else {
-          os << 'd';
-        }
-      } else if (data.at(j, i) != PATH_COST_INFINITE) {
-        os << (char)(c + 'A');
-      } else {
-        os << '*';
-      }
-    }
-    os << std::endl;
-  }
-  os << std::endl;
-}
+MapImpl::MapImpl(const MapMutator& mutation, bool incremental) {
+  for (const auto& it : mutation.mutations) {
+    bool state = it.second.state;
+    uint_least8_t cost = it.second.cost;
+    Coord cell = it.first;
+    auto door_iter = doors.find(cell);
+    switch (it.second.kind) {
+      case MapMutator::Mutation::Kind::CREATE_DOOR:
+        incremental_create_door(cell, state, cost);
+        break;
 
-void Map::print_static_components(std::ostream& os) const {
-  for (uint16_t j = 0; j < size().row; ++j) {
-    for (uint16_t i = 0; i < size().col; ++i) {
-      if (color.at(j, i) == COLOR_IMPASSABLE) {
-        os << ' ';
-      } else {
-        int_least32_t c = static_component.at(color.at(j, i));
-        char start = c < 0 ? 'Z' : 'A';
-        if (c < 25) {
-          os << (char)(c + start);
-        } else {
-          os << ' ' << c << ' ';
-        }
-      }
-    }
-    os << std::endl;
-  }
-}
+      case MapMutator::Mutation::Kind::REMOVE_DOOR:
+        incremental_remove_door(cell, state, cost);
+        break;
 
-void Map::print_dynamic_components(std::ostream& os) const {
-  for (uint16_t j = 0; j < size().row; ++j) {
-    for (uint16_t i = 0; i < size().col; ++i) {
-      if (color.at(j, i) == COLOR_IMPASSABLE) {
-        os << ' ';
-      } else {
-        int_least32_t c = dynamic_component.lookup(
-            static_component.at(color.at(j, i))
-          );
-        char start = c < 0 ? 'Z' : 'A';
-        if (c < 25) {
-          os << (char)(c + start);
-        } else {
-          os << ' ' << c << ' ';
-        }
-      }
-    }
-    os << std::endl;
-  }
-}
+      case MapMutator::Mutation::Kind::SET_COST:
+        incremental_set_cost(cell, state, cost);
+        break;
 
-bool Map::path_exists(Coord a, Coord b) const {
-  return (is_passable(a) && is_passable(b) &&
-          dynamic_component.equivalent(
-              static_component.at(color.at(a)),
-              static_component.at(color.at(b))
-            )
-          );
-}
+      case MapMutator::Mutation::Kind::UPDATE_DOOR:
+        incremental_update_door(cell, state, cost);
+        break;
 
-Path Map::path(Coord src, Coord dst) const {
-  Grid<uint_fast8_t> expanded(size(), 0);
-  Grid<Coord> previous(size(), {(uint16_t)-1, (uint16_t)-1});
-  size_t num_expanded = 0;
-
-  if (!data.check_bounds(src) || !data.check_bounds(dst)) {
-    return Path({}, -1);
-  }
-
-  // A path exists iff they are in the same equivalence class and both are
-  // passable squares.
-  if (!is_passable(src) || !is_passable(dst) || !path_exists(src, dst)) {
-    return Path(std::vector<Coord>(), -1);
-  }
-
-  // Order intentional, if A is impassable there is no path from A to A.
-  if (src == dst) {
-    return Path(std::vector<Coord> {src}, 0);
-  }
-
-  Grid<float> distance(size(), INFINITY);
-  distance.at(src) = 0;
-
-  struct Entry {
-    Coord pos;
-    float cost;
-
-    // Make pqueue work in proper order.
-    bool operator< (const Entry& e) const {
-      return cost > e.cost;
-    }
-  };
-  std::priority_queue<Entry> fringe;
-  fringe.push({src, manhattan(src, dst)});
-
-  while (!fringe.empty()) {
-    Entry cur = fringe.top();
-    assert(is_passable(cur.pos));
-    fringe.pop();
-    expanded.at(cur.pos) = 1;
-    ++num_expanded;
-
-    if (cur.pos == dst) {
-      // TODO: unnecessary copy
-      std::vector<Coord> rval{dst};
-      rval.reserve((unsigned int)(distance.at(dst) + 1));
-      while (rval.back() != src) {
-        rval.push_back(previous.at(rval.back()));
-      }
-      std::reverse(rval.begin(), rval.end());
-      return Path(std::move(rval), distance.at(dst));
-    }
-
-    for (const auto& next : data.get_adjacent(cur.pos)) {
-      float cost = move_cost(cur.pos, next);
-      float my_dist = distance.at(cur.pos) + cost;
-      if (distance.at(next) > my_dist &&
-          !expanded.at(next) &&
-          cost != -1) {
-        distance.at(next) = my_dist;
-        fringe.push({next, manhattan(next, dst) + my_dist});
-        previous.at(next) = cur.pos;
-      }
+      default:
+        assert(0);
     }
   }
-  assert(0);
-  return Path(std::vector<Coord>(), -1);
-}
-
-Map::Map(MapBuilder&& builder)
-: version(0),
-  outstanding_mutators(0),
-  data(std::move(builder.data)),
-  doors(std::move(builder.doors)),
-  dynamic_updates(builder.dynamic_updates) {
-
-  clear_cache();
-}
-
-
-MapMutator Map::get_mutator() {
-  return MapMutator(this, version);
 }
 
 
 // Caller's responsibility to set the newly transparent cell's cost AFTER
 // the call.
-void Map::incremental_wall_to_transparent(Coord cell) {
+void MapImpl::incremental_wall_to_transparent(Coord cell) {
   assert(color.at(cell) == COLOR_IMPASSABLE);
 
   // Set its color to the first transparent neighbor (Manhattan) found.
@@ -256,7 +109,7 @@ void Map::incremental_wall_to_transparent(Coord cell) {
 }
 
 
-void Map::incremental_closed_door_to_open_door(Coord cell, DoorIter door_iter) {
+void MapImpl::incremental_closed_door_to_open_door(Coord cell, DoorIter door_iter) {
   int_least32_t door_static_component = static_component.at(color.at(cell));
   for (const auto& n : data.get_adjacent(cell, false)) {
     if (color.at(n) != COLOR_IMPASSABLE &&
@@ -271,7 +124,7 @@ void Map::incremental_closed_door_to_open_door(Coord cell, DoorIter door_iter) {
 }
 
 
-void Map::incremental_closed_door_to_wall(
+void MapImpl::incremental_closed_door_to_wall(
     Coord cell,
     DoorIter door_iter,
     uint_least8_t cost
@@ -282,12 +135,13 @@ void Map::incremental_closed_door_to_wall(
 }
 
 
-void Map::incremental_open_door_to_closed_door(Coord cell, DoorIter door_iter) {
+void MapImpl::incremental_open_door_to_closed_door(Coord cell, DoorIter door_iter) {
   dynamic_component.isolate_component(static_component.at(color.at(cell)));
   door_iter->second.open = false;
 }
 
-void Map::incremental_transparent_to_wall(Coord cell) {
+
+void MapImpl::incremental_transparent_to_wall(Coord cell) {
   int_least32_t old_color = color.at(cell);
   data.at(cell) = PATH_COST_INFINITE;
   color.at(cell) = COLOR_IMPASSABLE;
@@ -332,7 +186,7 @@ void Map::incremental_transparent_to_wall(Coord cell) {
 }
 
 
-Map::DoorIter Map::incremental_wall_to_closed_door (
+MapImpl::DoorIter MapImpl::incremental_wall_to_closed_door (
     Coord cell,
     uint_least8_t cost_closed,
     uint_least8_t cost_open
@@ -347,7 +201,7 @@ Map::DoorIter Map::incremental_wall_to_closed_door (
 }
 
 
-void Map::incremental_create_door(Coord cell, bool state, uint_least8_t cost) {
+void MapImpl::incremental_create_door(Coord cell, bool state, uint_least8_t cost) {
   assert(doors.find(cell) == doors.end());
   assert(cost != PATH_COST_INFINITE);
   assert(!is_door(cell));
@@ -378,7 +232,7 @@ void Map::incremental_create_door(Coord cell, bool state, uint_least8_t cost) {
 }
 
 
-void Map::incremental_remove_door(Coord cell, bool state, uint_least8_t cost) {
+void MapImpl::incremental_remove_door(Coord cell, bool state, uint_least8_t cost) {
   auto door_iter = doors.find(cell);
   assert(door_iter != doors.end());
   if (door_iter->second.open) {
@@ -424,7 +278,7 @@ void Map::incremental_remove_door(Coord cell, bool state, uint_least8_t cost) {
 }
 
 
-void Map::incremental_set_cost(Coord cell, bool state, uint_least8_t cost) {
+void MapImpl::incremental_set_cost(Coord cell, bool state, uint_least8_t cost) {
   assert(doors.find(cell) == doors.end());
 
   if (data.at(cell) == PATH_COST_INFINITE &&
@@ -443,7 +297,7 @@ void Map::incremental_set_cost(Coord cell, bool state, uint_least8_t cost) {
 }
 
 
-void Map::incremental_update_door(Coord cell, bool state, uint_least8_t cost) {
+void MapImpl::incremental_update_door(Coord cell, bool state, uint_least8_t cost) {
   auto door_iter = doors.find(cell);
   door_iter->second.open ^= state;
 
@@ -471,46 +325,8 @@ void Map::incremental_update_door(Coord cell, bool state, uint_least8_t cost) {
 }
 
 
-// Changes the world immediately, doing all necessary computations.
-void Map::mutate(MapMutator&& mutation) {
-  assert(mutation.version == version);
-  assert(mutation.map == this);
-  ++version;
-  for (const auto& it : mutation.mutations) {
-    bool state = it.second.state;
-    uint_least8_t cost = it.second.cost;
-    Coord cell = it.first;
-    auto door_iter = doors.find(cell);
-    switch (it.second.kind) {
-      case MapMutator::Mutation::Kind::CREATE_DOOR:
-        incremental_create_door(cell, state, cost);
-        break;
-
-      case MapMutator::Mutation::Kind::REMOVE_DOOR:
-        incremental_remove_door(cell, state, cost);
-        break;
-
-      case MapMutator::Mutation::Kind::SET_COST:
-        incremental_set_cost(cell, state, cost);
-        break;
-
-      case MapMutator::Mutation::Kind::UPDATE_DOOR:
-        incremental_update_door(cell, state, cost);
-        break;
-
-      default:
-        assert(0);
-    }
-  }
-
-  if (!dynamic_updates) {
-    clear_cache();
-  }
-}
-
-
 // Forces recomputation of all cached information.
-void Map::clear_cache() {
+void MapImpl::rebuild() {
   dynamic_component = decltype(dynamic_component)();
 
   // Temporary function for determining transparancy since doors have not
@@ -523,7 +339,7 @@ void Map::clear_cache() {
     }
   };
 
-  color = Grid<int_least32_t>(size(), COLOR_UNKNOWN);
+  color = Grid<int_least32_t>(get_size(), COLOR_UNKNOWN);
   color.fill(COLOR_UNKNOWN);
 
   // Temporarily mark doors as having multiple colors. We do this so we
@@ -537,9 +353,9 @@ void Map::clear_cache() {
   // appropriate color value (COLOR_IMPASSABLE)
   Coord restart{0, 0};
   int_least32_t index = 0;
-  while (restart.row < size().row) {
+  while (restart.row < get_size().row) {
     restart.col = 0;
-    while (restart.col < size().col) {
+    while (restart.col < get_size().col) {
       if (color.at(restart) == COLOR_UNKNOWN &&
           is_transparent_temporary(restart)) {
         // Flood fill colors.
@@ -596,32 +412,103 @@ void Map::clear_cache() {
   }
 }
 
-MapBuilder::MapBuilder(std::istream& is) {
-  std::vector<Coord> door_index_to_coords;
 
-  std::string line;
-  Coord size;
-  is >> size.row >> size.col;
-  std::getline(is, line);
-  assert(is);
-  *this = MapBuilder(size, 1);
-  for (uint16_t row = 0; row < size.row; ++row) {
-    std::getline(is, line);
-    assert(is);
-    assert(line.size() >= size.col);
-    for (uint16_t col = 0; col < size.col; ++col) {
-      Coord cell{row, col};
-      cost(cell) = (line[col] == '*' ? suncatcher::pathfinder::PATH_COST_INFINITE : 1);
-      if (line[col] == 'd') {
-        add_door(cell, true, 1, suncatcher::pathfinder::PATH_COST_INFINITE);
-        door_index_to_coords.push_back(cell);
-      } else if (line[col] == 'D') {
-        add_door(cell, false, 1, suncatcher::pathfinder::PATH_COST_INFINITE);
-        door_index_to_coords.push_back(cell);
+void MapImpl::print_map(std::ostream& os, const Path& path_to_show) const {
+  std::set<Coord> in_path(
+      path_to_show.get_path().begin(),
+      path_to_show.get_path().end()
+    );
+  size_t index = 0;
+  for (uint16_t j = 0; j < get_size().row; ++j) {
+    for (uint16_t i = 0; i < get_size().col; ++i) {
+      auto door = doors.find({j, i});
+      if (in_path.find({j, i}) != in_path.end()) {
+        if (door == doors.end()) {
+          os << '.';
+        } else {
+          ++index;
+          os << "\033[1m.\033[0m";
+        }
+      } else if (door != doors.end()) {
+        if (door->second.open) {
+          os << index++;
+        } else {
+          os << "\033[1m" << index++ << "\033[0m";
+        }
+      } else {
+        os << (data.at(j, i) == PATH_COST_INFINITE ? '*' : ' ');
       }
     }
+    os << std::endl;
   }
 }
+
+
+void MapImpl::print_colors(std::ostream& os) const {
+  for (uint16_t j = 0; j < get_size().row; ++j) {
+    for (uint16_t i = 0; i < get_size().col; ++i) {
+      int_least32_t c = color.at(j, i);
+      auto door = doors.find({j, i});
+      if (door != doors.end()) {
+        if (doors.find({j, i})->second.open) {
+          os << '_';
+        } else {
+          os << 'd';
+        }
+      } else if (data.at(j, i) != PATH_COST_INFINITE) {
+        os << (char)(c + 'A');
+      } else {
+        os << '*';
+      }
+    }
+    os << std::endl;
+  }
+  os << std::endl;
+}
+
+
+void MapImpl::print_static_components(std::ostream& os) const {
+  for (uint16_t j = 0; j < get_size().row; ++j) {
+    for (uint16_t i = 0; i < get_size().col; ++i) {
+      if (color.at(j, i) == COLOR_IMPASSABLE) {
+        os << ' ';
+      } else {
+        int_least32_t c = static_component.at(color.at(j, i));
+        char start = c < 0 ? 'Z' : 'A';
+        if (c < 25) {
+          os << (char)(c + start);
+        } else {
+          os << ' ' << c << ' ';
+        }
+      }
+    }
+    os << std::endl;
+  }
+}
+
+
+void MapImpl::print_dynamic_components(std::ostream& os) const {
+  for (uint16_t j = 0; j < get_size().row; ++j) {
+    for (uint16_t i = 0; i < get_size().col; ++i) {
+      if (color.at(j, i) == COLOR_IMPASSABLE) {
+        os << ' ';
+      } else {
+        int_least32_t c = dynamic_component.lookup(
+            static_component.at(color.at(j, i))
+          );
+        char start = c < 0 ? 'Z' : 'A';
+        if (c < 25) {
+          os << (char)(c + start);
+        } else {
+          os << ' ' << c << ' ';
+        }
+      }
+    }
+    os << std::endl;
+  }
+}
+
+
 
 }  // namespace pathfinder
 }  // namespace suncatcher

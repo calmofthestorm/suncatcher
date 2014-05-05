@@ -28,6 +28,7 @@
 #include "suncatcher/util/Grid.hh"
 
 #include "suncatcher/MapMutator.hh"
+#include "suncatcher/MapView.hh"
 #include "suncatcher/Path.hh"
 #include "suncatcher/Coord.hh"
 
@@ -94,7 +95,9 @@ class DeltaMutator {
 
 class DeltaMap {
   public:
-    explicit DeltaMap(pathfinder::MapBuilder mb);
+    DeltaMap();
+
+    explicit DeltaMap(pathfinder::MapView view);
 
     // Verifies both maps have the same cached data.
     void check_invariant() const;
@@ -108,27 +111,23 @@ class DeltaMap {
 
     // Mutate both maps and check the invarant.
     DeltaMutator get_mutator();
-    void mutate(DeltaMutator&& mutator);
+    void mutate(const DeltaMutator& mutator);
 
     // Get map access
-    const pathfinder::Map& get_simple() const {
-      return *simple_map;
-    }
+    const pathfinder::MapView& get_simple() const { return simple_map; }
 
-    const pathfinder::Map& get_optimized() const {
-      return *optimized_map;
-    }
+    const pathfinder::MapView& get_optimized() const { return optimized_map; }
 
     const std::map<const pathfinder::Coord, pathfinder::Door>& get_doors() const;
 
-    const util::Grid<uint8_t>& get_data() const;
+    const util::Grid<uint_least8_t>& get_data() const;
 
     void clear_cache();
     pathfinder::Coord size() const;
 
   private:
     bool enable_delta;
-    std::unique_ptr<pathfinder::Map> optimized_map, simple_map;
+    pathfinder::MapView optimized_map, simple_map;
 };
 
 

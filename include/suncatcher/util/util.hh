@@ -30,9 +30,9 @@ namespace pathfinder {
 
 namespace util {
 
-inline uint_least32_t find_representative(
-    const std::vector<uint_least32_t>& parents,
-    uint_least32_t elem
+inline int_least32_t find_representative(
+    const std::vector<int_least32_t>& parents,
+    int_least32_t elem
   ) {
   while (elem != parents[elem]) {
     elem = parents[elem];

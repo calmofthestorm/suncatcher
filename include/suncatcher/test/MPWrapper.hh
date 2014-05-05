@@ -34,18 +34,16 @@ namespace pathfinder {
 
 namespace test {
 
-class DeltaMap;
-
 class MPWrapper {
   public:
-    MPWrapper(const DeltaMap* map);
+    MPWrapper(pathfinder::MapView view);
 
     void new_pather();
 
     pathfinder::Path path(pathfinder::Coord start, pathfinder::Coord finish);
 
   private:
-    const pathfinder::Map* my_map;
+    pathfinder::MapView view;
     std::unique_ptr<pathfinder::MicropatherGraph> mpg;
     std::unique_ptr<micropather::MicroPather> mp;
 };

@@ -27,7 +27,7 @@
   #include "suncatcher/test/MPWrapper.hh"
 #endif
 
-#include "suncatcher/MapBuilder.hh"
+#include "suncatcher/MapView.hh"
 
 namespace suncatcher {
 
@@ -41,8 +41,6 @@ class DeltaMap;
 
 class ResourceManager {
   public:
-    static const pathfinder::MapBuilder& get_builder(std::string fn);
-
     static const DeltaMap& get_map(std::string fn);
 
     #ifdef MICROPATHER_DELTA_TEST
@@ -53,8 +51,7 @@ class ResourceManager {
     static ResourceManager& get_me();
 
     ResourceManager();
-    std::map<const std::string, pathfinder::MapBuilder> builder_cache;
-    std::map<const std::string, std::unique_ptr<DeltaMap>> map_cache;
+    std::map<const std::string, DeltaMap> map_cache;
 };
 
 }  // namespace test

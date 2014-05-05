@@ -20,7 +20,7 @@
 using namespace suncatcher::test;
 
 // Really simple tests for basic functionality.
-class StaticSanity : public StaticMapTest<MAP_OPEN> { };
+class StaticSanity : public MapTest<MAP_OPEN> { };
 
 TEST_F(StaticSanity, OpenMapOOB1) {
   ASSERT_FALSE(map.path({0, 0}, {100, 100}));
@@ -96,7 +96,7 @@ TEST_F(StaticSanity, OpenMapLongPath) {
 }
 
 // Invalid cases involving walls
-class StaticInvalidWall : public StaticMapTest<MAP_MAIN> { };
+class StaticInvalidWall : public MapTest<MAP_MAIN> { };
 
 TEST_F(StaticInvalidWall, ToSelf) {
   ASSERT_FALSE(map.path({0, 0}, {0, 0}));
@@ -119,7 +119,7 @@ TEST_F(StaticInvalidWall, ToOOB2) {
 }
 
 // More interesting terrain-based tests.
-class StaticTerrainPathing : public StaticMapTest<MAP_MAIN> { };
+class StaticTerrainPathing : public MapTest<MAP_MAIN> { };
 
 // Upper left to just outside great hall.
 TEST_F(StaticTerrainPathing, ULToJustOutsideGreatHall) {
@@ -190,7 +190,7 @@ TEST_F(StaticTerrainPathing, DiagonalTube) {
 }
 
 // Static door tests (open ones are pathable, closed are not.)
-class StaticDoorSanity : public StaticMapTest<MAP_MAIN> { };
+class StaticDoorSanity : public MapTest<MAP_MAIN> { };
 
 TEST_F(StaticDoorSanity, OpenToSelf) {
   auto actual = map.path({8, 28}, {8, 28});
@@ -237,7 +237,7 @@ TEST_F(StaticDoorSanity, SpaceToClosed) {
 }
 
 // Welcome to Doorland
-class StaticDoorland : public StaticMapTest<MAP_DOORLAND> { };
+class StaticDoorland : public MapTest<MAP_DOORLAND> { };
 
 TEST_F(StaticDoorland, LockedDoorWall) {
   Coord inside{2, 2};
