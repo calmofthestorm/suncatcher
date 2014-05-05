@@ -93,10 +93,14 @@ class MapView {
 
 
   private:
-    std::shared_ptr<MapImpl> map;
-
+    // Needed so that MapImpl can clone itself from a view, used as part
+    // of mutation.
     friend class MapImpl;
+
+    // Needed for testing invariant checking.
     friend class test::DeltaMap;
+
+    std::shared_ptr<MapImpl> map;
 };
 
 }  // namespace pathfinder

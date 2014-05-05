@@ -114,14 +114,9 @@ class MapImpl {
     void print_map(std::ostream& os, const Path& path={}) const;
 
   private:
-    typedef std::map<const Coord, Door>::iterator DoorIter;
-
-    // CONTRACT: MapMutator MUST NOT use friendship for ANY PURPOSE except
-    // calling notify_mutator_destroyed and notify_mutator_created.
-    // TODO: better design?
-    friend class MapMutator;
-    friend class MapManager;
     friend class test::DeltaMap;
+
+    typedef std::map<const Coord, Door>::iterator DoorIter;
 
     // Cost to traverse terrain.
     suncatcher::util::Grid<uint_least8_t> data;

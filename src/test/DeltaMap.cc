@@ -137,56 +137,53 @@ DeltaMap::DeltaMap(MapView view)
 
 
 void DeltaMap::check_invariant() const {
-  // assert(enable_delta);
-  // assert(simple_map.version == optimized_map.version);
-  // assert(simple_map.outstanding_mutators == optimized_map.outstanding_mutators);
-  // assert(simple_map.data == optimized_map.data);
-  // assert(simple_map.doors == optimized_map.doors);
-  //
-  // assert(simple_map.color.size() == optimized_map.color.size());
-  // std::map<int_least32_t, int_least32_t> cmapping, smapping, dmapping;
-  // for (size_t j = 0; j < simple_map.color.size().row; ++j) {
-  //   for (size_t i = 0; i < simple_map.color.size().col; ++i) {
-  //     // Check color. Colors may vary provided that it's many-to-one from
-  //     // optimized to simple.
-  //     int_least32_t scolor = simple_map.color.at(j, i);
-  //     int_least32_t ocolor = optimized_map.color.at(j, i);
-  //     if (scolor == pathfinder::COLOR_IMPASSABLE) {
-  //       assert(ocolor == scolor);
-  //     } else {
-  //       auto c = cmapping.find(ocolor);
-  //       if (c != cmapping.end()) {
-  //         assert(c->second == scolor);
-  //       } else {
-  //         // Door base color may differ, but doorliness should be preserved.
-  //         assert(simple_map.is_door(scolor) == optimized_map.is_door(ocolor));
-  //         cmapping[ocolor] = scolor;
-  //       }
-  //     }
-  //
-  //     if (scolor != pathfinder::COLOR_IMPASSABLE) {
-  //       // Attempt to find an isomorphism for static components.
-  //       int_least32_t sstatic = simple_map.static_component.at(scolor);
-  //       int_least32_t ostatic = optimized_map.static_component.at(ocolor);
-  //       auto c = smapping.find(ostatic);
-  //       if (c != smapping.end()) {
-  //         assert(c->second == sstatic);
-  //       } else {
-  //         smapping[ostatic] = sstatic;
-  //       }
-  //
-  //       // Attempt to find an isomorphism for dynamic components.
-  //       int_least32_t sdynamic = simple_map.dynamic_component.lookup(sstatic);
-  //       int_least32_t odynamic = optimized_map.dynamic_component.lookup(ostatic);
-  //       c = dmapping.find(odynamic);
-  //       if (c != dmapping.end()) {
-  //         assert(c->second == sdynamic);
-  //       } else {
-  //         dmapping[odynamic] = sdynamic;
-  //       }
-  //     }
-  //   }
-  // }
+  assert(simple_map.get_data() == optimized_map.get_data());
+  assert(simple_map.get_doors() == optimized_map.get_doors());
+
+  assert(simple_map.size() == optimized_map.size());
+  std::map<int_least32_t, int_least32_t> cmapping, smapping, dmapping;
+  for (size_t j = 0; j < simple_map.size().row; ++j) {
+    for (size_t i = 0; i < simple_map.size().col; ++i) {
+      // Check color. Colors may vary provided that it's many-to-one from
+      // optimized to simple.
+      int_least32_t scolor = simple_map.map->color.at(j, i);
+      int_least32_t ocolor = optimized_map.map->color.at(j, i);
+      if (scolor == COLOR_IMPASSABLE) {
+        assert(ocolor == scolor);
+      } else {
+        auto c = cmapping.find(ocolor);
+        if (c != cmapping.end()) {
+          assert(c->second == scolor);
+        } else {
+          // Door base color may differ, but doorliness should be preserved.
+          assert(simple_map.is_door(scolor) == optimized_map.is_door(ocolor));
+          cmapping[ocolor] = scolor;
+        }
+      }
+
+      if (scolor != COLOR_IMPASSABLE) {
+        // Attempt to find an isomorphism for static components.
+        int_least32_t sstatic = simple_map.map->static_component.at(scolor);
+        int_least32_t ostatic = optimized_map.map->static_component.at(ocolor);
+        auto c = smapping.find(ostatic);
+        if (c != smapping.end()) {
+          assert(c->second == sstatic);
+        } else {
+          smapping[ostatic] = sstatic;
+        }
+
+        // Attempt to find an isomorphism for dynamic components.
+        int_least32_t sdynamic = simple_map.map->dynamic_component.lookup(sstatic);
+        int_least32_t odynamic = optimized_map.map->dynamic_component.lookup(ostatic);
+        c = dmapping.find(odynamic);
+        if (c != dmapping.end()) {
+          assert(c->second == sdynamic);
+        } else {
+          dmapping[odynamic] = sdynamic;
+        }
+      }
+    }
+  }
 }
 
 bool DeltaMap::is_door(Coord start) const {

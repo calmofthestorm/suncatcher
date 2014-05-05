@@ -153,7 +153,7 @@ add_custom_target(cppcheck
 add_custom_target(unittest
     ALL
     DEPENDS run_unit_tests
-    COMMAND ${PROJECT_SOURCE_DIR}/thirdparty/gatherer/gatherer.py bin/run_unit_tests 4 -- --gtest_filter=-*SLOW*
+    COMMAND SLOWTEST=0 ${PROJECT_SOURCE_DIR}/thirdparty/gatherer/gatherer.py bin/run_unit_tests 4 -- --gtest_filter=-*SLOW*
 )
 
 # run all unit tests with complete invariant checking.
