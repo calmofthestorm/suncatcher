@@ -119,6 +119,7 @@ inline bool Grid<T>::operator==(const Grid<T>& other) const {
 }
 
 
+
 }  // namespace util
 }  // namespace suncatcher
 

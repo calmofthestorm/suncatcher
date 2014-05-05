@@ -57,17 +57,17 @@ MapBuilder::MapBuilder(std::istream& is) {
   std::getline(is, line);
   assert(is);
   *this = MapBuilder(size, 1);
-  for (uint16_t row = 0; row < size.row; ++row) {
+  Coord cell;
+  for (cell.row = 0; cell.row < size.row; ++cell.row) {
     std::getline(is, line);
     assert(is);
     assert(line.size() >= size.col);
-    for (uint16_t col = 0; col < size.col; ++col) {
-      Coord cell{row, col};
-      cost(cell) = (line[col] == '*' ? PATH_COST_INFINITE : 1);
-      if (line[col] == 'd') {
+    for (cell.col = 0; cell.col < size.col; ++cell.col) {
+      cost(cell) = (line[cell.col] == '*' ? PATH_COST_INFINITE : 1);
+      if (line[cell.col] == 'd') {
         add_door(cell, true, 1, PATH_COST_INFINITE);
         door_index_to_coords.push_back(cell);
-      } else if (line[col] == 'D') {
+      } else if (line[cell.col] == 'D') {
         add_door(cell, false, 1, PATH_COST_INFINITE);
         door_index_to_coords.push_back(cell);
       }

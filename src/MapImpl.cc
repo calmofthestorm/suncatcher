@@ -32,6 +32,7 @@
 #include "suncatcher/util/util.hh"
 #include "suncatcher/MapBuilder.hh"
 #include "suncatcher/MapMutator.hh"
+#include "suncatcher/CoordRange.hh"
 
 namespace suncatcher {
 namespace pathfinder {
@@ -356,38 +357,33 @@ void MapImpl::rebuild() {
   // Identify colors (components connected by Manhattan-adjacent transparant
   // squares), stopping at walls and doors. We also mark walls with the
   // appropriate color value (COLOR_IMPASSABLE)
-  Coord restart{0, 0};
   int_least32_t index = 0;
-  while (restart.row < get_size().row) {
-    restart.col = 0;
-    while (restart.col < get_size().col) {
-      if (color.at(restart) == COLOR_UNKNOWN &&
-          is_transparent_temporary(restart)) {
-        // Flood fill colors.
-        std::stack<Coord> todo;
-        todo.push(restart);
-        color.at(restart) = index;
-        dynamic_component.add_component(static_component[index]);
+  CoordRange cr(get_size());
+  for (const Coord& restart : cr) {
+    if (color.at(restart) == COLOR_UNKNOWN &&
+        is_transparent_temporary(restart)) {
+      // Flood fill colors.
+      std::stack<Coord> todo;
+      todo.push(restart);
+      color.at(restart) = index;
+      dynamic_component.add_component(static_component[index]);
 
-        while (!todo.empty()) {
-          auto cur = todo.top();
-          todo.pop();
-          // Explore neighbors, but only Manhattan adjacent ones.
-          for (const auto& n : data.get_adjacent(cur, false)) {
-            if (is_transparent_temporary(n) && color.at(n) == COLOR_UNKNOWN) {
-              todo.push(n);
-              color.at(n) = index;
-            }
+      while (!todo.empty()) {
+        auto cur = todo.top();
+        todo.pop();
+        // Explore neighbors, but only Manhattan adjacent ones.
+        for (const auto& n : data.get_adjacent(cur, false)) {
+          if (is_transparent_temporary(n) && color.at(n) == COLOR_UNKNOWN) {
+            todo.push(n);
+            color.at(n) = index;
           }
         }
-        ++index;
-      } else if (color.at(restart) != COLOR_MULTIPLE &&
-                 !is_transparent_temporary(restart)) {
-        color.at(restart) = COLOR_IMPASSABLE;
       }
-      ++restart.col;
+      ++index;
+    } else if (color.at(restart) != COLOR_MULTIPLE &&
+        !is_transparent_temporary(restart)) {
+      color.at(restart) = COLOR_IMPASSABLE;
     }
-    ++restart.row;
   }
   next_component_color = index;
 
@@ -424,27 +420,27 @@ void MapImpl::print_map(std::ostream& os, const Path& path_to_show) const {
       path_to_show.get_path().end()
     );
   size_t index = 0;
-  for (uint16_t j = 0; j < get_size().row; ++j) {
-    for (uint16_t i = 0; i < get_size().col; ++i) {
-      auto door = doors.find({j, i});
-      if (in_path.find({j, i}) != in_path.end()) {
-        if (door == doors.end()) {
-          os << '.';
-        } else {
-          ++index;
-          os << "\033[1m.\033[0m";
-        }
-      } else if (door != doors.end()) {
-        if (door->second.open) {
-          os << index++;
-        } else {
-          os << "\033[1m" << index++ << "\033[0m";
-        }
+  for (const Coord& c : CoordRange(get_size())) {
+    auto door = doors.find(c);
+    if (in_path.find(c) != in_path.end()) {
+      if (door == doors.end()) {
+        os << '.';
       } else {
-        os << (data.at(j, i) == PATH_COST_INFINITE ? '*' : ' ');
+        ++index;
+        os << "\033[1m.\033[0m";
       }
+    } else if (door != doors.end()) {
+      if (door->second.open) {
+        os << index++;
+      } else {
+        os << "\033[1m" << index++ << "\033[0m";
+      }
+    } else {
+      os << (data.at(c) == PATH_COST_INFINITE ? '*' : ' ');
     }
-    os << std::endl;
+    if (c.col == 0) {
+      os << std::endl;
+    }
   }
 }
 
