@@ -75,7 +75,8 @@ class MapTest : public ::testing::Test {
 
     #ifdef MICROPATHER_DELTA_TEST
       MPWrapper get_micropather() {
-        return MPWrapper(map.get_simple());
+        MPWrapper ok(map.get_simple());
+        return std::move(ok);
       }
     #endif
 

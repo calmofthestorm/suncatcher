@@ -61,22 +61,27 @@ MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
     Coord cell = it.first;
     auto door_iter = doors.find(cell);
     switch (it.second.kind) {
-       case MapMutator::Mutation::Kind::CREATE_DOOR:
-      doors[cell] = Door{state, cost, PATH_COST_INFINITE};
-         break;
-      
-       case MapMutator::Mutation::Kind::REMOVE_DOOR:
-      doors.erase(doors.find(cell));
-         break;
+      case MapMutator::Mutation::Kind::CREATE_DOOR:
+        doors[cell] = Door{state, cost, PATH_COST_INFINITE};
+        data.at(cell) = state ? cost : PATH_COST_INFINITE;
+        break;
+
+      case MapMutator::Mutation::Kind::REMOVE_DOOR:
+        doors.erase(doors.find(cell));
+        data.at(cell) = cost;
+        break;
 
       case MapMutator::Mutation::Kind::SET_COST:
         data.at(cell) = cost;
         break;
 
-       case MapMutator::Mutation::Kind::UPDATE_DOOR:
-         doors.at(cell).cost_open = cost;
-         doors.at(cell).open = state;
-         break;
+      case MapMutator::Mutation::Kind::UPDATE_DOOR:
+        if (cost != PATH_COST_INFINITE) {
+          doors.at(cell).cost_open = cost;
+        }
+        doors.at(cell).open ^= state;
+        data.at(cell) = door_iter->second.open ? doors.at(cell).cost_open : PATH_COST_INFINITE;
+        break;
 
       default:
         assert(0);
