@@ -124,7 +124,9 @@ int main(int argc, char** argv) {
           std::cout << "There are only " << door_index_to_coords.size() << " doors." << std::endl;
         } else {
           Coord door_coord = door_index_to_coords.at(door);
+          timer();
           my_map = MapMutator(my_map).toggle_door_open(door_coord).execute();
+          std::cout << timer() << " to open door." << std::endl;
         }
         break;
 
