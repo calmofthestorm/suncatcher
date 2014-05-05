@@ -215,7 +215,6 @@ void CrossWorld::check() {
   make_impassable({4, 5});
   make_impassable({6, 7});
   make_impassable({5, 6});
-  std::cout << "Forreal!" << std::endl;
 }
 
 class OptWall : public CrossWorld {

@@ -65,6 +65,28 @@ inline float MapView::move_cost(Coord src, Coord dst) const {
 }
 
 
+inline void MapView::print_colors(std::ostream& os) const {
+  return map->print_colors(os);
+}
+
+
+inline void MapView::print_static_components(std::ostream& os) const {
+  return map->print_static_components(os);
+}
+
+
+inline void MapView::print_dynamic_components(std::ostream& os) const {
+  return map->print_dynamic_components(os);
+}
+
+
+inline void MapView::print_map(std::ostream& os, const Path& path) const {
+  return map->print_map(os, path);
+}
+
+
+
+
 }  // namespace pathfinder
 }  // namespace suncatcher
 

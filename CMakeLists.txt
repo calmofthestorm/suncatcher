@@ -136,13 +136,6 @@ add_executable(repl
     $<TARGET_OBJECTS:suncatcher_objs>)
 target_link_libraries (repl ${SYSTEM_LIBRARIES})
 
-# add door_torture, a brute force all pairs door tester.
-add_executable(door_torture
-    ${PROJECT_SOURCE_DIR}/src/tool/door_torture.cc
-    $<TARGET_OBJECTS:test_objs>
-    $<TARGET_OBJECTS:suncatcher_objs>)
-target_link_libraries (door_torture ${SYSTEM_LIBRARIES})
-
 # add a cpplint target to the "all" target
 add_custom_target(cpplint
     ALL

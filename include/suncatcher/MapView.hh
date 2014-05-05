@@ -84,6 +84,14 @@ class MapView {
     inline bool is_door(Coord cell) const;
     inline bool is_door(int_least32_t cell_color) const;
 
+    // Useful debugging features -- dump a simple representation of aspects
+    // of the map to a stream.
+    inline void print_colors(std::ostream& os) const;
+    inline void print_static_components(std::ostream& os) const;
+    inline void print_dynamic_components(std::ostream& os) const;
+    inline void print_map(std::ostream& os, const Path& path={}) const;
+
+
   private:
     std::shared_ptr<MapImpl> map;
 

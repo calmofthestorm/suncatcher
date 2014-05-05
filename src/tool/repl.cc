@@ -31,14 +31,17 @@
 #include "suncatcher/micropather/micropather.hh"
 
 #include "suncatcher/Coord.hh"
-#include "suncatcher/Map.hh"
+#include "suncatcher/MapView.hh"
+#include "suncatcher/MapBuilder.hh"
+#include "suncatcher/MapMutator.hh"
 #include "suncatcher/util/util.hh"
 #include "suncatcher/micropather/MicropatherGraph.hh"
 
 namespace {
 
 using suncatcher::util::manhattan;
-using suncatcher::pathfinder::Map;
+using suncatcher::pathfinder::MapView;
+using suncatcher::pathfinder::MapMutator;
 using suncatcher::pathfinder::Path;
 using suncatcher::pathfinder::Coord;
 using suncatcher::pathfinder::MicropatherGraph;
@@ -59,7 +62,7 @@ int main(int argc, char** argv) {
   suncatcher::pathfinder::MapBuilder mb(is);
 
   timer();
-  Map my_map(std::move(mb));
+  MapView my_map(std::move(mb));
   std::cout << "Flood fill time: " << timer() << std::endl;
 
   std::vector<Coord> door_index_to_coords;
@@ -67,7 +70,7 @@ int main(int argc, char** argv) {
     door_index_to_coords.push_back(it.first);
   }
 
-  MicropatherGraph mgraph(&my_map);
+  MicropatherGraph mgraph(my_map);
 
   std::unique_ptr<micropather::MicroPather> mp(new micropather::MicroPather(&mgraph, 4000000, 8, false));
   Path my_path;
@@ -121,7 +124,7 @@ int main(int argc, char** argv) {
           std::cout << "There are only " << door_index_to_coords.size() << " doors." << std::endl;
         } else {
           Coord door_coord = door_index_to_coords.at(door);
-          my_map.mutate(std::move(my_map.get_mutator().toggle_door_open(door_coord)));
+          my_map = MapMutator(my_map).toggle_door_open(door_coord).execute();
         }
         break;
 
