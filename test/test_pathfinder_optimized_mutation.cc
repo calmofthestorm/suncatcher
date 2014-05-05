@@ -22,6 +22,7 @@
 #include "suncatcher/MapMutator.hh"
 #include "suncatcher/util/util.hh"
 #include "suncatcher/test/ResourceManager.hh"
+#include "suncatcher/CoordRange.hh"
 
 
 using namespace suncatcher::test;
@@ -346,10 +347,8 @@ class SolidWorld : public MapTest<MAP_SMALL_OPEN> {
   protected:
     virtual void SetUp() final override {
       auto m = map.get_mutator();
-      for (uint16_t j = 0; j < map.size().row; ++j) {
-        for (uint16_t i = 0; i < map.size().col; ++i) {
-          m.set_cost({j, i}, PATH_COST_INFINITE);
-        }
+      for (const Coord& c : suncatcher::pathfinder::CoordRange(map.size())) {
+        m.set_cost(c, PATH_COST_INFINITE);
       }
       map.mutate(std::move(m));
     }

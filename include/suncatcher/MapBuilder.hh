@@ -58,7 +58,7 @@ class MapBuilder {
 
   private:
     friend class MapImpl;
-    suncatcher::util::Grid<uint_least8_t> data;
+    util::Grid<uint_least8_t> data;
     bool dynamic_updates;
     std::map<const Coord, Door> doors;
 };

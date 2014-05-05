@@ -57,10 +57,7 @@ class MapView {
 
     // Returns true if it is possible to path from src to dst. Unlike path,
     // this will always run in constant time. Invalid inputs result in false.
-    inline bool path_exists(
-        pathfinder::Coord src,
-        pathfinder::Coord dst
-      ) const;
+    inline bool path_exists(Coord src, Coord dst) const;
 
     // Returns the map's size, as a coordinate.
     inline Coord size() const;

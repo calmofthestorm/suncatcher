@@ -44,7 +44,7 @@ using suncatcher::pathfinder::MapView;
 using suncatcher::pathfinder::MapMutator;
 using suncatcher::pathfinder::Path;
 using suncatcher::pathfinder::Coord;
-using suncatcher::pathfinder::MicropatherGraph;
+using suncatcher::test::MicropatherGraph;
 
 int timer() {
   static auto begin = std::chrono::high_resolution_clock::now();

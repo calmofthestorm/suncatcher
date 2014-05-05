@@ -28,7 +28,7 @@ inline Grid<T>::Grid()
 
 
 template <typename T>
-inline Grid<T>::Grid(const suncatcher::pathfinder::Coord size_in, const T& val)
+inline Grid<T>::Grid(const pathfinder::Coord size_in, const T& val)
 : my_size(size_in),
   backing(size_in.row * size_in.col, val) { }
 
@@ -45,13 +45,13 @@ inline void Grid<T>::fill(const T& val) {
 
 
 template <typename T>
-inline T& Grid<T>::at(const suncatcher::pathfinder::Coord cell) {
+inline T& Grid<T>::at(const pathfinder::Coord cell) {
   return at(cell.row, cell.col);
 }
 
 
 template <typename T>
-inline const T& Grid<T>::at(const suncatcher::pathfinder::Coord cell) const {
+inline const T& Grid<T>::at(const pathfinder::Coord cell) const {
   return at(cell.row, cell.col);
 }
 
@@ -72,17 +72,17 @@ inline T& Grid<T>::at(uint16_t row, uint16_t col) {
 
 //TODO: evaluate cache performance of ordering.
 template <typename T>
-inline std::vector<suncatcher::pathfinder::Coord> Grid<T>::get_adjacent(
-    const suncatcher::pathfinder::Coord cell,
+inline std::vector<pathfinder::Coord> Grid<T>::get_adjacent(
+    const pathfinder::Coord cell,
     bool include_diagonals
     ) const {
-  const static std::vector<suncatcher::pathfinder::Coord> ADJ_DELTA{
+  const static std::vector<pathfinder::Coord> ADJ_DELTA{
     {0, (uint16_t)-1}, {(uint16_t)-1, 0}, {1, 0}, {0, 1},
       {(uint16_t)-1, (uint16_t)-1}, {1, 1},
       {(uint16_t)-1, 1}, {1, (uint16_t)-1}
   };
 
-  std::vector<suncatcher::pathfinder::Coord> neighbors;
+  std::vector<pathfinder::Coord> neighbors;
 
   for (size_t i = 0; i < (size_t)(include_diagonals ? 8 : 4); ++i) {
     auto n = ADJ_DELTA[i] + cell;
@@ -96,7 +96,7 @@ inline std::vector<suncatcher::pathfinder::Coord> Grid<T>::get_adjacent(
 
 
 template <typename T>
-inline bool Grid<T>::check_bounds(const suncatcher::pathfinder::Coord cell) const {
+inline bool Grid<T>::check_bounds(const pathfinder::Coord cell) const {
   return check_bounds(cell.row, cell.col);
 }
 
@@ -108,7 +108,7 @@ inline bool Grid<T>::check_bounds(uint16_t row, uint16_t col) const {
 
 
 template <typename T>
-inline const suncatcher::pathfinder::Coord& Grid<T>::size() const {
+inline const pathfinder::Coord& Grid<T>::size() const {
   return my_size;
 }
 

@@ -74,12 +74,12 @@ class MapImpl {
 
     // Returns a constant reference to the underlying color.
     // TODO: fix
-    const suncatcher::util::Grid<int_least32_t>& get_color() const { return color; }
+    const util::Grid<int_least32_t>& get_color() const { return color; }
 
     // Returns a constant reference to the underlying backing, for bounds
     // checks, direct access, etc.
     // TODO: fix
-    const suncatcher::util::Grid<uint_least8_t>& get_data() const { return data; }
+    const util::Grid<uint_least8_t>& get_data() const { return data; }
 
     // True iff the cell/static component is a door. We can take either a
     // coordinate or a (valid) color, since all doors have their own color.
@@ -101,10 +101,7 @@ class MapImpl {
 
     // Returns true if it is possible to path from src to dst. Unlike path,
     // this will always run in constant time. Invalid inputs result in false.
-    inline bool path_exists(
-        pathfinder::Coord src,
-        pathfinder::Coord dst
-      ) const;
+    inline bool path_exists(Coord src, Coord dst) const;
 
     // Useful debugging features -- dump a simple representation of aspects
     // of the map to a stream.
@@ -119,7 +116,7 @@ class MapImpl {
     typedef std::map<const Coord, Door>::iterator DoorIter;
 
     // Cost to traverse terrain.
-    suncatcher::util::Grid<uint_least8_t> data;
+    util::Grid<uint_least8_t> data;
 
     // All registered doors.
     std::map<const Coord, Door> doors;
@@ -130,7 +127,7 @@ class MapImpl {
     // of a small indirect lookup table). Typically there will be anywhere from
     // 1-5 colors per door on the map, plus one for each isolated walled off
     // region.
-    suncatcher::util::Grid<int_least32_t> color;
+    util::Grid<int_least32_t> color;
 
     // Static component -- represent the same areas as colors, but there may
     // be a many-to-one mapping of colors to static components -- for example,

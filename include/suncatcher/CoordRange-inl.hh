@@ -61,7 +61,7 @@ inline CoordRange::iterator CoordRange::end() {
   if (size.row == 0 || size.col == 0) {
     return begin();
   } else {
-    return iterator(pathfinder::Coord{size.row, 0}, size);
+    return iterator(Coord{size.row, 0}, size);
   }
 }
 

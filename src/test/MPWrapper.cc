@@ -26,7 +26,7 @@ namespace suncatcher {
 namespace test {
 
 using suncatcher::test::DeltaMap;
-using suncatcher::pathfinder::MicropatherGraph;
+using suncatcher::test::MicropatherGraph;
 using suncatcher::pathfinder::Map;
 using suncatcher::pathfinder::Path;
 using suncatcher::pathfinder::Coord;

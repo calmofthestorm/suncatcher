@@ -44,7 +44,7 @@ class MPWrapper {
 
   private:
     pathfinder::MapView view;
-    std::unique_ptr<pathfinder::MicropatherGraph> mpg;
+    std::unique_ptr<test::MicropatherGraph> mpg;
     std::unique_ptr<micropather::MicroPather> mp;
 };
 

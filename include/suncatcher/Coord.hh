@@ -56,7 +56,7 @@ class Coord {
     }
 };
 
-inline std::ostream& operator<< (std::ostream& os, const pathfinder::Coord& c) {
+inline std::ostream& operator<< (std::ostream& os, const Coord& c) {
   os << '(' << c.row << ", " << c.col << ')';
   return os;
 }

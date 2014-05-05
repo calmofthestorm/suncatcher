@@ -30,11 +30,6 @@
 #include "suncatcher/MapView.hh"
 
 namespace suncatcher {
-
-namespace pathfinder {
-  class Map;
-}  // namespace PATH_COST_INFINITE
-
 namespace test {
 
 class DeltaMap;

@@ -26,15 +26,13 @@
 #include "suncatcher/util/util.hh"
 
 namespace suncatcher {
-namespace pathfinder {
+namespace test {
 
-using suncatcher::util::manhattan;
-using suncatcher::pathfinder::MapView;
-using suncatcher::pathfinder::Coord;
+using util::manhattan;
 
 class MicropatherGraph : public micropather::Graph {
   public:
-    explicit MicropatherGraph(MapView map)
+    explicit MicropatherGraph(pathfinder::MapView map)
     : graph(map) { }
 
     virtual float LeastCostEstimate(void* stateStart, void* stateEnd) const {
@@ -58,12 +56,12 @@ class MicropatherGraph : public micropather::Graph {
 
     virtual void PrintStateInfo(void*) const { }
 
-    void* encode(const suncatcher::pathfinder::Coord& c) const {
+    void* encode(const pathfinder::Coord& c) const {
       uintptr_t encoded = (c.row * graph.size().col + c.col);
       return (void*)encoded;
     }
 
-    suncatcher::pathfinder::Coord decode(void* c) const {
+    pathfinder::Coord decode(void* c) const {
       uintptr_t encoded = (uintptr_t)c;
       uintptr_t width = graph.size().col;
       return {(uint16_t)(encoded / width),
@@ -71,10 +69,10 @@ class MicropatherGraph : public micropather::Graph {
     }
 
   private:
-    MapView graph;
+    pathfinder::MapView graph;
 };
 
-}  // namespace pathfinder
+}  // namespace test
 }  // namespace suncatcher
 
 #endif  /* MICROPATHERGRAPH_0b8eae0922b042fe860d049a997b4c28 */

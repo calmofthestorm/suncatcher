@@ -32,18 +32,21 @@ class CoordRange {
         inline Coord operator*() const;
         inline iterator& operator++();
         inline bool operator!=(const iterator& it) const;
+
       private:
         friend class CoordRange;
-        inline iterator(pathfinder::Coord start, pathfinder::Coord size);
-        pathfinder::Coord pos;
-        pathfinder::Coord size;
+
+        inline iterator(Coord start, Coord size);
+
+        Coord pos;
+        Coord size;
     };
 
     inline iterator begin();
     inline iterator end();
 
   private:
-    pathfinder::Coord size;
+    Coord size;
 };
 
 }  // namespace pathfinder
