@@ -41,12 +41,6 @@ const DeltaMap& ResourceManager::get_map(std::string fn) {
   return get_me().map_cache[fn];
 }
 
-#ifdef MICROPATHER_DELTA_TEST
-  MPWrapper ResourceManager::get_micropather(std::string fn) {
-    return MPWrapper(get_map(fn).get_simple());
-  }
-#endif
-
 ResourceManager& ResourceManager::get_me() {
   static ResourceManager self;
   return self;

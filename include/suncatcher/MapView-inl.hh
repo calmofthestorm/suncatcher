@@ -60,7 +60,7 @@ inline bool MapView::path_exists(Coord src, Coord dst) const {
 }
 
 
-inline uint8_t MapView::move_cost(Coord src, Coord dst) const {
+inline float MapView::move_cost(Coord src, Coord dst) const {
   return map->move_cost(src, dst);
 }
 

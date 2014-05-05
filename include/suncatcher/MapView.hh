@@ -76,7 +76,7 @@ class MapView {
 
     inline bool is_passable(Coord cell) const;
 
-    inline uint_least8_t move_cost(Coord src, Coord dst) const;
+    inline float move_cost(Coord src, Coord dst) const;
 
     // True iff the cell/static component is a door. We can take either a
     // coordinate or a (valid) color, since all doors have their own color.

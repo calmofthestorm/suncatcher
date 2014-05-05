@@ -240,7 +240,7 @@ void DeltaMap::clear_cache() {
 
 
 pathfinder::Coord DeltaMap::size() const {
-  optimized_map.size();
+  return optimized_map.size();
 }
 
 
