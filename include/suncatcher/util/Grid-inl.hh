@@ -23,7 +23,7 @@ namespace util {
 
 template <typename T>
 inline Grid<T>::Grid()
-: my_size({0, 0}),
+: my_size({0, 0, 0}),
   backing() { }
 
 
@@ -77,9 +77,9 @@ inline std::vector<pathfinder::Coord> Grid<T>::get_adjacent(
     bool include_diagonals
     ) const {
   const static std::vector<pathfinder::Coord> ADJ_DELTA{
-    {0, (uint16_t)-1}, {(uint16_t)-1, 0}, {1, 0}, {0, 1},
-      {(uint16_t)-1, (uint16_t)-1}, {1, 1},
-      {(uint16_t)-1, 1}, {1, (uint16_t)-1}
+    {0, (uint16_t)-1, 0}, {(uint16_t)-1, 0, 0}, {1, 0, 0}, {0, 1, 0},
+      {(uint16_t)-1, (uint16_t)-1, 0}, {1, 1, 0},
+      {(uint16_t)-1, 1, 0}, {1, (uint16_t)-1, 0}
   };
 
   std::vector<pathfinder::Coord> neighbors;

@@ -35,11 +35,11 @@ using namespace suncatcher::test;
 class OptOpenCloseDoor : public MapTest<MAP_MICRO> { };
 
 TEST_F(OptOpenCloseDoor, ConnectedComponentsMaintained) {
-  Coord door1 = {2, 4};
-  Coord door2 = {8, 4};
-  Coord door3 = {12, 8};
-  Coord cell1 = {3, 4};
-  Coord cell2 = {7, 4};
+  Coord door1 = {2, 4, 0};
+  Coord door2 = {8, 4, 0};
+  Coord door3 = {12, 8, 0};
+  Coord cell1 = {3, 4, 0};
+  Coord cell2 = {7, 4, 0};
   ASSERT_TRUE(map.path_exists(cell1, cell2));
   map.mutate(std::move(map.get_mutator().toggle_door_open(door1)));
   ASSERT_FALSE(map.path_exists(cell1, cell2));
@@ -47,18 +47,18 @@ TEST_F(OptOpenCloseDoor, ConnectedComponentsMaintained) {
   ASSERT_FALSE(map.path_exists(cell1, cell2));
   map.mutate(std::move(map.get_mutator().toggle_door_open(door1)));
   ASSERT_FALSE(map.path_exists(cell1, cell2));
-  map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4, 0})));
   ASSERT_TRUE(map.path_exists(cell1, cell2));
-  map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4, 0})));
   ASSERT_FALSE(map.path_exists(cell1, cell2));
   map.mutate(std::move(map.get_mutator().toggle_door_open(door2)));
   ASSERT_TRUE(map.path_exists(cell1, cell2));
 }
 
 TEST_F(OptOpenCloseDoor, SLOWSmartBruteForceTorture) {
-  std::vector<Coord> doors{Coord{2, 4}, Coord{6, 4}, Coord{8, 4},
-    Coord{12, 8}, Coord{14, 2}, Coord{11, 8}};
-  std::vector<Coord> interesting{{1, 1}, {3, 4}, {7, 4}};
+  std::vector<Coord> doors{Coord{2, 4, 0}, Coord{6, 4, 0}, Coord{8, 4, 0},
+    Coord{12, 8, 0}, Coord{14, 2, 0}, Coord{11, 8, 0}};
+  std::vector<Coord> interesting{{1, 1, 0}, {3, 4, 0}, {7, 4, 0}};
 
   size_t num_iterations = std::pow(2, doors.size());
 
@@ -75,20 +75,20 @@ TEST_F(OptOpenCloseDoor, SLOWSmartBruteForceTorture) {
         mask <<= 1;
       }
 
-      bool top_open = map.get_doors().at({2, 4}).open;
-      bool bot_open = (map.get_doors().at({6, 4}).open ||
-                       map.get_doors().at({8, 4}).open);
+      bool top_open = map.get_doors().at({2, 4, 0}).open;
+      bool bot_open = (map.get_doors().at({6, 4, 0}).open ||
+                       map.get_doors().at({8, 4, 0}).open);
 
       // Handle paths between open spaces.
       for (const auto& it : interesting) {
         for (const auto& jt : interesting) {
           bool is_path = map.path_exists(it, jt);
           if (it < jt) {
-            if (it == Coord{3, 4} && jt == Coord{7, 4}) {
+            if (it == Coord{3, 4, 0} && jt == Coord{7, 4, 0}) {
               ASSERT_EQ(is_path, top_open && bot_open);
-            } else if (it == Coord{3, 4} || jt == Coord{3, 4}) {
+            } else if (it == Coord{3, 4, 0} || jt == Coord{3, 4, 0}) {
                 ASSERT_EQ(is_path, top_open);
-            } else if (it == Coord{7, 4} || jt == Coord{7, 4}) {
+            } else if (it == Coord{7, 4, 0} || jt == Coord{7, 4, 0}) {
               ASSERT_EQ(is_path, bot_open);
             } else {
               std::cout << it << ' ' << jt << std::endl;
@@ -115,8 +115,8 @@ TEST_F(OptOpenCloseDoor, SLOWSmartBruteForceTorture) {
         for (const auto& square : interesting) {
           bool is_path = map.path_exists(door.first, square);
           bool should = door.second.open;
-          should &= square != Coord{3, 4} || top_open;
-          should &= square != Coord{7, 4} || bot_open;
+          should &= square != Coord{3, 4, 0} || top_open;
+          should &= square != Coord{7, 4, 0} || bot_open;
           ASSERT_EQ(is_path, should);
         }
       }
@@ -144,78 +144,78 @@ class CrossWorld : public MapTest<MAP_CROSS> {
 };
 
 void CrossWorld::check() {
-  make_passable({3, 5});
-  ASSERT_TRUE(map.path_exists({1, 1}, {1, 8}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {8, 1}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {8, 8}));
-  ASSERT_FALSE(map.path_exists({1, 8}, {8, 1}));
-  ASSERT_FALSE(map.path_exists({1, 8}, {8, 8}));
-  ASSERT_FALSE(map.path_exists({8, 1}, {8, 8}));
-  make_passable({7, 5});
-  ASSERT_TRUE(map.path_exists({1, 1}, {1, 8}));
-  ASSERT_TRUE(map.path_exists({8, 1}, {8, 8}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {8, 1}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {8, 8}));
-  ASSERT_FALSE(map.path_exists({1, 8}, {8, 1}));
-  ASSERT_FALSE(map.path_exists({1, 8}, {8, 8}));
-  make_impassable({3, 5});
-  ASSERT_TRUE(map.path_exists({8, 1}, {8, 8}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {1, 8}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {8, 1}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {8, 8}));
-  ASSERT_FALSE(map.path_exists({1, 8}, {8, 1}));
-  ASSERT_FALSE(map.path_exists({1, 8}, {8, 8}));
-  make_passable({2, 9});
-  ASSERT_TRUE(map.path_exists({8, 1}, {8, 8}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {1, 8}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {8, 1}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {8, 8}));
-  ASSERT_FALSE(map.path_exists({1, 8}, {8, 1}));
-  ASSERT_FALSE(map.path_exists({1, 8}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {10, 10}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {10, 10}));
-  make_passable({5, 2});
-  ASSERT_TRUE(map.path_exists({8, 1}, {8, 8}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {1, 8}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {8, 1}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {8, 8}));
-  ASSERT_FALSE(map.path_exists({1, 8}, {8, 1}));
-  ASSERT_FALSE(map.path_exists({1, 8}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {10, 10}));
-  ASSERT_FALSE(map.path_exists({1, 1}, {10, 10}));
-  make_passable({4, 5});
-  ASSERT_TRUE(map.path_exists({8, 1}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {1, 8}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {8, 1}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {8, 1}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {10, 10}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {10, 10}));
-  make_passable({6, 7});
-  ASSERT_TRUE(map.path_exists({8, 1}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {1, 8}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {8, 1}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {8, 1}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {10, 10}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {10, 10}));
-  make_passable({5, 6});
-  ASSERT_TRUE(map.path_exists({8, 1}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {1, 8}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {8, 1}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {8, 1}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {8, 8}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {10, 10}));
-  ASSERT_TRUE(map.path_exists({1, 1}, {10, 10}));
-  make_impassable({7, 5});
-  make_impassable({2, 9});
-  make_impassable({5, 2});
-  make_impassable({4, 5});
-  make_impassable({6, 7});
-  make_impassable({5, 6});
+  make_passable({3, 5, 0});
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {1, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {8, 1, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {8, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 8, 0}, {8, 1, 0}));
+  ASSERT_FALSE(map.path_exists({1, 8, 0}, {8, 8, 0}));
+  ASSERT_FALSE(map.path_exists({8, 1, 0}, {8, 8, 0}));
+  make_passable({7, 5, 0});
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {1, 8, 0}));
+  ASSERT_TRUE(map.path_exists({8, 1, 0}, {8, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {8, 1, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {8, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 8, 0}, {8, 1, 0}));
+  ASSERT_FALSE(map.path_exists({1, 8, 0}, {8, 8, 0}));
+  make_impassable({3, 5, 0});
+  ASSERT_TRUE(map.path_exists({8, 1, 0}, {8, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {1, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {8, 1, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {8, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 8, 0}, {8, 1, 0}));
+  ASSERT_FALSE(map.path_exists({1, 8, 0}, {8, 8, 0}));
+  make_passable({2, 9, 0});
+  ASSERT_TRUE(map.path_exists({8, 1, 0}, {8, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {1, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {8, 1, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {8, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 8, 0}, {8, 1, 0}));
+  ASSERT_FALSE(map.path_exists({1, 8, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {10, 10, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {10, 10, 0}));
+  make_passable({5, 2, 0});
+  ASSERT_TRUE(map.path_exists({8, 1, 0}, {8, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {1, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {8, 1, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {8, 8, 0}));
+  ASSERT_FALSE(map.path_exists({1, 8, 0}, {8, 1, 0}));
+  ASSERT_FALSE(map.path_exists({1, 8, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {10, 10, 0}));
+  ASSERT_FALSE(map.path_exists({1, 1, 0}, {10, 10, 0}));
+  make_passable({4, 5, 0});
+  ASSERT_TRUE(map.path_exists({8, 1, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {1, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {8, 1, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {8, 1, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {10, 10, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {10, 10, 0}));
+  make_passable({6, 7, 0});
+  ASSERT_TRUE(map.path_exists({8, 1, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {1, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {8, 1, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {8, 1, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {10, 10, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {10, 10, 0}));
+  make_passable({5, 6, 0});
+  ASSERT_TRUE(map.path_exists({8, 1, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {1, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {8, 1, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {8, 1, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {8, 8, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {10, 10, 0}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {10, 10, 0}));
+  make_impassable({7, 5, 0});
+  make_impassable({2, 9, 0});
+  make_impassable({5, 2, 0});
+  make_impassable({4, 5, 0});
+  make_impassable({6, 7, 0});
+  make_impassable({5, 6, 0});
 }
 
 class OptWall : public CrossWorld {
@@ -230,8 +230,8 @@ class OptWall : public CrossWorld {
 };
 
 TEST_F(OptWall, Sanity) {
-  std::vector<Coord> interesting{Coord{1, 1}, Coord{1, 8}, Coord{8, 8},
-                                 Coord{8, 1}, Coord{10, 10}};
+  std::vector<Coord> interesting{Coord{1, 1, 0}, Coord{1, 8, 0}, Coord{8, 8, 0},
+                                 Coord{8, 1, 0}, Coord{10, 10, 0}};
   for (const auto& it : interesting) {
     for (const auto& jt : interesting) {
       ASSERT_EQ(map.path_exists(it, jt), it == jt);
@@ -241,12 +241,12 @@ TEST_F(OptWall, Sanity) {
 
 
 TEST_F(OptWall, SameComponent) {
-  ASSERT_TRUE(map.path_exists({1, 1}, {3, 3}));
-  ASSERT_TRUE(map.path_exists({1, 8}, {3, 6}));
-  ASSERT_TRUE(map.path_exists({8, 8}, {6, 6}));
-  ASSERT_TRUE(map.path_exists({8, 1}, {6, 3}));
-  ASSERT_TRUE(map.path_exists({10, 10}, {10, 0}));
-  ASSERT_TRUE(map.path_exists({10, 10}, {0, 10}));
+  ASSERT_TRUE(map.path_exists({1, 1, 0}, {3, 3, 0}));
+  ASSERT_TRUE(map.path_exists({1, 8, 0}, {3, 6, 0}));
+  ASSERT_TRUE(map.path_exists({8, 8, 0}, {6, 6, 0}));
+  ASSERT_TRUE(map.path_exists({8, 1, 0}, {6, 3, 0}));
+  ASSERT_TRUE(map.path_exists({10, 10, 0}, {10, 0, 0}));
+  ASSERT_TRUE(map.path_exists({10, 10, 0}, {0, 10, 0}));
 }
 
 
@@ -357,39 +357,39 @@ class SolidWorld : public MapTest<MAP_SMALL_OPEN> {
 };
 
 TEST_F(SolidWorld, Simple) {
-  for (const auto& dest : {Coord{5, 7}, Coord{6, 6}}) {
-    ASSERT_FALSE(map.path_exists({5, 5}, {5, 5}));
-    map.mutate(std::move(map.get_mutator().set_cost({5, 5}, 10)));
-    ASSERT_TRUE(map.path_exists({5, 5}, {5, 5}));
-    ASSERT_FALSE(map.path_exists({5, 5}, dest));
+  for (const auto& dest : {Coord{5, 7, 0}, Coord{6, 6, 0}}) {
+    ASSERT_FALSE(map.path_exists({5, 5, 0}, {5, 5, 0}));
+    map.mutate(std::move(map.get_mutator().set_cost({5, 5, 0}, 10)));
+    ASSERT_TRUE(map.path_exists({5, 5, 0}, {5, 5, 0}));
+    ASSERT_FALSE(map.path_exists({5, 5, 0}, dest));
     ASSERT_FALSE(map.path_exists(dest, dest));
     map.mutate(std::move(map.get_mutator().set_cost(dest, 30)));
-    ASSERT_TRUE(map.path_exists({5, 5}, {5, 5}));
-    ASSERT_FALSE(map.path_exists({5, 5}, dest));
+    ASSERT_TRUE(map.path_exists({5, 5, 0}, {5, 5, 0}));
+    ASSERT_FALSE(map.path_exists({5, 5, 0}, dest));
     ASSERT_TRUE(map.path_exists(dest, dest));
-    map.mutate(std::move(map.get_mutator().set_cost({5, 6}, 0)));
-    ASSERT_TRUE(map.path_exists({5, 5}, {5, 5}));
-    ASSERT_TRUE(map.path_exists({5, 5}, dest));
+    map.mutate(std::move(map.get_mutator().set_cost({5, 6, 0}, 0)));
+    ASSERT_TRUE(map.path_exists({5, 5, 0}, {5, 5, 0}));
+    ASSERT_TRUE(map.path_exists({5, 5, 0}, dest));
     ASSERT_TRUE(map.path_exists(dest, dest));
-    map.mutate(std::move(map.get_mutator().create_door({5, 6}, false, 10)));
-    ASSERT_TRUE(map.path_exists({5, 5}, {5, 5}));
-    ASSERT_FALSE(map.path_exists({5, 5}, dest));
+    map.mutate(std::move(map.get_mutator().create_door({5, 6, 0}, false, 10)));
+    ASSERT_TRUE(map.path_exists({5, 5, 0}, {5, 5, 0}));
+    ASSERT_FALSE(map.path_exists({5, 5, 0}, dest));
     ASSERT_TRUE(map.path_exists(dest, dest));
-    map.mutate(std::move(map.get_mutator().set_door_open({5, 6}, true)));
-    ASSERT_TRUE(map.path_exists({5, 5}, {5, 5}));
-    ASSERT_TRUE(map.path_exists({5, 5}, dest));
+    map.mutate(std::move(map.get_mutator().set_door_open({5, 6, 0}, true)));
+    ASSERT_TRUE(map.path_exists({5, 5, 0}, {5, 5, 0}));
+    ASSERT_TRUE(map.path_exists({5, 5, 0}, dest));
     ASSERT_TRUE(map.path_exists(dest, dest));
 
-    map.mutate(std::move(map.get_mutator().remove_door({5, 6}, PATH_COST_INFINITE)));
-    map.mutate(std::move(map.get_mutator().set_cost({5, 5}, PATH_COST_INFINITE)));
+    map.mutate(std::move(map.get_mutator().remove_door({5, 6, 0}, PATH_COST_INFINITE)));
+    map.mutate(std::move(map.get_mutator().set_cost({5, 5, 0}, PATH_COST_INFINITE)));
     map.mutate(std::move(map.get_mutator().set_cost(dest, PATH_COST_INFINITE)));
   }
 }
 
 
 TEST_F(SolidWorld, ConnectDisconnect) {
-  std::vector<Coord> inner_cross{Coord{4, 5}, Coord{6, 5}, Coord{5, 5},
-                                 Coord{5, 4}, Coord{5, 6}};
+  std::vector<Coord> inner_cross{Coord{4, 5, 0}, Coord{6, 5, 0}, Coord{5, 5, 0},
+                                 Coord{5, 4, 0}, Coord{5, 6, 0}};
   auto m = map.get_mutator();
   for (const auto& it : inner_cross) {
     m.set_cost(it, 10);
@@ -402,15 +402,15 @@ TEST_F(SolidWorld, ConnectDisconnect) {
     }
   }
 
-  map.mutate(std::move(map.get_mutator().set_cost({5, 5}, PATH_COST_INFINITE)));
+  map.mutate(std::move(map.get_mutator().set_cost({5, 5, 0}, PATH_COST_INFINITE)));
 
   for (const auto& it : inner_cross) {
     for (const auto& jt : inner_cross) {
-      ASSERT_EQ(map.path_exists(it, jt), (it == jt && it != Coord{5, 5}));
+      ASSERT_EQ(map.path_exists(it, jt), (it == jt && it != Coord{5, 5, 0}));
     }
   }
 
-  map.mutate(std::move(map.get_mutator().create_door({5, 5}, true, 10)));
+  map.mutate(std::move(map.get_mutator().create_door({5, 5, 0}, true, 10)));
 
   for (const auto& it : inner_cross) {
     for (const auto& jt : inner_cross) {
@@ -418,15 +418,15 @@ TEST_F(SolidWorld, ConnectDisconnect) {
     }
   }
 
-  map.mutate(std::move(map.get_mutator().set_door_open({5, 5}, false)));
+  map.mutate(std::move(map.get_mutator().set_door_open({5, 5, 0}, false)));
 
   for (const auto& it : inner_cross) {
     for (const auto& jt : inner_cross) {
-      ASSERT_EQ(map.path_exists(it, jt), (it == jt && it != Coord{5, 5}));
+      ASSERT_EQ(map.path_exists(it, jt), (it == jt && it != Coord{5, 5, 0}));
     }
   }
 
-  map.mutate(std::move(map.get_mutator().remove_door({5, 5}, 10)));
+  map.mutate(std::move(map.get_mutator().remove_door({5, 5, 0}, 10)));
 
   for (const auto& it : inner_cross) {
     for (const auto& jt : inner_cross) {

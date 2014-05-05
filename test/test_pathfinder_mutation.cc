@@ -27,7 +27,7 @@ using namespace suncatcher::test;
 class SimpleDoor : public MapTest<MAP_MICRO> { };
 
 TEST_F(SimpleDoor, ToggleOpen) {
-  Coord cell = {6, 4};
+  Coord cell = {6, 4, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_FALSE(map.get_doors().at(cell).open);
   ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
@@ -38,7 +38,7 @@ TEST_F(SimpleDoor, ToggleOpen) {
 
 
 TEST_F(SimpleDoor, ToggleClosed) {
-  Coord cell = {12, 8};
+  Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_TRUE(map.get_doors().at(cell).open);
   ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
@@ -49,7 +49,7 @@ TEST_F(SimpleDoor, ToggleClosed) {
 
 
 TEST_F(SimpleDoor, SetOpenStateChange) {
-  Coord cell = {6, 4};
+  Coord cell = {6, 4, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_FALSE(map.get_doors().at(cell).open);
   ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
@@ -59,7 +59,7 @@ TEST_F(SimpleDoor, SetOpenStateChange) {
 
 
 TEST_F(SimpleDoor, SetClosedStateChange) {
-  Coord cell = {12, 8};
+  Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_TRUE(map.get_doors().at(cell).open);
   ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
@@ -70,7 +70,7 @@ TEST_F(SimpleDoor, SetClosedStateChange) {
 
 
 TEST_F(SimpleDoor, SetClosedNop) {
-  Coord cell = {6, 4};
+  Coord cell = {6, 4, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_FALSE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().set_door_open(cell, false)));
@@ -79,7 +79,7 @@ TEST_F(SimpleDoor, SetClosedNop) {
 }
 
 TEST_F(SimpleDoor, SetOpenNop) {
-  Coord cell = {12, 8};
+  Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_TRUE(map.get_doors().at(cell).open);
   ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
@@ -90,7 +90,7 @@ TEST_F(SimpleDoor, SetOpenNop) {
 
 
 TEST_F(SimpleDoor, SetCost1) {
-  Coord cell = {12, 8};
+  Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   map.mutate(std::move(map.get_mutator().set_door_open_cost(cell, 0)));
   ASSERT_TRUE(map.get_doors().at(cell).cost_open == 0);
@@ -99,7 +99,7 @@ TEST_F(SimpleDoor, SetCost1) {
 
 
 TEST_F(SimpleDoor, SetCost2) {
-  Coord cell = {12, 8};
+  Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   map.mutate(std::move(map.get_mutator().set_door_open_cost(cell, 55)));
   ASSERT_TRUE(map.get_doors().at(cell).cost_open == 55);
@@ -112,7 +112,7 @@ class DoorCreateRemove : public MapTest<MAP_MICRO> { };
 
 
 TEST_F(DoorCreateRemove, CreateOpenValidFree) {
-  Coord cell = {12, 7};
+  Coord cell = {12, 7, 0};
   ASSERT_FALSE(map.is_door(cell));
   map.mutate(std::move(map.get_mutator().create_door(cell, true, 0)));
   ASSERT_TRUE(map.get_doors().at(cell).open);
@@ -122,7 +122,7 @@ TEST_F(DoorCreateRemove, CreateOpenValidFree) {
 
 
 TEST_F(DoorCreateRemove, CreateOpenValid) {
-  Coord cell = {12, 7};
+  Coord cell = {12, 7, 0};
   ASSERT_FALSE(map.is_door(cell));
   map.mutate(std::move(map.get_mutator().create_door(cell, true, 5)));
   ASSERT_TRUE(map.get_doors().at(cell).open);
@@ -132,7 +132,7 @@ TEST_F(DoorCreateRemove, CreateOpenValid) {
 
 
 TEST_F(DoorCreateRemove, CreateClosedValid) {
-  Coord cell = {12, 4};
+  Coord cell = {12, 4, 0};
   ASSERT_FALSE(map.is_door(cell));
   map.mutate(std::move(map.get_mutator().create_door(cell, false, 55)));
   ASSERT_FALSE(map.get_doors().at(cell).open);
@@ -142,7 +142,7 @@ TEST_F(DoorCreateRemove, CreateClosedValid) {
 
 
 TEST_F(DoorCreateRemove, WallToOpenValid) {
-  Coord cell = {0, 0};
+  Coord cell = {0, 0, 0};
   ASSERT_FALSE(map.is_door(cell));
   ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().create_door(cell, true, 5)));
@@ -153,7 +153,7 @@ TEST_F(DoorCreateRemove, WallToOpenValid) {
 
 
 TEST_F(DoorCreateRemove, WallToClosedValid) {
-  Coord cell = {0, 0};
+  Coord cell = {0, 0, 0};
   ASSERT_FALSE(map.is_door(cell));
   ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().create_door(cell, false, 55)));
@@ -164,7 +164,7 @@ TEST_F(DoorCreateRemove, WallToClosedValid) {
 
 
 TEST_F(DoorCreateRemove, RemoveOpenToWallValid) {
-  Coord cell = {12, 8};
+  Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
   ASSERT_TRUE(map.get_doors().at(cell).open);
@@ -175,7 +175,7 @@ TEST_F(DoorCreateRemove, RemoveOpenToWallValid) {
 
 
 TEST_F(DoorCreateRemove, RemoveOpenToFreeSquare) {
-  Coord cell = {12, 8};
+  Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
   ASSERT_TRUE(map.get_doors().at(cell).open);
@@ -186,7 +186,7 @@ TEST_F(DoorCreateRemove, RemoveOpenToFreeSquare) {
 
 
 TEST_F(DoorCreateRemove, RemoveOpenToNormalPassable) {
-  Coord cell = {12, 8};
+  Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
   ASSERT_TRUE(map.get_doors().at(cell).open);
@@ -197,7 +197,7 @@ TEST_F(DoorCreateRemove, RemoveOpenToNormalPassable) {
 
 
 TEST_F(DoorCreateRemove, RemoveClosedToWallValid) {
-  Coord cell = {6, 4};
+  Coord cell = {6, 4, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_FALSE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().remove_door(cell, PATH_COST_INFINITE)));
@@ -207,7 +207,7 @@ TEST_F(DoorCreateRemove, RemoveClosedToWallValid) {
 
 
 TEST_F(DoorCreateRemove, RemoveClosedToFreeSquare) {
-  Coord cell = {6, 4};
+  Coord cell = {6, 4, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_FALSE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().remove_door(cell, 0)));
@@ -217,7 +217,7 @@ TEST_F(DoorCreateRemove, RemoveClosedToFreeSquare) {
 
 
 TEST_F(DoorCreateRemove, RemoveClosedToNormalPassable) {
-  Coord cell = {6, 4};
+  Coord cell = {6, 4, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_FALSE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().remove_door(cell, 1)));
@@ -231,7 +231,7 @@ class TerrainCost : public MapTest<MAP_MICRO> { };
 
 
 TEST_F(TerrainCost, WallToWall) {
-  Coord cell = {0, 0};
+  Coord cell = {0, 0, 0};
   ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().set_cost(cell, PATH_COST_INFINITE)));
   ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
@@ -239,7 +239,7 @@ TEST_F(TerrainCost, WallToWall) {
 
 
 TEST_F(TerrainCost, WallToFree) {
-  Coord cell = {0, 0};
+  Coord cell = {0, 0, 0};
   ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().set_cost(cell, 0)));
   ASSERT_EQ(map.get_data().at(cell), 0);
@@ -247,7 +247,7 @@ TEST_F(TerrainCost, WallToFree) {
 
 
 TEST_F(TerrainCost, WallToNormal) {
-  Coord cell = {0, 0};
+  Coord cell = {0, 0, 0};
   ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().set_cost(cell, 1)));
   ASSERT_EQ(map.get_data().at(cell), 1);
@@ -255,7 +255,7 @@ TEST_F(TerrainCost, WallToNormal) {
 
 
 TEST_F(TerrainCost, NormalCostToWall) {
-  Coord cell = {1, 1};
+  Coord cell = {1, 1, 0};
   ASSERT_EQ(map.get_data().at(cell), 1);
   map.mutate(std::move(map.get_mutator().set_cost(cell, PATH_COST_INFINITE)));
   ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
@@ -263,7 +263,7 @@ TEST_F(TerrainCost, NormalCostToWall) {
 
 
 TEST_F(TerrainCost, NormalCostToFree) {
-  Coord cell = {1, 1};
+  Coord cell = {1, 1, 0};
   ASSERT_EQ(map.get_data().at(cell), 1);
   map.mutate(std::move(map.get_mutator().set_cost(cell, 0)));
   ASSERT_EQ(map.get_data().at(cell), 0);
@@ -271,7 +271,7 @@ TEST_F(TerrainCost, NormalCostToFree) {
 
 
 TEST_F(TerrainCost, NormalCostTo4X) {
-  Coord cell = {1, 1};
+  Coord cell = {1, 1, 0};
   ASSERT_EQ(map.get_data().at(cell), 1);
   map.mutate(std::move(map.get_mutator().set_cost(cell, 4)));
   ASSERT_EQ(map.get_data().at(cell), 4);
@@ -283,9 +283,9 @@ class Misc : public MapTest<MAP_MICRO> { };
 
 
 TEST_F(Misc, DoorToDoorTesseractService) {
-  Coord door1{14, 7};
-  Coord door2{0, 0};
-  Coord old{14, 2};
+  Coord door1{14, 7, 0};
+  Coord door2{0, 0, 0};
+  Coord old{14, 2, 0};
   map.mutate(std::move(map.get_mutator().create_door(door1, true, 1)));
   map.mutate(std::move(map.get_mutator().create_door(door2, true, 1)));
   ASSERT_FALSE(map.path_exists(old, door2));
@@ -298,8 +298,8 @@ class NonUniformCost : public MapTest<MAP_MICRO> { };
 
 // Create an expensive "ridge" so it paths around
 TEST_F(NonUniformCost, HillGoAround) {
-  Coord src{5, 7};
-  Coord dst{7, 7};
+  Coord src{5, 7, 0};
+  Coord dst{7, 7, 0};
   auto actual = map.path(src, dst);
   ASSERT_EQ(2, actual.get_length());
   ASSERT_EQ(3, actual.get_path().size());
@@ -310,7 +310,7 @@ TEST_F(NonUniformCost, HillGoAround) {
   }
   #endif
   for (uint16_t i = 6; i <= 8; ++i) {
-    map.mutate(std::move(map.get_mutator().set_cost({6, i}, 200)));
+    map.mutate(std::move(map.get_mutator().set_cost({6, i, 0}, 200)));
   }
   actual = map.path(src, dst);
   ASSERT_NEAR(13.6569, actual.get_length(), 0.1);
@@ -326,8 +326,8 @@ TEST_F(NonUniformCost, HillGoAround) {
 
 // Create an expensive "ridge" but path into it explicitely.
 TEST_F(NonUniformCost, DeliciousHillYouMustClimbIt) {
-  Coord src{5, 7};
-  Coord dst{6, 7};
+  Coord src{5, 7, 0};
+  Coord dst{6, 7, 0};
   auto actual = map.path(src, dst);
   ASSERT_EQ(1, actual.get_length());
   ASSERT_EQ(2, actual.get_path().size());
@@ -338,7 +338,7 @@ TEST_F(NonUniformCost, DeliciousHillYouMustClimbIt) {
   }
   #endif
   for (uint16_t i = 6; i <= 8; ++i) {
-    map.mutate(std::move(map.get_mutator().set_cost({6, i}, 200)));
+    map.mutate(std::move(map.get_mutator().set_cost({6, i, 0}, 200)));
   }
   actual = map.path(src, dst);
   ASSERT_NEAR(200, actual.get_length(), 0.1);
@@ -354,8 +354,8 @@ TEST_F(NonUniformCost, DeliciousHillYouMustClimbIt) {
 
 // Create an expensive "ridge", that still wins vs going around.
 TEST_F(NonUniformCost, HillStillShortestPath) {
-  Coord src{5, 7};
-  Coord dst{7, 7};
+  Coord src{5, 7, 0};
+  Coord dst{7, 7, 0};
   auto actual = map.path(src, dst);
   ASSERT_EQ(2, actual.get_length());
   ASSERT_EQ(3, actual.get_path().size());
@@ -366,7 +366,7 @@ TEST_F(NonUniformCost, HillStillShortestPath) {
   }
   #endif
   for (uint16_t i = 6; i <= 8; ++i) {
-    map.mutate(std::move(map.get_mutator().set_cost({6, i}, 3)));
+    map.mutate(std::move(map.get_mutator().set_cost({6, i, 0}, 3)));
   }
   actual = map.path(src, dst);
   ASSERT_NEAR(4, actual.get_length(), 0.1);
@@ -382,10 +382,10 @@ TEST_F(NonUniformCost, HillStillShortestPath) {
 
 // Create an expensive door and a cheap door. The expensive one is closer.
 TEST_F(NonUniformCost, NonUniformExpensiveVsCheapDoor) {
-  map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4})));
-  map.mutate(std::move(map.get_mutator().set_door_open_cost({6, 4}, 25)));
-  Coord src{5, 4};
-  Coord dst{7, 4};
+  map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4, 0})));
+  map.mutate(std::move(map.get_mutator().set_door_open_cost({6, 4, 0}, 25)));
+  Coord src{5, 4, 0};
+  Coord dst{7, 4, 0};
   auto actual = map.path(src, dst);
   ASSERT_NEAR(8.243, actual.get_length(), 0.1);
   ASSERT_EQ(8, actual.get_path().size());
@@ -403,8 +403,8 @@ TEST_F(NonUniformCost, NonUniformExpensiveVsCheapDoor) {
 class SimpleAddRemoveWallUpdatesComponents : public MapTest<MAP_MICRO> { };
 
 TEST_F(SimpleAddRemoveWallUpdatesComponents, CreatingWallBlocksMovementToFromIt) {
-  Coord wall{11, 6};
-  Coord open{11, 7};
+  Coord wall{11, 6, 0};
+  Coord open{11, 7, 0};
   ASSERT_TRUE((bool)map.path_exists(wall, open));
   ASSERT_TRUE((bool)map.path(wall, open));
   ASSERT_TRUE((bool)map.path(open, wall));
@@ -418,9 +418,9 @@ TEST_F(SimpleAddRemoveWallUpdatesComponents, CreatingWallBlocksMovementToFromIt)
 
 
 TEST_F(SimpleAddRemoveWallUpdatesComponents, CreatingWallBlocksMovementThroughIt) {
-  Coord wall{9, 7};
-  Coord src{8, 7};
-  Coord dst{10, 7};
+  Coord wall{9, 7, 0};
+  Coord src{8, 7, 0};
+  Coord dst{10, 7, 0};
   ASSERT_NEAR(map.path(src, dst).get_length(), 2, 0.1);
   map.mutate(std::move(map.get_mutator().set_cost(wall, PATH_COST_INFINITE)));
   ASSERT_NEAR(map.path(src, dst).get_length(), 2.828, 0.1);
@@ -430,19 +430,19 @@ TEST_F(SimpleAddRemoveWallUpdatesComponents, CreatingWallBlocksMovementThroughIt
 
 
 TEST_F(SimpleAddRemoveWallUpdatesComponents, CreatingWallsDisconnectsComponents) {
-  Coord wall{11, 5};
-  Coord src{11, 4};
-  Coord dst{11, 6};
+  Coord wall{11, 5, 0};
+  Coord src{11, 4, 0};
+  Coord dst{11, 6, 0};
   ASSERT_NEAR(map.path(src, dst).get_length(), 2, 0.1);
   map.mutate(std::move(map.get_mutator().set_cost(wall, PATH_COST_INFINITE)));
 }
 
 
 TEST_F(SimpleAddRemoveWallUpdatesComponents, DiagonalWallDisconnectReconnect) {
-  Coord wall{11, 6};
-  Coord src{11, 5};
-  Coord dst{11, 7};
-  Coord origin{1, 1};
+  Coord wall{11, 6, 0};
+  Coord src{11, 5, 0};
+  Coord dst{11, 7, 0};
+  Coord origin{1, 1, 0};
   ASSERT_NEAR(map.path(src, dst).get_length(), 2, 0.1);
   ASSERT_NEAR(map.path(origin, src).get_length(), 13.657, 0.1);
   map.mutate(std::move(map.get_mutator().set_cost(wall, PATH_COST_INFINITE)));
@@ -458,26 +458,26 @@ TEST_F(SimpleAddRemoveWallUpdatesComponents, DiagonalWallDisconnectReconnect) {
 class DoorPathfinding : public MapTest<MAP_MICRO> { };
 
 TEST_F(DoorPathfinding, OpenDoorAndGoStandInDoorframe) {
-  Coord cell{6, 4};
+  Coord cell{6, 4, 0};
   map.mutate(std::move(map.get_mutator().toggle_door_open(cell)));
   ASSERT_TRUE(map.get_doors().at(cell).open);
-  ASSERT_TRUE(map.path_exists({7, 4}, cell));
-  ASSERT_TRUE(map.path_exists({5, 4}, cell));
+  ASSERT_TRUE(map.path_exists({7, 4, 0}, cell));
+  ASSERT_TRUE(map.path_exists({5, 4, 0}, cell));
 }
 
 
 TEST_F(DoorPathfinding, Airlock) {
-  Coord outside{5, 4};
-  Coord airlock{7, 4};
-  Coord inside{9, 4};
-  Coord outer_door{6, 4};
-  Coord inner_door{8, 4};
+  Coord outside{5, 4, 0};
+  Coord airlock{7, 4, 0};
+  Coord inside{9, 4, 0};
+  Coord outer_door{6, 4, 0};
+  Coord inner_door{8, 4, 0};
 
   // Add a wall to make it an airlock.
   auto mutator = map.get_mutator();
   for (uint16_t i = 0; i <= 9; ++i) {
     if (i != 4) {
-      mutator.set_cost({6, i}, PATH_COST_INFINITE);
+      mutator.set_cost({6, i, 0}, PATH_COST_INFINITE);
     }
   }
   map.mutate(std::move(mutator));
@@ -520,12 +520,12 @@ TEST_F(DoorPathfinding, Airlock) {
 }
 
 TEST_F(DoorPathfinding, OpenDoorAndGoThroughAsShortcut) {
-  Coord src{7, 4};
-  Coord dst{5, 4};
+  Coord src{7, 4, 0};
+  Coord dst{5, 4, 0};
   auto actual = map.path(src, dst);
   ASSERT_NEAR(8.243, actual.get_length(), 0.1);
   ASSERT_EQ(8, actual.get_path().size());
-  map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4, 0})));
   actual = map.path(src, dst);
   ASSERT_NEAR(2, actual.get_length(), 0.1);
   ASSERT_EQ(3, actual.get_path().size());
@@ -533,8 +533,8 @@ TEST_F(DoorPathfinding, OpenDoorAndGoThroughAsShortcut) {
 
 
 TEST_F(DoorPathfinding, DoorToDoorTogglingFun) {
-  Coord outer_door{6, 4};
-  Coord inner_door{8, 4};
+  Coord outer_door{6, 4, 0};
+  Coord inner_door{8, 4, 0};
 
   for (size_t i = 0; i < 4; ++i) {
     ASSERT_FALSE(map.path(outer_door, inner_door));
@@ -556,9 +556,9 @@ TEST_F(DoorPathfinding, DoorToDoorTogglingFun) {
 
 
 TEST_F(DoorPathfinding, DoorDisconnectsDiagonalComponents) {
-  Coord door{11, 6};
-  Coord outer{11, 7};
-  Coord inner{11, 5};
+  Coord door{11, 6, 0};
+  Coord outer{11, 7, 0};
+  Coord inner{11, 5, 0};
   ASSERT_TRUE((bool)map.path(outer, inner));
   map.mutate(std::move(map.get_mutator().create_door(door, true, 1)));
   ASSERT_TRUE((bool)map.path(inner, outer));
@@ -568,9 +568,9 @@ TEST_F(DoorPathfinding, DoorDisconnectsDiagonalComponents) {
 
 
 TEST_F(DoorPathfinding, MultipleDoorsDisconnectingComponents) {
-  std::array<Coord, 3> doors{Coord{10, 6}, Coord{11, 6}, Coord{12, 6}};
-  Coord outer{9, 7};
-  Coord inner{11, 5};
+  std::array<Coord, 3> doors{Coord{10, 6, 0}, Coord{11, 6, 0}, Coord{12, 6, 0}};
+  Coord outer{9, 7, 0};
+  Coord inner{11, 5, 0};
 
   // Create doors
   auto mutator = map.get_mutator();
@@ -621,10 +621,10 @@ TEST_F(DoorPathfinding, MultipleDoorsDisconnectingComponents) {
 class DoorPathfindingBigMap : public MapTest<MAP_MAIN> { };
 
 TEST_F(DoorPathfindingBigMap, AdjacentDoorsInCorridor) {
-  Coord upper{68, 71};
-  Coord top_door{69, 71};
-  Coord bot_door{70, 71};
-  Coord lower{71, 71};
+  Coord upper{68, 71, 0};
+  Coord top_door{69, 71, 0};
+  Coord bot_door{70, 71, 0};
+  Coord lower{71, 71, 0};
   assert(map.is_door(top_door));
   assert(map.is_door(bot_door));
 
@@ -642,8 +642,8 @@ TEST_F(DoorPathfindingBigMap, AdjacentDoorsInCorridor) {
 
 
 TEST_F(DoorPathfindingBigMap, OneDoorFiveColors) {
-  Coord door{68, 64};
-  std::array<Coord, 4> cells{Coord{67, 64}, Coord{69, 64}, Coord{68, 63}, Coord{68, 65}};
+  Coord door{68, 64, 0};
+  std::array<Coord, 4> cells{Coord{67, 64, 0}, Coord{69, 64, 0}, Coord{68, 63, 0}, Coord{68, 65, 0}};
 
   for (auto it = cells.begin(); it != cells.end(); ++it) {
     ASSERT_TRUE((bool)map.path(door, *it));
@@ -679,49 +679,49 @@ TEST_F(DoorPathfindingBigMap, OneDoorFiveColors) {
 class Doorland : public MapTest<MAP_DOORLAND> { };
 
 TEST_F(Doorland, DoorTunnelExpensiveSides) {
-  auto easy = map.path({0, 10}, {5, 3});
+  auto easy = map.path({0, 10, 0}, {5, 3, 0});
   ASSERT_NEAR(easy.get_length(), 9.071, 0.1);
   ASSERT_EQ(8, easy.get_path().size());
   for (uint16_t i = 0; i < 5; ++i) {
-    map.mutate(std::move(map.get_mutator().set_door_open_cost({i, 9}, 100)));
-    map.mutate(std::move(map.get_mutator().set_door_open_cost({i, 11}, 100)));
+    map.mutate(std::move(map.get_mutator().set_door_open_cost({i, 9, 0}, 100)));
+    map.mutate(std::move(map.get_mutator().set_door_open_cost({i, 11, 0}, 100)));
   }
-  auto hard = map.path({0, 10}, {5, 3});
+  auto hard = map.path({0, 10, 0}, {5, 3, 0});
   ASSERT_NEAR(hard.get_length(), 12.243, 0.1);
   ASSERT_EQ(12, hard.get_path().size());
 }
 
 
 TEST_F(Doorland, DoorTunnelClosedSides) {
-  auto easy = map.path({0, 10}, {5, 3});
+  auto easy = map.path({0, 10, 0}, {5, 3, 0});
   ASSERT_NEAR(easy.get_length(), 9.071, 0.1);
   ASSERT_EQ(8, easy.get_path().size());
-  map.mutate(std::move(map.get_mutator().set_door_open_cost({4, 10}, 100)));
+  map.mutate(std::move(map.get_mutator().set_door_open_cost({4, 10, 0}, 100)));
   for (uint16_t i = 0; i < 5; ++i) {
-    map.mutate(std::move(map.get_mutator().toggle_door_open({i, 9})));
-    map.mutate(std::move(map.get_mutator().toggle_door_open({i, 11})));
+    map.mutate(std::move(map.get_mutator().toggle_door_open({i, 9, 0})));
+    map.mutate(std::move(map.get_mutator().toggle_door_open({i, 11, 0})));
   }
-  auto hard = map.path({0, 10}, {5, 3});
+  auto hard = map.path({0, 10, 0}, {5, 3, 0});
   ASSERT_NEAR(hard.get_length(), 111.243, 0.1);
   ASSERT_EQ(12, hard.get_path().size());
 }
 
 
 TEST_F(Doorland, DoorlandItsATrap) {
-  Coord start{3, 11};
-  Coord finish{7, 12};
+  Coord start{3, 11, 0};
+  Coord finish{7, 12, 0};
   auto escape = map.path(start, finish);
   ASSERT_NEAR(escape.get_length(), 4.414, 0.1);
   ASSERT_EQ(5, escape.get_path().size());
 
   // Spring all but last "wall"
-  map.mutate(std::move(map.get_mutator().toggle_door_open({2, 10})));
-  map.mutate(std::move(map.get_mutator().toggle_door_open({2, 11})));
-  map.mutate(std::move(map.get_mutator().toggle_door_open({2, 12})));
-  map.mutate(std::move(map.get_mutator().toggle_door_open({3, 12})));
-  map.mutate(std::move(map.get_mutator().toggle_door_open({4, 10})));
-  map.mutate(std::move(map.get_mutator().toggle_door_open({4, 11})));
-  map.mutate(std::move(map.get_mutator().toggle_door_open({4, 12})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({2, 10, 0})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({2, 11, 0})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({2, 12, 0})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({3, 12, 0})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({4, 10, 0})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({4, 11, 0})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({4, 12, 0})));
 
   // Can still escape but route is longer!
   escape = map.path(start, finish);
@@ -729,7 +729,7 @@ TEST_F(Doorland, DoorlandItsATrap) {
   ASSERT_EQ(6, escape.get_path().size());
 
   // Last one
-  map.mutate(std::move(map.get_mutator().toggle_door_open({3, 10})));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({3, 10, 0})));
 
   // Too late!
   ASSERT_FALSE(map.path(start, finish));

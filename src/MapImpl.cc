@@ -439,6 +439,9 @@ void MapImpl::print_map(std::ostream& os, const Path& path_to_show) const {
       os << (data.at(c) == PATH_COST_INFINITE ? '*' : ' ');
     }
     if (c.col == 0) {
+      if (c.row == 0) {
+        os << std::endl;
+      }
       os << std::endl;
     }
   }
@@ -446,67 +449,78 @@ void MapImpl::print_map(std::ostream& os, const Path& path_to_show) const {
 
 
 void MapImpl::print_colors(std::ostream& os) const {
-  for (uint16_t j = 0; j < get_size().row; ++j) {
-    for (uint16_t i = 0; i < get_size().col; ++i) {
-      int_least32_t c = color.at(j, i);
-      auto door = doors.find({j, i});
-      if (door != doors.end()) {
-        if (doors.find({j, i})->second.open) {
-          os << '_';
-        } else {
-          os << 'd';
-        }
-      } else if (data.at(j, i) != PATH_COST_INFINITE) {
-        os << (char)(c + 'A');
+  for (const Coord& coord : CoordRange(get_size())) {
+    int_least32_t c = color.at(coord);
+    auto door = doors.find(coord);
+    if (door != doors.end()) {
+      if (doors.find(coord)->second.open) {
+        os << '_';
       } else {
-        os << '*';
+        os << 'd';
       }
+    } else if (data.at(coord) != PATH_COST_INFINITE) {
+      os << (char)(c + 'A');
+    } else {
+      os << '*';
     }
-    os << std::endl;
+    if (coord.col == 0) {
+      if (coord.row == 0) {
+        os << std::endl;
+      }
+      os << std::endl;
+    }
   }
   os << std::endl;
 }
 
 
 void MapImpl::print_static_components(std::ostream& os) const {
-  for (uint16_t j = 0; j < get_size().row; ++j) {
-    for (uint16_t i = 0; i < get_size().col; ++i) {
-      if (color.at(j, i) == COLOR_IMPASSABLE) {
-        os << ' ';
+  for (const Coord& coord : CoordRange(get_size())) {
+    if (color.at(coord) == COLOR_IMPASSABLE) {
+      os << ' ';
+    } else {
+      int_least32_t c = static_component.at(color.at(coord));
+      char start = c < 0 ? 'Z' : 'A';
+      if (c < 25) {
+        os << (char)(c + start);
       } else {
-        int_least32_t c = static_component.at(color.at(j, i));
-        char start = c < 0 ? 'Z' : 'A';
-        if (c < 25) {
-          os << (char)(c + start);
-        } else {
-          os << ' ' << c << ' ';
-        }
+        os << ' ' << c << ' ';
       }
     }
-    os << std::endl;
+    if (coord.col == 0) {
+      if (coord.row == 0) {
+        os << std::endl;
+      }
+      os << std::endl;
+    }
   }
+  os << std::endl;
 }
 
 
 void MapImpl::print_dynamic_components(std::ostream& os) const {
-  for (uint16_t j = 0; j < get_size().row; ++j) {
-    for (uint16_t i = 0; i < get_size().col; ++i) {
-      if (color.at(j, i) == COLOR_IMPASSABLE) {
-        os << ' ';
-      } else {
-        int_least32_t c = dynamic_component.lookup(
-            static_component.at(color.at(j, i))
+  for (const Coord& coord : CoordRange(get_size())) {
+    if (color.at(coord) == COLOR_IMPASSABLE) {
+      os << ' ';
+    } else {
+      int_least32_t c = dynamic_component.lookup(
+          static_component.at(color.at(coord))
           );
-        char start = c < 0 ? 'Z' : 'A';
-        if (c < 25) {
-          os << (char)(c + start);
-        } else {
-          os << ' ' << c << ' ';
-        }
+      char start = c < 0 ? 'Z' : 'A';
+      if (c < 25) {
+        os << (char)(c + start);
+      } else {
+        os << ' ' << c << ' ';
       }
     }
-    os << std::endl;
+    if (coord.col == 0) {
+      if (coord.row == 0) {
+        os << std::endl;
+      }
+      os << std::endl;
+    }
   }
+  os << std::endl;
 }
 
 

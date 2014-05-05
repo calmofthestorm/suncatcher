@@ -42,11 +42,6 @@ class Coord {
       col(col_i),
       layer(layer_i) { }
 
-    inline Coord(uint16_t row_i, uint16_t col_i)
-    : row(row_i),
-      col(col_i),
-      layer(0) { }
-
     uint16_t row, col, layer;
 
     inline bool operator!= (const Coord& other) const {
@@ -87,7 +82,7 @@ class Coord {
 };
 
 inline std::ostream& operator<< (std::ostream& os, const Coord& c) {
-  os << '(' << c.row << ", " << c.col << ')';
+  os << '(' << c.row << ", " << c.col << ", " << c.layer << ')';
   return os;
 }
 

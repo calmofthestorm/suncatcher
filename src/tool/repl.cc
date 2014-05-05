@@ -76,8 +76,8 @@ int main(int argc, char** argv) {
   Path my_path;
 
   if (argc == 4) {
-    Coord start{1, 1};
-    Coord finish{(uint16_t)atoi(argv[2]), (uint16_t)atoi(argv[3])};
+    Coord start{1, 1, 0};
+    Coord finish{(uint16_t)atoi(argv[2]), (uint16_t)atoi(argv[3]), 0};
     MP_VECTOR<void*> pa;
     float co = 23;
 
@@ -105,8 +105,8 @@ int main(int argc, char** argv) {
           std::cin >> a >> b >> c >> d;
           MP_VECTOR<void*> pa;
           float co = 23;
-          Coord start{a, b};
-          Coord finish{c, d};
+          Coord start{a, b, 0};
+          Coord finish{c, d, 0};
 
           timer();
           my_path = my_map.path(start, finish);

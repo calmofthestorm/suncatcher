@@ -35,7 +35,8 @@ inline float MapImpl::move_cost(Coord start, Coord finish) const {
   assert(get_data().check_bounds(start));
   assert(get_data().check_bounds(finish));
   assert(std::abs(start.row - finish.row) <= 1 &&
-        std::abs(start.col - finish.col) <= 1);
+         std::abs(start.col - finish.col) <= 1 &&
+         std::abs(start.layer - finish.layer) <= 1);
   assert(is_passable(start));
   if (!is_passable(finish)) {
     return -1;
@@ -45,12 +46,22 @@ inline float MapImpl::move_cost(Coord start, Coord finish) const {
     return 0;
   }
 
+  if (start.layer != finish.layer) {
+    if (start.row == finish.row && start.col == finish.col) {
+      return get_data().at(finish);
+    } else {
+      return -1;
+    }
+  }
+
   if (start.row == finish.row || start.col == finish.col) {
     return get_data().at(finish);
   }
 
+  assert(start.layer == finish.layer);
   // Can only move diagonally if Manhattan squares are passable.
-  if (is_passable({start.row, finish.col}) || is_passable({finish.row, start.col})) {
+  if (is_passable({start.row, finish.col, start.layer}) ||
+      is_passable({finish.row, start.col, start.layer})) {
     return get_data().at(finish) * (float)1.4142135623730951;
   } else {
     return -1;

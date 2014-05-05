@@ -35,8 +35,12 @@ inline Coord CoordRange::iterator::operator*() const {
 inline CoordRange::iterator& CoordRange::iterator::operator++() {
   if (++pos.col == size.col) {
     pos.col = 0;
-    ++pos.row;
+    if (++pos.row == size.row) {
+      pos.row = 0;
+      ++pos.layer;
+    }
   }
+  return *this;
 }
 
 
@@ -53,15 +57,15 @@ inline bool CoordRange::iterator::operator!=(
 
 
 inline CoordRange::iterator CoordRange::begin() {
-  return iterator(Coord(0, 0), size);
+  return iterator(Coord(0, 0, 0), size);
 }
 
 
 inline CoordRange::iterator CoordRange::end() {
-  if (size.row == 0 || size.col == 0) {
+  if (size.row == 0 || size.col == 0 || size.layer == 0) {
     return begin();
   } else {
-    return iterator(Coord(size.row, 0), size);
+    return iterator(Coord(0, 0, size.layer), size);
   }
 }
 

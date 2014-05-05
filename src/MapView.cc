@@ -55,7 +55,7 @@ MapView::MapView(std::shared_ptr<MapImpl> backing)
 
 Path MapView::path(Coord src, Coord dst) const {
   Grid<uint_fast8_t> expanded(size(), 0);
-  Grid<Coord> previous(size(), {(uint16_t)-1, (uint16_t)-1});
+  Grid<Coord> previous(size(), {(uint16_t)-1, (uint16_t)-1, (uint16_t)-1});
   size_t num_expanded = 0;
 
   if (!map->get_data().check_bounds(src) || !map->get_data().check_bounds(dst)) {

@@ -57,15 +57,22 @@ class MicropatherGraph : public micropather::Graph {
     virtual void PrintStateInfo(void*) const { }
 
     void* encode(const pathfinder::Coord& c) const {
-      uintptr_t encoded = (c.row * graph.size().col + c.col);
+      static_assert(sizeof(c.row) + sizeof(c.col) + sizeof(c.layer) <=
+                    sizeof(void*), "");
+      uintptr_t encoded = c.col + graph.size().col * (c.row + graph.size().row * c.layer);
       return (void*)encoded;
     }
 
     pathfinder::Coord decode(void* c) const {
       uintptr_t encoded = (uintptr_t)c;
       uintptr_t width = graph.size().col;
-      return {(uint16_t)(encoded / width),
-              (uint16_t)(encoded % width)};
+      uintptr_t height = graph.size().row;
+      pathfinder::Coord rval;
+      rval.layer = encoded / (width * height);
+      encoded %= (width * height);
+      rval.row = encoded / width;
+      rval.col = encoded % width;
+      return rval;
     }
 
   private:

@@ -22,6 +22,7 @@
 
 #include "suncatcher.hh"
 #include "suncatcher/MapImpl.hh"
+#include "suncatcher/CoordRange.hh"
 
 namespace suncatcher {
 namespace pathfinder {
@@ -29,7 +30,7 @@ namespace pathfinder {
 
 
 MapBuilder::MapBuilder()
-: data({0, 0}, 0),
+: data({0, 0, 0}, 0),
   dynamic_updates(true),
   doors() { }
 
@@ -53,25 +54,27 @@ MapBuilder::MapBuilder(std::istream& is) {
 
   std::string line;
   Coord size;
-  is >> size.row >> size.col;
+  is >> size.row >> size.col >> size.layer;
   std::getline(is, line);
   assert(is);
   *this = MapBuilder(size, 1);
-  Coord cell;
-  for (cell.row = 0; cell.row < size.row; ++cell.row) {
-    std::getline(is, line);
-    assert(is);
-    assert(line.size() >= size.col);
-    for (cell.col = 0; cell.col < size.col; ++cell.col) {
-      cost(cell) = (line[cell.col] == '*' ? PATH_COST_INFINITE : 1);
-      if (line[cell.col] == 'd') {
-        add_door(cell, true, 1, PATH_COST_INFINITE);
-        door_index_to_coords.push_back(cell);
-      } else if (line[cell.col] == 'D') {
-        add_door(cell, false, 1, PATH_COST_INFINITE);
-        door_index_to_coords.push_back(cell);
-      }
+  line.clear();
+  auto it = line.begin();
+  for (const Coord& cell : CoordRange(size)) {
+    if (it == line.end()) {
+      std::getline(is, line);
+      it = line.begin();
     }
+    assert(is);
+    cost(cell) = *it == '*' ? PATH_COST_INFINITE : 1;
+    if (*it == 'd') {
+      add_door(cell, true, 1, PATH_COST_INFINITE);
+      door_index_to_coords.push_back(cell);
+    } else if (*it == 'D') {
+      add_door(cell, false, 1, PATH_COST_INFINITE);
+      door_index_to_coords.push_back(cell);
+    }
+    ++it;
   }
 }
 
