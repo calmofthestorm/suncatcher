@@ -50,7 +50,6 @@ void MapBuilder::add_door(Coord cell, bool open, uint_least8_t cost_open,
 
 
 MapBuilder::MapBuilder(std::istream& is) {
-  std::vector<Coord> door_index_to_coords;
 
   std::string line;
   Coord size;
@@ -61,18 +60,16 @@ MapBuilder::MapBuilder(std::istream& is) {
   line.clear();
   auto it = line.begin();
   for (const Coord& cell : CoordRange(size)) {
-    if (it == line.end()) {
+    while (it == line.end()) {
       std::getline(is, line);
       it = line.begin();
     }
     assert(is);
-    cost(cell) = *it == '*' ? PATH_COST_INFINITE : 1;
+    cost(cell) = (*it == '*') ? PATH_COST_INFINITE : 1;
     if (*it == 'd') {
       add_door(cell, true, 1, PATH_COST_INFINITE);
-      door_index_to_coords.push_back(cell);
     } else if (*it == 'D') {
       add_door(cell, false, 1, PATH_COST_INFINITE);
-      door_index_to_coords.push_back(cell);
     }
     ++it;
   }

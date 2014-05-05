@@ -30,12 +30,12 @@ inline Grid<T>::Grid()
 template <typename T>
 inline Grid<T>::Grid(const pathfinder::Coord size_in, const T& val)
 : my_size(size_in),
-  backing(size_in.row * size_in.col, val) { }
+  backing(size_in.row * size_in.col * size_in.layer, val) { }
 
 
 template <typename T>
-inline Grid<T>::Grid(uint16_t r, uint16_t c, const T& val)
-  : Grid({r, c}, val) { }
+inline Grid<T>::Grid(uint16_t r, uint16_t c, uint16_t l, const T& val)
+  : Grid({r, c, l}, val) { }
 
 
 template <typename T>
@@ -46,27 +46,27 @@ inline void Grid<T>::fill(const T& val) {
 
 template <typename T>
 inline T& Grid<T>::at(const pathfinder::Coord cell) {
-  return at(cell.row, cell.col);
+  return at(cell.row, cell.col, cell.layer);
 }
 
 
 template <typename T>
 inline const T& Grid<T>::at(const pathfinder::Coord cell) const {
-  return at(cell.row, cell.col);
+  return at(cell.row, cell.col, cell.layer);
 }
 
 
 template <typename T>
-inline const T& Grid<T>::at(uint16_t row, uint16_t col) const {
-  assert(check_bounds(row, col));
-  return backing[row * my_size.col + col];
+inline const T& Grid<T>::at(uint16_t row, uint16_t col, uint16_t layer) const {
+  assert(check_bounds(row, col, layer));
+  return backing[col + my_size.col * (row + my_size.row * layer)];
 }
 
 
 template <typename T>
-inline T& Grid<T>::at(uint16_t row, uint16_t col) {
-  assert(check_bounds(row, col));
-  return backing[row * my_size.col + col];
+inline T& Grid<T>::at(uint16_t row, uint16_t col, uint16_t layer) {
+  assert(check_bounds(row, col, layer));
+  return backing[col + my_size.col * (row + my_size.row * layer)];
 }
 
 
@@ -97,13 +97,13 @@ inline std::vector<pathfinder::Coord> Grid<T>::get_adjacent(
 
 template <typename T>
 inline bool Grid<T>::check_bounds(const pathfinder::Coord cell) const {
-  return check_bounds(cell.row, cell.col);
+  return check_bounds(cell.row, cell.col, cell.layer);
 }
 
 
 template <typename T>
-inline bool Grid<T>::check_bounds(uint16_t row, uint16_t col) const {
-  return (row < my_size.row && col < my_size.col);
+inline bool Grid<T>::check_bounds(uint16_t row, uint16_t col, uint16_t layer) const {
+  return (row < my_size.row && col < my_size.col && layer < my_size.layer);
 }
 
 

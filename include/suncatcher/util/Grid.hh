@@ -41,15 +41,15 @@ class Grid {
 
     inline Grid(const pathfinder::Coord size_in, const T& val);
 
-    inline Grid(uint16_t r, uint16_t c, const T& val);
+    inline Grid(uint16_t row, uint16_t col, uint16_t layer, const T& val);
 
     inline void fill(const T& val);
 
     inline T& at(const pathfinder::Coord cell);
     inline const T& at(const pathfinder::Coord cell) const;
 
-    inline T& at(uint16_t row, uint16_t col);
-    inline const T& at(uint16_t row, uint16_t col) const;
+    inline T& at(uint16_t row, uint16_t col, uint16_t layer);
+    inline const T& at(uint16_t row, uint16_t col, uint16_t layer) const;
 
     inline std::vector<pathfinder::Coord> get_adjacent(
         const pathfinder::Coord cell,
@@ -57,7 +57,7 @@ class Grid {
       ) const;
 
     inline bool check_bounds(const pathfinder::Coord cell) const;
-    inline bool check_bounds(uint16_t row, uint16_t col) const;
+    inline bool check_bounds(uint16_t row, uint16_t col, uint16_t layer) const;
 
     inline const pathfinder::Coord& size() const;
 

@@ -422,6 +422,12 @@ void MapImpl::print_map(std::ostream& os, const Path& path_to_show) const {
   size_t index = 0;
   for (const Coord& c : CoordRange(get_size())) {
     auto door = doors.find(c);
+    if (c.col == 0) {
+      if (c.row == 0) {
+        os << std::endl;
+      }
+      os << std::endl;
+    }
     if (in_path.find(c) != in_path.end()) {
       if (door == doors.end()) {
         os << '.';
@@ -438,12 +444,6 @@ void MapImpl::print_map(std::ostream& os, const Path& path_to_show) const {
     } else {
       os << (data.at(c) == PATH_COST_INFINITE ? '*' : ' ');
     }
-    if (c.col == 0) {
-      if (c.row == 0) {
-        os << std::endl;
-      }
-      os << std::endl;
-    }
   }
 }
 
@@ -452,6 +452,12 @@ void MapImpl::print_colors(std::ostream& os) const {
   for (const Coord& coord : CoordRange(get_size())) {
     int_least32_t c = color.at(coord);
     auto door = doors.find(coord);
+    if (coord.col == 0) {
+      if (coord.row == 0) {
+        os << std::endl;
+      }
+      os << std::endl;
+    }
     if (door != doors.end()) {
       if (doors.find(coord)->second.open) {
         os << '_';
@@ -463,12 +469,6 @@ void MapImpl::print_colors(std::ostream& os) const {
     } else {
       os << '*';
     }
-    if (coord.col == 0) {
-      if (coord.row == 0) {
-        os << std::endl;
-      }
-      os << std::endl;
-    }
   }
   os << std::endl;
 }
@@ -476,6 +476,12 @@ void MapImpl::print_colors(std::ostream& os) const {
 
 void MapImpl::print_static_components(std::ostream& os) const {
   for (const Coord& coord : CoordRange(get_size())) {
+    if (coord.col == 0) {
+      if (coord.row == 0) {
+        os << std::endl;
+      }
+      os << std::endl;
+    }
     if (color.at(coord) == COLOR_IMPASSABLE) {
       os << ' ';
     } else {
@@ -487,12 +493,6 @@ void MapImpl::print_static_components(std::ostream& os) const {
         os << ' ' << c << ' ';
       }
     }
-    if (coord.col == 0) {
-      if (coord.row == 0) {
-        os << std::endl;
-      }
-      os << std::endl;
-    }
   }
   os << std::endl;
 }
@@ -500,6 +500,12 @@ void MapImpl::print_static_components(std::ostream& os) const {
 
 void MapImpl::print_dynamic_components(std::ostream& os) const {
   for (const Coord& coord : CoordRange(get_size())) {
+    if (coord.col == 0) {
+      if (coord.row == 0) {
+        os << std::endl;
+      }
+      os << std::endl;
+    }
     if (color.at(coord) == COLOR_IMPASSABLE) {
       os << ' ';
     } else {
@@ -512,12 +518,6 @@ void MapImpl::print_dynamic_components(std::ostream& os) const {
       } else {
         os << ' ' << c << ' ';
       }
-    }
-    if (coord.col == 0) {
-      if (coord.row == 0) {
-        os << std::endl;
-      }
-      os << std::endl;
     }
   }
   os << std::endl;
