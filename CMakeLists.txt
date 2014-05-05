@@ -17,7 +17,7 @@ if (MSVC)
     add_definitions (/D_CRT_SECURE_NO_WARNINGS)
 else()
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -g -ggdb")
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -g -ggdb -Wall -Wextra -pedantic")
     set(CPPLINT_ARG_OUTPUT      "--output=eclipse")
     set(CPPCHECK_ARG_TEMPLATE   "--template=gcc")
     set(DEV_NULL                "/dev/null")
@@ -159,7 +159,7 @@ add_custom_target(unittest
 # run all unit tests with complete invariant checking.
 add_custom_target(test
     DEPENDS run_unit_tests_verbose
-    COMMAND ${CMAKE_BINARY_DIR}/bin/run_unit_tests_verbose --gtest_color=yes --gtest_shuffle
+    COMMAND SLOWTEST=1 ${CMAKE_BINARY_DIR}/thirdparty/gatherer/gatherer.py bin/run_unit_tests_verbose 4 -- --gtest_color=yes --gtest_shuffle
 )
 
 # add a Doxygen target to the "all" target
