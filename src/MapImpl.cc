@@ -51,9 +51,7 @@ MapImpl::MapImpl(MapBuilder&& builder)
 
 
 MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
-: doors(mutation.view.map->doors),
-  data(mutation.view.map->data),
-  color(mutation.view.map->color) {
+: MapImpl(*mutation.view.map) {
 
   for (const auto& it : mutation.mutations) {
     bool state = it.second.state;
@@ -62,31 +60,24 @@ MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
     auto door_iter = doors.find(cell);
     switch (it.second.kind) {
       case MapMutator::Mutation::Kind::CREATE_DOOR:
-        doors[cell] = Door{state, cost, PATH_COST_INFINITE};
-        data.at(cell) = state ? cost : PATH_COST_INFINITE;
+        incremental_create_door(cell, state, cost);
         break;
 
       case MapMutator::Mutation::Kind::REMOVE_DOOR:
-        doors.erase(doors.find(cell));
-        data.at(cell) = cost;
+        incremental_remove_door(cell, state, cost);
         break;
 
       case MapMutator::Mutation::Kind::SET_COST:
-        data.at(cell) = cost;
+        incremental_set_cost(cell, state, cost);
         break;
 
       case MapMutator::Mutation::Kind::UPDATE_DOOR:
-        if (cost != PATH_COST_INFINITE) {
-          doors.at(cell).cost_open = cost;
-        }
-        doors.at(cell).open ^= state;
-        data.at(cell) = door_iter->second.open ? doors.at(cell).cost_open : PATH_COST_INFINITE;
+        incremental_update_door(cell, state, cost);
         break;
 
       default:
         assert(0);
     }
-    rebuild();
   }
 }
 
@@ -156,6 +147,7 @@ void MapImpl::incremental_transparent_to_wall(Coord cell) {
   int_least32_t old_color = color.at(cell);
   data.at(cell) = PATH_COST_INFINITE;
   color.at(cell) = COLOR_IMPASSABLE;
+  assert(old_color != next_component_color);
   for (const auto& seed : data.get_adjacent(cell, false)) {
     if (color.at(seed) == old_color && is_transparent(seed)) {
       std::stack<Coord> todo;
@@ -340,6 +332,7 @@ void MapImpl::incremental_update_door(Coord cell, bool state, uint_least8_t cost
 // Forces recomputation of all cached information.
 void MapImpl::rebuild() {
   dynamic_component = decltype(dynamic_component)();
+  static_component = decltype(static_component)();
 
   // Temporary function for determining transparancy since doors have not
   // yet been set to appropriate colors.
