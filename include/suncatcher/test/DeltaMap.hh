@@ -1,4 +1,4 @@
-// t a load fromThis file is part of Suncatcher
+// This file is part of Suncatcher
 // Alex Roper <alex@aroper.net>
 //
 // Suncatcher is free software: you can redistribute it and/or modify it under

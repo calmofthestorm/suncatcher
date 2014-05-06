@@ -55,62 +55,48 @@ DeltaMutator::DeltaMutator(MapMutator&& m1_i, MapMutator&& m2_i, bool slow_i)
 
 DeltaMutator::DeltaMutator(DeltaMutator&& other) {
   std::swap(other.m1, m1);
-  if (enable_delta) {
-    std::swap(other.m2, m2);
-  }
+  std::swap(other.m2, m2);
 }
 
 
 DeltaMutator& DeltaMutator::operator=(DeltaMutator&& other) {
   std::swap(other.m1, m1);
-  if (enable_delta) {
-    std::swap(other.m2, m2);
-  }
+  std::swap(other.m2, m2);
   return *this;
 }
 
 
 DeltaMutator& DeltaMutator::set_door_open_cost(Coord door, uint_least8_t cost) {
   m1.set_door_open_cost(door, cost);
-  if (enable_delta) {
-    m2.set_door_open_cost(door, cost);
-  }
+  m2.set_door_open_cost(door, cost);
   return *this;
 }
 
 
 DeltaMutator& DeltaMutator::set_door_open(Coord door, bool open) {
   m1.set_door_open(door, open);
-  if (enable_delta) {
-    m2.set_door_open(door, open);
-  }
+  m2.set_door_open(door, open);
   return *this;
 }
 
 
 DeltaMutator& DeltaMutator::toggle_door_open(Coord door) {
   m1.toggle_door_open(door);
-  if (enable_delta) {
-    m2.toggle_door_open(door);
-  }
+  m2.toggle_door_open(door);
   return *this;
 }
 
 
 DeltaMutator& DeltaMutator::set_cost(Coord cell, uint_least8_t cost) {
   m1.set_cost(cell, cost);
-  if (enable_delta) {
-    m2.set_cost(cell, cost);
-  }
+  m2.set_cost(cell, cost);
   return *this;
 }
 
 
 DeltaMutator& DeltaMutator::create_door(Coord cell, bool open, uint_least8_t open_cost) {
   m1.create_door(cell, open, open_cost);
-  if (enable_delta) {
-    m2.create_door(cell, open, open_cost);
-  }
+  m2.create_door(cell, open, open_cost);
   return *this;
 }
 
@@ -202,8 +188,8 @@ Path DeltaMap::path(Coord start, Coord finish) const {
 
 DeltaMutator DeltaMap::get_mutator() {
   return DeltaMutator(
-      MapMutator(simple_map),
       MapMutator(optimized_map),
+      MapMutator(simple_map),
       enable_delta
     );
 }
@@ -212,7 +198,7 @@ DeltaMutator DeltaMap::get_mutator() {
 void DeltaMap::mutate(const DeltaMutator& mutator) {
   optimized_map = mutator.m1.execute();
   if (enable_delta) {
-    simple_map = mutator.m2.execute(true);
+    simple_map = mutator.m2.execute(false);
     check_invariant();
   } else {
     simple_map = optimized_map;
