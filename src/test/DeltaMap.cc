@@ -177,12 +177,22 @@ bool DeltaMap::is_door(Coord start) const {
 
 
 bool DeltaMap::path_exists(Coord start, Coord finish) const {
-  return optimized_map.path_exists(start, finish);
+  bool opt = optimized_map.path_exists(start, finish);
+  if (enable_delta) {
+    bool sim = simple_map.path_exists(start, finish);
+    assert(opt == sim);
+  }
+  return opt;
 }
 
 
 Path DeltaMap::path(Coord start, Coord finish) const {
-  return optimized_map.path(start, finish);
+  Path opt = optimized_map.path(start, finish);
+  if (enable_delta) {
+    Path sim = simple_map.path(start, finish);
+    assert(opt == sim);
+  }
+  return opt;
 }
 
 
