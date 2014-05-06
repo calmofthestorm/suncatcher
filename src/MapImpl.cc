@@ -119,8 +119,7 @@ void MapImpl::incremental_wall_to_transparent(Coord cell) {
 void MapImpl::incremental_closed_door_to_open_door(Coord cell, DoorIter door_iter) {
   int_least32_t door_static_component = static_component.at(color.at(cell));
   for (const auto& n : data.get_adjacent(cell, false)) {
-    if (color.at(n) != COLOR_IMPASSABLE &&
-        (!is_door(n) || (doors.find(n)->second.open && n < cell))) {
+    if (is_passable(n)) {
       dynamic_component.add_edge(
           static_component.at(color.at(n)),
           door_static_component
@@ -181,8 +180,7 @@ void MapImpl::incremental_transparent_to_wall(Coord cell) {
     if (door.second.open) {
       int_least32_t door_static_component = static_component.at(color.at(door.first));
       for (const auto& n : data.get_adjacent(door.first, false)) {
-        if (color.at(n) != COLOR_IMPASSABLE &&
-            (!is_door(n) || (doors.find(n)->second.open && n < door.first))) {
+        if (is_passable(n)) {
           dynamic_component.add_edge(
               static_component.at(color.at(n)),
               door_static_component
@@ -405,8 +403,7 @@ void MapImpl::rebuild() {
     if (door.second.open) {
       int_least32_t door_static_component = static_component.at(color.at(door.first));
       for (const auto& n : data.get_adjacent(door.first, false)) {
-        if (color.at(n) != COLOR_IMPASSABLE &&
-            (!is_door(n) || (doors.find(n)->second.open && n < door.first))) {
+        if (is_passable(n)) {
           dynamic_component.add_edge(
               static_component.at(color.at(n)),
               door_static_component
