@@ -38,6 +38,7 @@ inline float MapImpl::move_cost(Coord start, Coord finish) const {
          std::abs(start.col - finish.col) <= 1 &&
          std::abs(start.layer - finish.layer) <= 1);
   assert(is_passable(start));
+
   if (!is_passable(finish)) {
     return -1;
   }

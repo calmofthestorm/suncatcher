@@ -217,6 +217,7 @@ void CrossWorld::check() {
   make_impassable({5, 6, 2});
 }
 
+
 class OptWall : public CrossWorld {
   protected:
     virtual void make_impassable(Coord cell) {
@@ -227,6 +228,21 @@ class OptWall : public CrossWorld {
       map.mutate(std::move(map.get_mutator().set_cost(cell, 10)));
     }
 };
+
+
+// Verifies that when we do a flood fill of all neighbors of a wall,
+// we look at the static components of the neighbors, rather than their
+// colors.
+TEST_F(OptWall, ColorComponentRegression) {
+  auto m = map.get_mutator();
+  m.set_cost({3, 5, 2}, 1);
+  m.set_cost({7, 5, 2}, 1);
+  map.mutate(m);
+  map.mutate(map.get_mutator().set_cost({5, 2, 2}, 1));
+  map.mutate(map.get_mutator().set_cost({5, 2, 2}, PATH_COST_INFINITE));
+  ASSERT_FALSE(map.path_exists({4, 6, 2}, {6, 6, 2}));
+}
+
 
 TEST_F(OptWall, Sanity) {
   std::vector<Coord> interesting{Coord{1, 1, 2}, Coord{1, 8, 2}, Coord{8, 8, 2},

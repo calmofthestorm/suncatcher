@@ -80,6 +80,10 @@ MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
         assert(0);
     }
   }
+
+  if (!incremental) {
+    rebuild();
+  }
 }
 
 
@@ -145,12 +149,12 @@ void MapImpl::incremental_open_door_to_closed_door(Coord cell, DoorIter door_ite
 
 
 void MapImpl::incremental_transparent_to_wall(Coord cell) {
-  int_least32_t old_color = color.at(cell);
+  int_least32_t old_static_component = static_component.at(color.at(cell));
   data.at(cell) = PATH_COST_INFINITE;
   color.at(cell) = COLOR_IMPASSABLE;
-  assert(old_color != next_component_color);
   for (const auto& seed : data.get_adjacent(cell, false)) {
-    if (color.at(seed) == old_color && is_transparent(seed)) {
+    if (is_transparent(seed) && 
+        static_component.at(color.at(seed)) == old_static_component) {
       std::stack<Coord> todo;
       todo.push(seed);
       dynamic_component.add_component(static_component[next_component_color]);
@@ -161,7 +165,7 @@ void MapImpl::incremental_transparent_to_wall(Coord cell) {
         todo.pop();
         // Explore neighbors, but only Manhattan adjacent ones.
         for (const auto& n : data.get_adjacent(cur, false)) {
-          if (is_transparent(n) && color.at(n) == old_color) {
+          if (is_transparent(n) && static_component.at(color.at(n)) == old_static_component) {
             todo.push(n);
             color.at(n) = next_component_color;
           }
@@ -172,7 +176,7 @@ void MapImpl::incremental_transparent_to_wall(Coord cell) {
   }
 
   // Recalculate dynamic components.
-  dynamic_component.isolate_component(static_component.at(old_color));
+  dynamic_component.isolate_component(old_static_component);
   for (const auto& door : doors) {
     if (door.second.open) {
       int_least32_t door_static_component = static_component.at(color.at(door.first));
@@ -483,7 +487,7 @@ void MapImpl::print_static_components(std::ostream& os) const {
       os << std::endl;
     }
     if (color.at(coord) == COLOR_IMPASSABLE) {
-      os << ' ';
+      os << '*';
     } else {
       int_least32_t c = static_component.at(color.at(coord));
       char start = c < 0 ? 'Z' : 'A';
@@ -507,7 +511,7 @@ void MapImpl::print_dynamic_components(std::ostream& os) const {
       os << std::endl;
     }
     if (color.at(coord) == COLOR_IMPASSABLE) {
-      os << ' ';
+      os << '*';
     } else {
       int_least32_t c = dynamic_component.lookup(
           static_component.at(color.at(coord))
