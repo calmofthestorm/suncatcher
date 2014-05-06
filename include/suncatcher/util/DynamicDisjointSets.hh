@@ -18,8 +18,8 @@
 #ifndef DYNAMICDISJOINTSETS_aad82f09d61946839aa33f7c20060e92
 #define DYNAMICDISJOINTSETS_aad82f09d61946839aa33f7c20060e92
 
+#include <set>
 #include <utility>
-#include <unordered_map>
 #include <vector>
 
 #include <boost/functional/hash.hpp>
@@ -50,9 +50,7 @@ namespace util {
 
 
 // The DynamicDisjointSets is used to maintain the connections between
-// components in a structure that is efficient to update. Adding an edge
-// between components will always be constant time. Removing an edge may in the
-// worst case be linear in graph size.
+// components in a structure that is efficient to update.
 //
 // Internally, a union find is used to efficiently merge components, and
 // potentially disconnect components trigger a regeneration of the union find.
@@ -64,45 +62,36 @@ namespace util {
 // Probably overkill. TLDR this class could be faster but I doubt it matters
 // -- its worst ops are linear in number of components, which just won't get
 // that big, and the linear ops aren't THAT frequent.
+// TODO: evaluate boost multiindex and/or bimap for our state.
 template <typename T>
 class DynamicDisjointSets {
   public:
     // Adds a node with the given label to the graph with no adjacent nodes.
-    // No effect if label exists. Amortized constant time, though vector
-    // resizes are involved so it's a slow constant time.
+    // No effect if label exists.
     inline void add_component(T label);
 
     // Adds an edge between two labels, merging their equivalence classes.
-    // Edges are weighted, so adding an edge N times means it must be removed N
-    // times to actually be gone. If either label does not exist, it's a no-op.
-    // Amortized constant time.
+    // Both labels must exist.
     inline void add_edge(T label1, T label2);
 
-    // Decrements an edge's weight by 1, removing it if the weight reaches 0.
-    // Constant time if the edge is not removed, linear if it is. Asserts edge
-    // weight is non-zero/edge exists.
-    inline void remove_edge(T label1, T label2);
-    inline void remove_edges(const std::vector<std::pair<T, T>>& edges);
-
-    // Remove all of the label's adjacent edges (but not it). Linear.
+    // Remove all of the label's adjacent edges (but not it).
     inline void isolate_component(T label);
 
     // Get a representative label for the given label. All nodes in an
     // equivalence class will have the same representative label. Note that
     // adding or removing edges may change the representative for any/all
-    // labels. Asserts label is valid. Amortized constant time.
+    // labels. Asserts label is valid.
     inline T lookup(T label) const;
 
     // Convenience function that returns whether two labels are equivalent.
-    // Asserts labels are valid. Amortized constant time.
+    // Asserts labels are valid.
     inline bool equivalent(T label1, T label2) const;
 
   private:
     friend class test::DeltaMap;
-    void rebuild();
 
     UnionFind<T> uf;
-    std::unordered_map<std::pair<T, T>, unsigned int> weights;
+    std::set<std::pair<T, T>> edges;
 };
 
 
