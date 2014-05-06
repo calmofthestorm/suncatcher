@@ -17,7 +17,10 @@
 
 #ifdef _MSC_VER
   #define NOEXCEPT _NOEXCEPT
+  #define ALIGNED_8 __attribute__ __declspec( align(8) )
 #else
+  // g++ & clang
+  #define ALIGNED_8 __attribute__((__aligned__(8)))
   #define NOEXCEPT noexcept
 #endif
 

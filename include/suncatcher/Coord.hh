@@ -25,6 +25,8 @@
 #include <limits>
 #include <type_traits>
 
+#include "platform.hh"
+
 namespace suncatcher {
 namespace pathfinder {
 
@@ -79,7 +81,7 @@ class Coord {
       return ((uint64_t)col + coord_max *
               ((uint64_t)row + coord_max * (uint64_t)layer));
     }
-};
+} ALIGNED_8;
 
 inline std::ostream& operator<< (std::ostream& os, const Coord& c) {
   os << '(' << c.row << ", " << c.col << ", " << c.layer << ')';
