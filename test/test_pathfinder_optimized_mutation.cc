@@ -449,3 +449,50 @@ TEST_F(SolidWorld, ConnectDisconnect) {
     }
   }
 }
+
+
+class Doors : public SolidWorld { };
+
+
+TEST_F(Doors, DoorsPassOnDynConRegression1) {
+  auto m = map.get_mutator();
+  Coord d1(3, 4, 0);
+  Coord d2(3, 6, 0);
+  m.create_door(d1, true, 1);
+  m.create_door(d2, true, 1);
+  map.mutate(m);
+
+  map.mutate(map.get_mutator().create_door({3, 5, 0}, true, 1));
+  ASSERT_TRUE(map.path_exists(d1, d2));
+}
+
+
+TEST_F(Doors, DoorsPassOnDynConRegression2) {
+  auto m = map.get_mutator();
+  Coord d1(3, 4, 0);
+  Coord d2(3, 6, 0);
+  m.create_door(d1, true, 1);
+  m.create_door(d2, true, 1);
+  map.mutate(m);
+
+  map.mutate(map.get_mutator().create_door({3, 5, 0}, false, 1));
+  ASSERT_FALSE(map.path_exists(d1, d2));
+  map.mutate(map.get_mutator().toggle_door_open({3, 5, 0}));
+  ASSERT_TRUE(map.path_exists(d1, d2));
+}
+
+
+TEST_F(Doors, RemoveWallNextToClosedDoorCantPathToItRegression) {
+  auto m = map.get_mutator();
+  Coord d(3, 4, 0);
+  Coord w1(3, 5, 0);
+  Coord w2(3, 3, 0);
+  m.create_door(d, false, 1);
+  map.mutate(m);
+
+  ASSERT_FALSE(map.path_exists(w1, w2));
+  map.mutate(map.get_mutator().set_cost(w1, 1));
+  map.mutate(map.get_mutator().set_cost(w2, 1));
+  ASSERT_FALSE(map.path_exists(w1, d));
+  ASSERT_FALSE(map.path_exists(w1, w2));
+}
