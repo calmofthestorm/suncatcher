@@ -51,6 +51,9 @@ extern const char MAP_CROSS[];
 extern const char MAP_MAIN[];
 extern const char MAP_DOORLAND[];
 extern const char MAP_MICRO[];
+extern const char MAP_CUBE3[];
+extern const char MAP_CUBE5[];
+extern const char MAP_OCTANTS[];
 
 using suncatcher::util::manhattan;
 using suncatcher::pathfinder::Map;

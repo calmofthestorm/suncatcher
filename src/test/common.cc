@@ -20,12 +20,16 @@
 namespace suncatcher {
 namespace test {
 
+// Need to actually exist since we point to them as template arguments.
 extern const char MAP_OPEN[] = "open";
 extern const char MAP_SMALL_OPEN[] = "small_open";
 extern const char MAP_CROSS[] = "cross";
 extern const char MAP_MAIN[] = "map";
 extern const char MAP_DOORLAND[] = "doorland";
 extern const char MAP_MICRO[] = "micro";
+extern const char MAP_CUBE3[] = "cube3";
+extern const char MAP_CUBE5[] = "cube5";
+extern const char MAP_OCTANTS[] = "octants";
 
 }  // namespace test
 }  // namespace suncatcher
