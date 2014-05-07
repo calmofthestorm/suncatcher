@@ -415,7 +415,7 @@ void MapImpl::rebuild() {
 }
 
 
-void MapImpl::print_map(std::ostream& os, const Path& path_to_show) const {
+void MapImpl::print_map(std::ostream& os, bool number_doors, const Path& path_to_show) const {
   std::set<Coord> in_path(
       path_to_show.get_path().begin(),
       path_to_show.get_path().end()
@@ -437,15 +437,22 @@ void MapImpl::print_map(std::ostream& os, const Path& path_to_show) const {
         os << "\033[1m.\033[0m";
       }
     } else if (door != doors.end()) {
-      if (door->second.open) {
+      if (!door->second.open) {
+        os << "\033[1m";
+      }
+      if (number_doors) {
         os << index++;
       } else {
-        os << "\033[1m" << index++ << "\033[0m";
+        os << 'd';
+      }
+      if (!door->second.open) {
+        os << "\033[0m";
       }
     } else {
       os << (data.at(c) == PATH_COST_INFINITE ? '*' : ' ');
     }
   }
+  os << std::endl;
 }
 
 
@@ -487,7 +494,7 @@ void MapImpl::print_static_components(std::ostream& os) const {
       os << '*';
     } else {
       int_least32_t c = static_component.at(color.at(coord));
-      char start = c < 0 ? 'Z' : 'A';
+      char start = c < 0 ? 'z' : 'A';
       if (c < 25) {
         os << (char)(c + start);
       } else {
@@ -512,8 +519,8 @@ void MapImpl::print_dynamic_components(std::ostream& os) const {
     } else {
       int_least32_t c = dynamic_component.lookup(
           static_component.at(color.at(coord))
-          );
-      char start = c < 0 ? 'Z' : 'A';
+        );
+      char start = c < 0 ? 'z' : 'A';
       if (c < 25) {
         os << (char)(c + start);
       } else {

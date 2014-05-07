@@ -108,7 +108,7 @@ class MapImpl {
     void print_colors(std::ostream& os) const;
     void print_static_components(std::ostream& os) const;
     void print_dynamic_components(std::ostream& os) const;
-    void print_map(std::ostream& os, const Path& path={}) const;
+    void print_map(std::ostream& os, bool number_doors=true, const Path& path={}) const;
 
   private:
     friend class test::DeltaMap;

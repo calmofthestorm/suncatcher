@@ -35,7 +35,7 @@ class Path {
     : path(),
       length(-1) { }
 
-    inline explicit Path(std::vector<Coord>&& path_i, float length_i)
+    inline Path(std::vector<Coord>&& path_i, float length_i)
     : path(path_i),
       length(length_i) { }
 
