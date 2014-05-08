@@ -92,29 +92,31 @@ Path MapView::path(Coord src, Coord dst) const {
     Entry cur = fringe.top();
     assert(is_passable(cur.pos));
     fringe.pop();
-    expanded.at(cur.pos) = 1;
-    ++num_expanded;
+    if (!expanded.at(cur.pos)) {
+      expanded.at(cur.pos) = 1;
+      ++num_expanded;
 
-    if (cur.pos == dst) {
-      // TODO: unnecessary copy
-      std::vector<Coord> rval{dst};
-      rval.reserve((unsigned int)(distance.at(dst) + 1));
-      while (rval.back() != src) {
-        rval.push_back(previous.at(rval.back()));
+      if (cur.pos == dst) {
+        // TODO: unnecessary copy
+        std::vector<Coord> rval{dst};
+        rval.reserve((unsigned int)(distance.at(dst) + 1));
+        while (rval.back() != src) {
+          rval.push_back(previous.at(rval.back()));
+        }
+        std::reverse(rval.begin(), rval.end());
+        return Path(std::move(rval), distance.at(dst));
       }
-      std::reverse(rval.begin(), rval.end());
-      return Path(std::move(rval), distance.at(dst));
-    }
 
-    for (const auto& next : map->get_adjacent(cur.pos)) {
-      float cost = move_cost(cur.pos, next);
-      float my_dist = distance.at(cur.pos) + cost;
-      if (distance.at(next) > my_dist &&
-          !expanded.at(next) &&
-          cost != -1) {
-        distance.at(next) = my_dist;
-        fringe.push({next, manhattan(next, dst) + my_dist});
-        previous.at(next) = cur.pos;
+      for (const auto& next : map->get_adjacent(cur.pos)) {
+        float cost = move_cost(cur.pos, next);
+        float my_dist = distance.at(cur.pos) + cost;
+        if (distance.at(next) > my_dist &&
+            !expanded.at(next) &&
+            cost != -1) {
+          distance.at(next) = my_dist;
+          fringe.push({next, manhattan(next, dst) + my_dist});
+          previous.at(next) = cur.pos;
+        }
       }
     }
   }
