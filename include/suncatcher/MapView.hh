@@ -25,7 +25,6 @@
 #include <memory>
 #include <vector>
 
-#include "suncatcher/util/DynamicDisjointSets.hh"
 #include "suncatcher/util/Grid.hh"
 #include "suncatcher/util/UnionFind.hh"
 
