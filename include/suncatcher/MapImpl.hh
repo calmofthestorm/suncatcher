@@ -48,7 +48,9 @@
 #include "suncatcher/Path.hh"
 #include "suncatcher/Door.hh"
 #include "suncatcher/GraphDelegate.hh"
-#include "suncatcher/EuclideanGraph.hh"
+
+//TODO bad
+#include "suncatcher/graph/EuclideanGraph.hh"
 
 namespace suncatcher {
 

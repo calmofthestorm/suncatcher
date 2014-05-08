@@ -30,9 +30,14 @@
 #include "suncatcher.hh"
 #include "suncatcher/Coord.hh"
 #include "suncatcher/util/Grid.hh"
-#include "suncatcher/EuclideanGraph.hh"
 
 // #define POLYMORPHIC_API
+#ifdef POLYMORPHIC_API
+  #include "suncatcher/graph/GraphInterface.hh"
+#else
+  #include "suncatcher/graph/EuclideanGraph.hh"
+#endif
+
 namespace suncatcher {
 
 namespace test {
@@ -40,32 +45,6 @@ namespace test {
 }  // namespace test
 
 namespace pathfinder {
-
-
-
-class GraphInterface {
-  public:
-    virtual float move_cost(Coord start, Coord finish) = 0;
-
-    virtual uint_least8_t get_cost(Coord cell) = 0;
-    virtual void set_cost(Coord cell, uint_least8_t cost) = 0;
-
-    virtual int_least32_t get_color(Coord cell) = 0;
-    virtual void set_color(Coord cell, int_least32_t color) = 0;
-
-    virtual Coord size() = 0;
-    virtual bool check_bounds(Coord cell) = 0;
-
-    virtual  std::vector<pathfinder::Coord> get_adjacent(
-        const pathfinder::Coord cell,
-        bool include_diagonals = true
-      ) = 0;
-
-    virtual void fill_color(int_least32_t fill) = 0;
-
-    virtual void is_passable(Coord cell) = 0;
-};
-
 
 
 class GraphDelegate {

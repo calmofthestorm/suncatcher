@@ -16,7 +16,7 @@
 // Copyright 2014 Alex Roper
 
 #include "suncatcher.hh"
-#include "suncatcher/EuclideanGraph.hh"
+#include "suncatcher/graph/EuclideanGraph.hh"
 
 namespace suncatcher {
 namespace graph {

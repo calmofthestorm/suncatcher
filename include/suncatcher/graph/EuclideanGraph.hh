@@ -31,7 +31,6 @@ namespace test {
 namespace graph {
 
 
-
 class EuclideanGraph {
   public:
     EuclideanGraph();
