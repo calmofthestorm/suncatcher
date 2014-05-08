@@ -25,6 +25,8 @@ namespace graph {
 
 class GraphInterface {
   public:
+    virtual ~GraphInterface() { }
+
     virtual float move_cost(pathfinder::Coord start, pathfinder::Coord finish) = 0;
 
     virtual uint_least8_t get_cost(pathfinder::Coord cell) = 0;
