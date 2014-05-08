@@ -33,7 +33,11 @@ EuclideanGraph::EuclideanGraph(util::Grid<uint_least8_t>&& data_i)
   color = decltype(color)(data.size(), COLOR_UNKNOWN);
 }
 
-EuclideanGraph::EuclideanGraph(pathfinder::Coord size_i, uint8_t cost_i, int_least32_t color_i)
+EuclideanGraph::EuclideanGraph(
+    pathfinder::Coord size_i,
+    uint8_t cost_i,
+    int_least32_t color_i
+  )
 : color(size_i, color_i),
   data(size_i, cost_i) { }
 

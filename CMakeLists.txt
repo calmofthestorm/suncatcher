@@ -105,7 +105,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 
 # Source for the library itself.
-file (GLOB suncatcher_srcs ${PROJECT_SOURCE_DIR}/src/*.cc)
+file (GLOB suncatcher_srcs
+  ${PROJECT_SOURCE_DIR}/src/*.cc
+  ${PROJECT_SOURCE_DIR}/src/graph/*.cc)
 
 # Source for the testing support code. (Common code and non-unit tests)
 file (GLOB test_srcs

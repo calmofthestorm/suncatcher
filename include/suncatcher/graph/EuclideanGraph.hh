@@ -35,65 +35,36 @@ class EuclideanGraph {
   public:
     EuclideanGraph();
     EuclideanGraph(util::Grid<uint_least8_t>&& data_i);
-    EuclideanGraph(pathfinder::Coord size, uint_least8_t cost_i, int_least32_t color_i);
+    EuclideanGraph(
+        pathfinder::Coord size,
+        uint_least8_t cost_i,
+        int_least32_t color_i
+      );
 
-    inline float move_cost(const pathfinder::Coord start, const pathfinder::Coord finish) const {
-      assert(check_bounds(start));
-      assert(check_bounds(finish));
-      assert(std::abs(start.row - finish.row) <= 1 &&
-             std::abs(start.col - finish.col) <= 1 &&
-             std::abs(start.layer - finish.layer) <= 1);
-      assert(is_passable(start));
-
-      if (!is_passable(finish)) {
-        return -1;
-      }
-
-      if (start == finish) {
-        return 0;
-      }
-
-      if (start.layer != finish.layer) {
-        if (start.row == finish.row && start.col == finish.col) {
-          return get_cost(finish);
-        } else {
-          return -1;
-        }
-      }
-
-      if (start.row == finish.row || start.col == finish.col) {
-        return get_cost(finish);
-      }
-
-      assert(start.layer == finish.layer);
-      // Can only move diagonally if Manhattan squares are passable.
-      if (is_passable({start.row, finish.col, start.layer}) ||
-          is_passable({finish.row, start.col, start.layer})) {
-        return get_cost(finish) * static_cast<float>(1.4142135623730951);
-      } else {
-        return -1;
-      }
-    }
+    inline float move_cost(
+        const pathfinder::Coord start,
+        const pathfinder::Coord finish
+      ) const;
 
     inline uint_least8_t get_cost(const pathfinder::Coord cell) const {
       return data.at(cell);
     }
 
-    inline void set_cost(const pathfinder::Coord cell, const uint_least8_t new_cost) {
-      data.at(cell) = new_cost;
-    }
+    inline void set_cost(
+        const pathfinder::Coord cell,
+        const uint_least8_t new_cost
+      ) { data.at(cell) = new_cost; }
 
     inline int_least32_t get_color(const pathfinder::Coord cell) const {
       return color.at(cell);
     }
 
-    inline void set_color(const pathfinder::Coord cell, const int_least32_t new_color) {
-      color.at(cell) = new_color;
-    }
+    inline void set_color(
+        const pathfinder::Coord cell,
+        const int_least32_t new_color
+      ) { color.at(cell) = new_color; }
 
-    inline pathfinder::Coord size() const {
-      return data.size();
-    }
+    inline pathfinder::Coord size() const { return data.size(); }
 
     inline void fill_color(int_least32_t fill) { color.fill(fill); }
 
@@ -104,9 +75,7 @@ class EuclideanGraph {
     inline std::vector<pathfinder::Coord> get_adjacent(
         const pathfinder::Coord cell,
         bool include_diagonals = true
-      ) const {
-        return data.get_adjacent(cell, include_diagonals);
-      }
+      ) const { return data.get_adjacent(cell, include_diagonals); }
 
     inline bool is_passable(pathfinder::Coord cell) const {
       return (get_cost(cell) != PATH_COST_INFINITE);
@@ -128,8 +97,9 @@ class EuclideanGraph {
 };
 
 
-
 }  // namespace graph
 }  // namespace suncatcher
+
+#include "suncatcher/graph/EuclideanGraph-inl.hh"
 
 #endif  /* EUCLIDEANGRAPH_272b6e8aad5b4590a75bf12e43dc1adc */
