@@ -28,3 +28,7 @@ build.ninja
 .ninja_deps
 .ninja_log
 rules.ninja
+
+*.pyc
+
+tags
