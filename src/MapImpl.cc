@@ -44,7 +44,7 @@ using suncatcher::util::manhattan;
 
 
 MapImpl::MapImpl(MapBuilder&& builder)
-: graph(GraphDelegate(EuclideanGraph(std::move(builder.data)))),
+: graph(GraphDelegate(graph::EuclideanGraph(std::move(builder.data)))),
   doors(std::move(builder.doors)) {
 
   rebuild();

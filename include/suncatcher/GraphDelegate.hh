@@ -30,6 +30,7 @@
 #include "suncatcher.hh"
 #include "suncatcher/Coord.hh"
 #include "suncatcher/util/Grid.hh"
+#include "suncatcher/EuclideanGraph.hh"
 
 // #define POLYMORPHIC_API
 namespace suncatcher {
@@ -40,65 +41,6 @@ namespace test {
 
 namespace pathfinder {
 
-class EuclideanGraph {
-  public:
-    EuclideanGraph();
-    EuclideanGraph(util::Grid<uint_least8_t>&& data_i);
-    EuclideanGraph(Coord size, uint_least8_t cost_i, int_least32_t color_i);
-
-    inline float move_cost(const Coord start, const Coord finish) const {
-      return 5;
-    }
-
-    inline uint_least8_t get_cost(const Coord cell) const {
-      return data.at(cell);
-    }
-
-    inline void set_cost(const Coord cell, const uint_least8_t new_cost) {
-      data.at(cell) = new_cost;
-    }
-
-    inline int_least32_t get_color(const Coord cell) const {
-      return color.at(cell);
-    }
-
-    inline void set_color(const Coord cell, const int_least32_t new_color) {
-      color.at(cell) = new_color;
-    }
-
-    inline Coord size() const {
-      return data.size();
-    }
-
-    inline void fill_color(int_least32_t fill) { color.fill(fill); }
-
-    inline  bool check_bounds(const Coord cell) const {
-      return data.check_bounds(cell);
-    }
-
-    inline std::vector<pathfinder::Coord> get_adjacent(
-        const pathfinder::Coord cell,
-        bool include_diagonals = true
-      ) const {
-        return data.get_adjacent(cell, include_diagonals);
-      }
-
-
-
-
-  private:
-    friend class test::DeltaMap;
-    // The map is divided into "colors" -- areas connected by purely transparent
-    // terrain along Manhattan directions. Colors are handles into static
-    // components (thus, we can union two colors in constant time at the price
-    // of a small indirect lookup table). Typically there will be anywhere from
-    // 1-5 colors per door on the map, plus one for each isolated walled off
-    // region.
-    util::Grid<int_least32_t> color;
-
-    // Cost to traverse terrain.
-    util::Grid<uint_least8_t> data;
-};
 
 
 class GraphInterface {
@@ -120,6 +62,8 @@ class GraphInterface {
       ) = 0;
 
     virtual void fill_color(int_least32_t fill) = 0;
+
+    virtual void is_passable(Coord cell) = 0;
 };
 
 
@@ -129,7 +73,7 @@ class GraphDelegate {
     #ifdef POLYMORPHIC_API
     inline GraphDelegate(std::unique_ptr<GraphInterface> graph_i)
     #else
-    inline GraphDelegate(EuclideanGraph&& graph_i)
+    inline GraphDelegate(graph::EuclideanGraph&& graph_i)
     #endif
     : graph(std::move(graph_i)) { }
 
@@ -209,13 +153,23 @@ class GraphDelegate {
       #endif
     }
 
+
+    inline bool is_passable(Coord cell) const {
+      #ifdef POLYMORPHIC_API
+      return graph->is_passable(cell);
+      #else
+      return graph.is_passable(cell);
+      #endif
+    }
+
+
   private:
     friend class test::DeltaMap;
     #ifdef POLYMORPHIC_API
     // Don't want to force implementers to adhere to const restriction.
     mutable std::unique_ptr<GraphInterface> graph;
     #else
-    EuclideanGraph graph;
+    graph::EuclideanGraph graph;
     #endif
 };
 
