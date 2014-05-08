@@ -102,6 +102,7 @@ void MapImpl::incremental_wall_to_transparent(Coord cell) {
       } else {
         // Former wall has a color, merge them.
         static_component.union_sets(color.at(cell), color.at(n));
+        dynamic_component.union_sets(color.at(cell), color.at(n));
       }
     }
   }
@@ -110,7 +111,8 @@ void MapImpl::incremental_wall_to_transparent(Coord cell) {
   // that we can't merge with the new square). Allocate it a new
   // color, and thus a new static component and dynamic component.
   if (color.at(cell) == COLOR_IMPASSABLE) {
-    dynamic_component.add_component(static_component[next_component_color]);
+    static_component[next_component_color];
+    dynamic_component[next_component_color];
     color.at(cell) = next_component_color++;
   }
 }
@@ -120,7 +122,7 @@ void MapImpl::incremental_closed_door_to_open_door(Coord cell, DoorIter door_ite
   int_least32_t door_static_component = static_component.at(color.at(cell));
   for (const auto& n : data.get_adjacent(cell, false)) {
     if (is_passable(n)) {
-      dynamic_component.add_edge(
+      dynamic_component.union_sets(
           static_component.at(color.at(n)),
           door_static_component
         );
@@ -142,8 +144,27 @@ void MapImpl::incremental_closed_door_to_wall(
 
 
 void MapImpl::incremental_open_door_to_closed_door(Coord cell, DoorIter door_iter) {
-  dynamic_component.isolate_component(static_component.at(color.at(cell)));
   door_iter->second.open = false;
+  data.at(door_iter->first) = PATH_COST_INFINITE;
+  incremental_regenerate_dynamic_components();
+}
+
+
+void MapImpl::incremental_regenerate_dynamic_components() {
+  // Recalculate dynamic components.
+  dynamic_component = static_component;
+  for (const auto& door : doors) {
+    if (door.second.open) {
+      for (const auto& n : data.get_adjacent(door.first, false)) {
+        if (is_passable(n)) {
+          dynamic_component.union_sets(
+              color.at(n),
+              color.at(door.first)
+            );
+        }
+      }
+    }
+  }
 }
 
 
@@ -156,7 +177,8 @@ void MapImpl::incremental_transparent_to_wall(Coord cell) {
         static_component.at(color.at(seed)) == old_static_component) {
       std::stack<Coord> todo;
       todo.push(seed);
-      dynamic_component.add_component(static_component[next_component_color]);
+      dynamic_component[next_component_color];
+      static_component[next_component_color];
       color.at(seed) = next_component_color;
 
       while (!todo.empty()) {
@@ -173,24 +195,8 @@ void MapImpl::incremental_transparent_to_wall(Coord cell) {
       ++next_component_color;
     }
   }
-
-  // Recalculate dynamic components.
-  dynamic_component.isolate_component(old_static_component);
-  for (const auto& door : doors) {
-    if (door.second.open) {
-      int_least32_t door_static_component = static_component.at(color.at(door.first));
-      for (const auto& n : data.get_adjacent(door.first, false)) {
-        if (is_passable(n)) {
-          dynamic_component.add_edge(
-              static_component.at(color.at(n)),
-              door_static_component
-            );
-        }
-      }
-    }
-  }
+  incremental_regenerate_dynamic_components();
 }
-
 
 MapImpl::DoorIter MapImpl::incremental_wall_to_closed_door (
     Coord cell,
@@ -198,7 +204,8 @@ MapImpl::DoorIter MapImpl::incremental_wall_to_closed_door (
     uint_least8_t cost_open
   ) {
   data.at(cell) = PATH_COST_INFINITE;
-  dynamic_component.add_component(static_component[next_door_color]);
+  dynamic_component[next_door_color];
+  static_component[next_door_color];
   color.at(cell) = next_door_color--;
   return doors.insert(std::make_pair(
         cell,
@@ -368,7 +375,8 @@ void MapImpl::rebuild() {
       std::stack<Coord> todo;
       todo.push(restart);
       color.at(restart) = index;
-      dynamic_component.add_component(static_component[index]);
+      static_component[index];
+      dynamic_component[index];
 
       while (!todo.empty()) {
         auto cur = todo.top();
@@ -393,27 +401,13 @@ void MapImpl::rebuild() {
   index = -1;
   for (const auto& door : doors) {
     color.at(door.first) = index;
-    dynamic_component.add_component(static_component[index]);
+    static_component[index];
+    dynamic_component[index];
     --index;
   }
   next_door_color = index;
-
-  // Dynamically union all open doors with their neighbors.
-  for (auto& door : doors) {
-    if (door.second.open) {
-      int_least32_t door_static_component = static_component.at(color.at(door.first));
-      for (const auto& n : data.get_adjacent(door.first, false)) {
-        if (is_passable(n)) {
-          dynamic_component.add_edge(
-              static_component.at(color.at(n)),
-              door_static_component
-            );
-        }
-      }
-    }
-  }
+  incremental_regenerate_dynamic_components();
 }
-
 
 void MapImpl::print_map(std::ostream& os, bool number_doors, const Path& path_to_show) const {
   std::set<Coord> in_path(
@@ -517,9 +511,7 @@ void MapImpl::print_dynamic_components(std::ostream& os) const {
     if (color.at(coord) == COLOR_IMPASSABLE) {
       os << '*';
     } else {
-      int_least32_t c = dynamic_component.lookup(
-          static_component.at(color.at(coord))
-        );
+      int_least32_t c = dynamic_component.at(color.at(coord));
       char start = c < 0 ? 'z' : 'A';
       if (c < 25) {
         os << (char)(c + start);

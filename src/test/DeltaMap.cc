@@ -159,8 +159,8 @@ void DeltaMap::check_invariant() const {
       }
 
       // Attempt to find an isomorphism for dynamic components.
-      int_least32_t sdynamic = simple_map.map->dynamic_component.lookup(sstatic);
-      int_least32_t odynamic = optimized_map.map->dynamic_component.lookup(ostatic);
+      int_least32_t sdynamic = simple_map.map->dynamic_component.at(scolor);
+      int_least32_t odynamic = optimized_map.map->dynamic_component.at(ocolor);
       c = dmapping.find(odynamic);
       if (c != dmapping.end()) {
         assert(c->second == sdynamic);

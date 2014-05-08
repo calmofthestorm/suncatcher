@@ -23,11 +23,7 @@ inline bool MapImpl::is_door(int_least32_t cell_color) const {
 
 inline bool MapImpl::path_exists(Coord a, Coord b) const {
   return (is_passable(a) && is_passable(b) &&
-          dynamic_component.equivalent(
-              static_component.at(color.at(a)),
-              static_component.at(color.at(b))
-            )
-          );
+          dynamic_component.at(color.at(a)) == dynamic_component.at(color.at(b)));
 }
 
 
@@ -71,8 +67,8 @@ inline float MapImpl::move_cost(Coord start, Coord finish) const {
 
 
 inline bool MapImpl::is_passable(Coord cell) const {
-  assert(get_data().check_bounds(cell));
-  assert(get_color().at(cell) != COLOR_UNKNOWN);
+  assert(data.check_bounds(cell));
+  assert(color.at(cell) != COLOR_UNKNOWN);
   bool rval = (get_data().at(cell) != PATH_COST_INFINITE);
   #ifndef NDEBUG
     if (is_door(cell)) {

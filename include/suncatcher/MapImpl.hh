@@ -139,7 +139,7 @@ class MapImpl {
     // dynamic components (reachability). This lets us minimize expensive
     // operations such as DFS to determine connected components by performing
     // the frequent ones on a simplified graph.
-    util::DynamicDisjointSets<int_least32_t> dynamic_component;
+    util::UnionFind<int_least32_t> dynamic_component;
 
     // The color of the next door/component to assign. Components grow up;
     // doors grow down.
@@ -172,6 +172,7 @@ class MapImpl {
     // Shoutout to Sarah Northway, one of several sources of inspiration for
     // this project! http://rebuildgame.com/
     void rebuild();
+    void incremental_regenerate_dynamic_components();
 };
 
 }  // namespace pathfinder
