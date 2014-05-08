@@ -50,100 +50,38 @@ namespace pathfinder {
 class GraphDelegate {
   public:
     #ifdef POLYMORPHIC_API
-    inline GraphDelegate(std::unique_ptr<GraphInterface> graph_i)
+    inline GraphDelegate(std::unique_ptr<GraphInterface> graph_i);
     #else
-    inline GraphDelegate(graph::EuclideanGraph&& graph_i)
+    inline GraphDelegate(graph::EuclideanGraph&& graph_i);
     #endif
-    : graph(std::move(graph_i)) { }
 
-    inline float move_cost(Coord start, Coord finish) const {
-      #ifdef POLYMORPHIC_API
-      return graph->move_cost(start, finish);
-      #else
-      return graph.move_cost(start, finish);
-      #endif
-    }
+    inline float move_cost(Coord start, Coord finish) const;
 
-    inline uint_least8_t get_cost(Coord cell) const {
-      #ifdef POLYMORPHIC_API
-      return graph->get_cost(cell);
-      #else
-      return graph.get_cost(cell);
-      #endif
-    }
+    inline uint_least8_t get_cost(Coord cell) const;
 
-    inline void set_cost(const Coord cell, const uint_least8_t cost) {
-      #ifdef POLYMORPHIC_API
-      graph->set_cost(cell, cost);
-      #else
-      graph.set_cost(cell, cost);
-      #endif
-    }
+    inline void set_cost(const Coord cell, const uint_least8_t cost);
 
-    inline int_least32_t get_color(Coord cell) const {
-      #ifdef POLYMORPHIC_API
-      return graph->get_color(cell);
-      #else
-      return graph.get_color(cell);
-      #endif
-    }
+    inline int_least32_t get_color(Coord cell) const;
 
-    inline void set_color(Coord cell, int_least32_t color) {
-      #ifdef POLYMORPHIC_API
-      graph->set_color(cell, color);
-      #else
-      graph.set_color(cell, color);
-      #endif
-    }
+    inline void set_color(Coord cell, int_least32_t color);
 
-    inline bool check_bounds(Coord cell) const {
-      #ifdef POLYMORPHIC_API
-      return graph->check_bounds(cell);
-      #else
-      return graph.check_bounds(cell);
-      #endif
-    }
+    inline bool check_bounds(Coord cell) const;
 
-
-    inline Coord size() const {
-      #ifdef POLYMORPHIC_API
-      return graph->size();
-      #else
-      return graph.size();
-      #endif
-    }
+    inline Coord size() const;
 
     inline std::vector<pathfinder::Coord> get_adjacent(
         const pathfinder::Coord cell,
         bool include_diagonals = true
-      ) const {
-        #ifdef POLYMORPHIC_API
-        return graph->get_adjacent(cell, include_diagonals);
-        #else
-        return graph.get_adjacent(cell, include_diagonals);
-        #endif
-      }
+      ) const;
 
-    inline void fill_color(int_least32_t fill) {
-      #ifdef POLYMORPHIC_API
-      return graph->fill_color(fill);
-      #else
-      return graph.fill_color(fill);
-      #endif
-    }
+    inline void fill_color(int_least32_t fill);
 
-
-    inline bool is_passable(Coord cell) const {
-      #ifdef POLYMORPHIC_API
-      return graph->is_passable(cell);
-      #else
-      return graph.is_passable(cell);
-      #endif
-    }
+    inline bool is_passable(Coord cell) const;
 
 
   private:
     friend class test::DeltaMap;
+
     #ifdef POLYMORPHIC_API
     // Don't want to force implementers to adhere to const restriction.
     mutable std::unique_ptr<GraphInterface> graph;
@@ -152,9 +90,9 @@ class GraphDelegate {
     #endif
 };
 
-
-
 }  // namespace pathfinder
 }  // namespace suncatcher
+
+#include "suncatcher/GraphDelegate-inl.hh"
 
 #endif  /* GRAPHDELEGATE_3219342b61d146a7af1e2a73e940cd56 */
