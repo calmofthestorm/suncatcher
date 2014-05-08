@@ -30,6 +30,10 @@ extern const char MAP_MICRO[] = "micro";
 extern const char MAP_CUBE3[] = "cube3";
 extern const char MAP_CUBE5[] = "cube5";
 extern const char MAP_OCTANTS[] = "octants";
+extern const char MAP_CHECKERDOOR[] = "checkerdoor";
+extern const char MAP_CHECKERDOOR64[] = "checkerdoor64";
+extern const char MAP_HARDNINE[] = "hardnine";
+extern const char MAP_HARDERNINE[] = "hardernine";
 
 }  // namespace test
 }  // namespace suncatcher

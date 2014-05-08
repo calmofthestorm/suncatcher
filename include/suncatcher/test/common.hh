@@ -54,6 +54,10 @@ extern const char MAP_MICRO[];
 extern const char MAP_CUBE3[];
 extern const char MAP_CUBE5[];
 extern const char MAP_OCTANTS[];
+extern const char MAP_CHECKERDOOR[];
+extern const char MAP_CHECKERDOOR64[];
+extern const char MAP_HARDNINE[];
+extern const char MAP_HARDERNINE[];
 
 using suncatcher::util::manhattan;
 using suncatcher::pathfinder::Map;
