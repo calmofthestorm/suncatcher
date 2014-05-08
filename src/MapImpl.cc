@@ -94,7 +94,8 @@ void MapImpl::incremental_wall_to_transparent(Coord cell) {
 
   // Set its color to the first transparent neighbor (Manhattan) found.
   // For the rest, union the static components.
-  for (const auto& n : data.get_adjacent(cell, false)) {
+  auto adjacent = data.get_adjacent(cell, false);
+  for (const auto& n : adjacent) {
     if (is_transparent(n)) {
       if (color.at(cell) == COLOR_IMPASSABLE) {
         // Not yet chosen the former wall's new color
@@ -114,6 +115,12 @@ void MapImpl::incremental_wall_to_transparent(Coord cell) {
     static_component[next_component_color];
     dynamic_component[next_component_color];
     color.at(cell) = next_component_color++;
+  }
+
+  for (const auto& n : adjacent) {
+    if (is_passable(n)) {
+      dynamic_component.union_sets(color.at(cell), color.at(n));
+    }
   }
 }
 

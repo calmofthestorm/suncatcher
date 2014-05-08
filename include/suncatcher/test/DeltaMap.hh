@@ -125,8 +125,9 @@ class DeltaMap {
     void clear_cache();
     pathfinder::Coord size() const;
 
-  private:
     bool enable_delta;
+
+  private:
     pathfinder::MapView optimized_map, simple_map;
 };
 

@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
   bool autoshow = false;
   while (std::cin) {
     if (autoshow) {
-      my_map.print_map(std::cout, my_path);
+      my_map.print_map(std::cout, true, my_path);
     }
     char cmd;
     std::cout << "\n\n>> ";
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
         break;
 
       case 's':
-        my_map.print_map(std::cout, my_path);
+        my_map.print_map(std::cout, true, my_path);
         break;
 
       case 'c':
