@@ -124,7 +124,7 @@ DeltaMap::DeltaMap(MapView view)
 
 
 void DeltaMap::check_invariant() const {
-  assert(simple_map.get_data() == optimized_map.get_data());
+  assert(simple_map.map->graph.graph.data == optimized_map.map->graph.graph.data);
   assert(simple_map.get_doors() == optimized_map.get_doors());
 
   assert(simple_map.size() == optimized_map.size());
@@ -132,8 +132,8 @@ void DeltaMap::check_invariant() const {
   for (const Coord& c : pathfinder::CoordRange(simple_map.size())) {
     // Check color. Colors may vary provided that it's many-to-one from
     // optimized to simple.
-    int_least32_t scolor = simple_map.map->color.at(c);
-    int_least32_t ocolor = optimized_map.map->color.at(c);
+    int_least32_t scolor = simple_map.map->graph.get_color(c);
+    int_least32_t ocolor = optimized_map.map->graph.get_color(c);
     if (scolor == COLOR_IMPASSABLE) {
       assert(ocolor == scolor);
     } else {
@@ -220,9 +220,8 @@ const std::map<const Coord, pathfinder::Door>& DeltaMap::get_doors() const {
   return optimized_map.get_doors();
 }
 
-
-const util::Grid<uint_least8_t>& DeltaMap::get_data() const {
-  return optimized_map.get_data();
+uint_least8_t DeltaMap::get_cost(pathfinder::Coord cell) const {
+  return optimized_map.map->graph.get_cost(cell);
 }
 
 

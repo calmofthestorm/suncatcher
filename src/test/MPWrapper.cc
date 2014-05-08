@@ -41,8 +41,8 @@ void MPWrapper::new_pather() {
 }
 
 Path MPWrapper::path(Coord start, Coord finish) {
-  if (!view.get_data().check_bounds(start) ||
-      !view.get_data().check_bounds(finish) ||
+  if (!view.check_bounds(start) ||
+      !view.check_bounds(finish) ||
       !view.is_passable(start) || !view.is_passable(finish)) {
     return Path({}, -1);
   }

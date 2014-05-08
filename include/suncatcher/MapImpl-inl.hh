@@ -5,13 +5,13 @@ namespace suncatcher {
 namespace pathfinder {
 
 inline bool MapImpl::is_transparent(Coord cell) const {
-  assert(data.check_bounds(cell));
-  return (!is_door(cell) && data.at(cell) != PATH_COST_INFINITE);
+  assert(graph.check_bounds(cell));
+  return (!is_door(cell) && graph.get_cost(cell) != PATH_COST_INFINITE);
 }
 
 
 inline bool MapImpl::is_door(Coord cell) const {
-  int_least32_t c = color.at(cell);
+  int_least32_t c = graph.get_color(cell);
   return (c != COLOR_IMPASSABLE && is_door(c));
 }
 
@@ -23,14 +23,14 @@ inline bool MapImpl::is_door(int_least32_t cell_color) const {
 
 inline bool MapImpl::path_exists(Coord a, Coord b) const {
   return (is_passable(a) && is_passable(b) &&
-          (dynamic_component.at(color.at(a)) ==
-           dynamic_component.at(color.at(b))));
+          (dynamic_component.at(graph.get_color(a)) ==
+           dynamic_component.at(graph.get_color(b))));
 }
 
 
 inline float MapImpl::move_cost(Coord start, Coord finish) const {
-  assert(get_data().check_bounds(start));
-  assert(get_data().check_bounds(finish));
+  assert(graph.check_bounds(start));
+  assert(graph.check_bounds(finish));
   assert(std::abs(start.row - finish.row) <= 1 &&
          std::abs(start.col - finish.col) <= 1 &&
          std::abs(start.layer - finish.layer) <= 1);
@@ -46,36 +46,43 @@ inline float MapImpl::move_cost(Coord start, Coord finish) const {
 
   if (start.layer != finish.layer) {
     if (start.row == finish.row && start.col == finish.col) {
-      return get_data().at(finish);
+      return graph.get_cost(finish);
     } else {
       return -1;
     }
   }
 
   if (start.row == finish.row || start.col == finish.col) {
-    return get_data().at(finish);
+    return graph.get_cost(finish);
   }
 
   assert(start.layer == finish.layer);
   // Can only move diagonally if Manhattan squares are passable.
   if (is_passable({start.row, finish.col, start.layer}) ||
       is_passable({finish.row, start.col, start.layer})) {
-    return get_data().at(finish) * static_cast<float>(1.4142135623730951);
+    return graph.get_cost(finish) * static_cast<float>(1.4142135623730951);
   } else {
     return -1;
   }
 }
 
+inline std::vector<pathfinder::Coord> MapImpl::get_adjacent(
+    const pathfinder::Coord cell,
+    bool include_diagonals
+  ) const {
+    return graph.get_adjacent(cell, include_diagonals);
+}
+
 
 inline bool MapImpl::is_passable(Coord cell) const {
-  assert(data.check_bounds(cell));
-  assert(color.at(cell) != COLOR_UNKNOWN);
-  bool rval = (get_data().at(cell) != PATH_COST_INFINITE);
+  assert(graph.check_bounds(cell));
+  assert(graph.get_color(cell) != COLOR_UNKNOWN);
+  bool rval = (graph.get_cost(cell) != PATH_COST_INFINITE);
   #ifndef NDEBUG
     if (is_door(cell)) {
       assert(rval == doors.at(cell).open);
     } else {
-      assert((get_color().at(cell) != COLOR_IMPASSABLE) == rval);
+      assert((graph.get_color(cell) != COLOR_IMPASSABLE) == rval);
     }
     #endif
   return rval;

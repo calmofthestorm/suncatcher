@@ -120,7 +120,7 @@ class DeltaMap {
 
     const std::map<const pathfinder::Coord, pathfinder::Door>& get_doors() const;
 
-    const util::Grid<uint_least8_t>& get_data() const;
+    uint_least8_t get_cost(pathfinder::Coord cell) const;
 
     void clear_cache();
     pathfinder::Coord size() const;

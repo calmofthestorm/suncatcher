@@ -47,6 +47,7 @@
 #include "suncatcher.hh"
 #include "suncatcher/Path.hh"
 #include "suncatcher/Door.hh"
+#include "suncatcher/GraphDelegate.hh"
 
 namespace suncatcher {
 
@@ -65,20 +66,11 @@ class MapImpl {
     explicit MapImpl(MapBuilder&& builder);
 
     // Returns the map's size, as a coordinate.
-    inline Coord get_size() const { return data.size(); }
+    inline Coord get_size() const { return graph.size(); }
 
     // Returns a constant reference to the mapping from coordinates to doors.
     // TODO: fix
     const std::map<const Coord, Door>& get_doors() const { return doors; }
-
-    // Returns a constant reference to the underlying color.
-    // TODO: fix
-    const util::Grid<int_least32_t>& get_color() const { return color; }
-
-    // Returns a constant reference to the underlying backing, for bounds
-    // checks, direct access, etc.
-    // TODO: fix
-    const util::Grid<uint_least8_t>& get_data() const { return data; }
 
     // True iff the cell/static component is a door. We can take either a
     // coordinate or a (valid) color, since all doors have their own color.
@@ -102,6 +94,13 @@ class MapImpl {
     // this will always run in constant time. Invalid inputs result in false.
     inline bool path_exists(Coord src, Coord dst) const;
 
+    inline std::vector<pathfinder::Coord> get_adjacent(
+        const pathfinder::Coord cell,
+        bool include_diagonals = true
+      ) const;
+
+    inline bool check_bounds(Coord cell) const { return graph.check_bounds(cell); }
+
     // Useful debugging features -- dump a simple representation of aspects
     // of the map to a stream.
     void print_colors(std::ostream& os) const;
@@ -116,10 +115,11 @@ class MapImpl {
   private:
     friend class test::DeltaMap;
 
+    GraphDelegate graph;
+
     typedef std::map<const Coord, Door>::iterator DoorIter;
 
     // Cost to traverse terrain.
-    util::Grid<uint_least8_t> data;
 
     // All registered doors.
     std::map<const Coord, Door> doors;
@@ -130,7 +130,6 @@ class MapImpl {
     // of a small indirect lookup table). Typically there will be anywhere from
     // 1-5 colors per door on the map, plus one for each isolated walled off
     // region.
-    util::Grid<int_least32_t> color;
 
     // Static component -- represent the same areas as colors, but there may
     // be a many-to-one mapping of colors to static components -- for example,

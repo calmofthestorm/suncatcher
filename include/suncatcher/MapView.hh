@@ -65,12 +65,14 @@ class MapView {
     // TODO: replace with stable interface.
     inline const std::map<const Coord, Door>& get_doors() const;
 
-    // Returns a constant reference to the underlying backing, for bounds
-    // checks, direct access, etc.
-    // TODO: replace with stable interface.
-    inline const suncatcher::util::Grid<uint_least8_t>& get_data() const;
-
     inline bool is_passable(Coord cell) const;
+
+    inline std::vector<pathfinder::Coord> get_adjacent(
+        const pathfinder::Coord cell,
+        bool include_diagonals = true
+      ) const;
+
+    inline bool check_bounds(Coord cell) const;
 
     inline float move_cost(Coord src, Coord dst) const;
 

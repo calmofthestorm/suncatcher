@@ -44,7 +44,7 @@ using suncatcher::util::manhattan;
 
 
 MapImpl::MapImpl(MapBuilder&& builder)
-: data(std::move(builder.data)),
+: graph(GraphDelegate(EuclideanGraph(std::move(builder.data)))),
   doors(std::move(builder.doors)) {
 
   rebuild();
@@ -90,20 +90,20 @@ MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
 // Caller's responsibility to set the newly transparent cell's cost AFTER
 // the call.
 void MapImpl::incremental_wall_to_transparent(Coord cell) {
-  assert(color.at(cell) == COLOR_IMPASSABLE);
+  assert(graph.get_color(cell) == COLOR_IMPASSABLE);
 
   // Set its color to the first transparent neighbor (Manhattan) found.
   // For the rest, union the static components.
-  auto adjacent = data.get_adjacent(cell, false);
+  auto adjacent = graph.get_adjacent(cell, false);
   for (const auto& n : adjacent) {
     if (is_transparent(n)) {
-      if (color.at(cell) == COLOR_IMPASSABLE) {
+      if (graph.get_color(cell) == COLOR_IMPASSABLE) {
         // Not yet chosen the former wall's new color
-        color.at(cell) = color.at(n);
+        graph.set_color(cell, graph.get_color(n));
       } else {
         // Former wall has a color, merge them.
-        static_component.union_sets(color.at(cell), color.at(n));
-        dynamic_component.union_sets(color.at(cell), color.at(n));
+        static_component.union_sets(graph.get_color(cell), graph.get_color(n));
+        dynamic_component.union_sets(graph.get_color(cell), graph.get_color(n));
       }
     }
   }
@@ -111,26 +111,26 @@ void MapImpl::incremental_wall_to_transparent(Coord cell) {
   // Wall was surrounded by walls (or other doors, etc -- anything
   // that we can't merge with the new square). Allocate it a new
   // color, and thus a new static component and dynamic component.
-  if (color.at(cell) == COLOR_IMPASSABLE) {
+  if (graph.get_color(cell) == COLOR_IMPASSABLE) {
     static_component[next_component_color];
     dynamic_component[next_component_color];
-    color.at(cell) = next_component_color++;
+    graph.set_color(cell, next_component_color++);
   }
 
   for (const auto& n : adjacent) {
     if (is_passable(n)) {
-      dynamic_component.union_sets(color.at(cell), color.at(n));
+      dynamic_component.union_sets(graph.get_color(cell), graph.get_color(n));
     }
   }
 }
 
 
 void MapImpl::incremental_closed_door_to_open_door(Coord cell, DoorIter door_iter) {
-  int_least32_t door_static_component = static_component.at(color.at(cell));
-  for (const auto& n : data.get_adjacent(cell, false)) {
+  int_least32_t door_static_component = static_component.at(graph.get_color(cell));
+  for (const auto& n : graph.get_adjacent(cell, false)) {
     if (is_passable(n)) {
       dynamic_component.union_sets(
-          static_component.at(color.at(n)),
+          static_component.at(graph.get_color(n)),
           door_static_component
         );
     }
@@ -144,15 +144,15 @@ void MapImpl::incremental_closed_door_to_wall(
     DoorIter door_iter,
     uint_least8_t cost
   ) {
-  color.at(cell) = COLOR_IMPASSABLE;
+  graph.set_color(cell, COLOR_IMPASSABLE);
   doors.erase(door_iter);
-  data.at(cell) = cost;
+  graph.set_cost(cell, cost);
 }
 
 
 void MapImpl::incremental_open_door_to_closed_door(Coord cell, DoorIter door_iter) {
   door_iter->second.open = false;
-  data.at(door_iter->first) = PATH_COST_INFINITE;
+  graph.set_cost(door_iter->first, PATH_COST_INFINITE);
   incremental_regenerate_dynamic_components();
 }
 
@@ -162,11 +162,11 @@ void MapImpl::incremental_regenerate_dynamic_components() {
   dynamic_component = static_component;
   for (const auto& door : doors) {
     if (door.second.open) {
-      for (const auto& n : data.get_adjacent(door.first, false)) {
+      for (const auto& n : graph.get_adjacent(door.first, false)) {
         if (is_passable(n)) {
           dynamic_component.union_sets(
-              color.at(n),
-              color.at(door.first)
+              graph.get_color(n),
+              graph.get_color(door.first)
             );
         }
       }
@@ -176,26 +176,26 @@ void MapImpl::incremental_regenerate_dynamic_components() {
 
 
 void MapImpl::incremental_transparent_to_wall(Coord cell) {
-  int_least32_t old_static_component = static_component.at(color.at(cell));
-  data.at(cell) = PATH_COST_INFINITE;
-  color.at(cell) = COLOR_IMPASSABLE;
-  for (const auto& seed : data.get_adjacent(cell, false)) {
+  int_least32_t old_static_component = static_component.at(graph.get_color(cell));
+  graph.set_cost(cell, PATH_COST_INFINITE);
+  graph.set_color(cell, COLOR_IMPASSABLE);
+  for (const auto& seed : graph.get_adjacent(cell, false)) {
     if (is_transparent(seed) && 
-        static_component.at(color.at(seed)) == old_static_component) {
+        static_component.at(graph.get_color(seed)) == old_static_component) {
       std::stack<Coord> todo;
       todo.push(seed);
       dynamic_component[next_component_color];
       static_component[next_component_color];
-      color.at(seed) = next_component_color;
+      graph.set_color(seed, next_component_color);
 
       while (!todo.empty()) {
         auto cur = todo.top();
         todo.pop();
         // Explore neighbors, but only Manhattan adjacent ones.
-        for (const auto& n : data.get_adjacent(cur, false)) {
-          if (is_transparent(n) && static_component.at(color.at(n)) == old_static_component) {
+        for (const auto& n : graph.get_adjacent(cur, false)) {
+          if (is_transparent(n) && static_component.at(graph.get_color(n)) == old_static_component) {
             todo.push(n);
-            color.at(n) = next_component_color;
+            graph.set_color(n, next_component_color);
           }
         }
       }
@@ -210,10 +210,10 @@ MapImpl::DoorIter MapImpl::incremental_wall_to_closed_door (
     uint_least8_t cost_closed,
     uint_least8_t cost_open
   ) {
-  data.at(cell) = PATH_COST_INFINITE;
+  graph.set_cost(cell, PATH_COST_INFINITE);
   dynamic_component[next_door_color];
   static_component[next_door_color];
-  color.at(cell) = next_door_color--;
+  graph.set_color(cell, next_door_color--);
   return doors.insert(std::make_pair(
         cell,
         Door{false, cost_closed, cost_open})
@@ -227,7 +227,7 @@ void MapImpl::incremental_create_door(Coord cell, bool state, uint_least8_t cost
   assert(!is_door(cell));
 
   // Create a wall, if cell is not already one.
-  if (data.at(cell) != PATH_COST_INFINITE) {
+  if (graph.get_cost(cell) != PATH_COST_INFINITE) {
     incremental_transparent_to_wall(cell);
   }
 
@@ -245,9 +245,9 @@ void MapImpl::incremental_create_door(Coord cell, bool state, uint_least8_t cost
 
   doors[cell] = Door{state, cost, PATH_COST_INFINITE};
   if (state) {
-    data.at(cell) = cost;
+    graph.set_cost(cell, cost);
   } else {
-    data.at(cell) = PATH_COST_INFINITE;
+    graph.set_cost(cell, PATH_COST_INFINITE);
   }
 }
 
@@ -275,24 +275,24 @@ void MapImpl::incremental_remove_door(Coord cell, bool state, uint_least8_t cost
 
       // Remove the wall.
       incremental_wall_to_transparent(cell);
-      data.at(cell) = cost;
+      graph.set_cost(cell, cost);
     }
   } else {
     if (cost == PATH_COST_INFINITE) {
       // Closed door to wall.
       // Nothing to do besides remove the door entry and update
       // the component.
-      color.at(cell) = COLOR_IMPASSABLE;
+      graph.set_color(cell, COLOR_IMPASSABLE);
       doors.erase(door_iter);
-      data.at(cell) = cost;
+      graph.set_cost(cell, cost);
     } else {
       // Closed door to transparent.
       // Turn it into a wall, then remove the wall.
-      color.at(cell) = COLOR_IMPASSABLE;
-      data.at(cell) = PATH_COST_INFINITE;
+      graph.set_color(cell, COLOR_IMPASSABLE);
+      graph.set_cost(cell, PATH_COST_INFINITE);
       doors.erase(door_iter);
       incremental_wall_to_transparent(cell);
-      data.at(cell) = cost;
+      graph.set_cost(cell, cost);
     }
   }
 }
@@ -301,16 +301,16 @@ void MapImpl::incremental_remove_door(Coord cell, bool state, uint_least8_t cost
 void MapImpl::incremental_set_cost(Coord cell, bool state, uint_least8_t cost) {
   assert(doors.find(cell) == doors.end());
 
-  if (data.at(cell) == PATH_COST_INFINITE &&
+  if (graph.get_cost(cell) == PATH_COST_INFINITE &&
       cost != PATH_COST_INFINITE) {
     // Removing a wall.
     incremental_wall_to_transparent(cell);
-  } else if (data.at(cell) != PATH_COST_INFINITE &&
+  } else if (graph.get_cost(cell) != PATH_COST_INFINITE &&
       cost == PATH_COST_INFINITE) {
     // Building a wall. Flood fill required.
     incremental_transparent_to_wall(cell);
   }
-  data.at(cell) = cost;
+  graph.set_cost(cell, cost);
   // else -- either PATH_COST_INFINITE -> PATH_COST_INFINITE (nop)
   // or passable value to passable value -- colors are not affected
   // (even though path cost might be).
@@ -330,9 +330,9 @@ void MapImpl::incremental_update_door(Coord cell, bool state, uint_least8_t cost
 
   // Update map costs.
   if (door_iter->second.open) {
-    data.at(cell) = door_iter->second.cost_open;
+    graph.set_cost(cell, door_iter->second.cost_open);
   } else {
-    data.at(cell) = PATH_COST_INFINITE;
+    graph.set_cost(cell, PATH_COST_INFINITE);
   }
 
   // Maintain links if door changed state.
@@ -354,20 +354,19 @@ void MapImpl::rebuild() {
   // Temporary function for determining transparancy since doors have not
   // yet been set to appropriate colors.
   auto is_transparent_temporary = [this] (Coord cell) {
-    if (color.at(cell) == COLOR_MULTIPLE) {
+    if (graph.get_color(cell) == COLOR_MULTIPLE) {
       return false;
     } else {
-      return data.at(cell) != PATH_COST_INFINITE;
+      return graph.get_cost(cell) != PATH_COST_INFINITE;
     }
   };
 
-  color = Grid<int_least32_t>(get_size(), COLOR_UNKNOWN);
-  color.fill(COLOR_UNKNOWN);
+  graph.fill_color(COLOR_UNKNOWN);
 
   // Temporarily mark doors as having multiple colors. We do this so we
   // can quickly detect if a cell is a door without having to search.
   for (const auto& door : doors) {
-    color.at(door.first) = COLOR_MULTIPLE;
+    graph.set_color(door.first, COLOR_MULTIPLE);
   }
 
   // Identify colors (components connected by Manhattan-adjacent transparant
@@ -376,12 +375,12 @@ void MapImpl::rebuild() {
   int_least32_t index = 0;
   CoordRange cr(get_size());
   for (const Coord& restart : cr) {
-    if (color.at(restart) == COLOR_UNKNOWN &&
+    if (graph.get_color(restart) == COLOR_UNKNOWN &&
         is_transparent_temporary(restart)) {
       // Flood fill colors.
       std::stack<Coord> todo;
       todo.push(restart);
-      color.at(restart) = index;
+      graph.set_color(restart, index);
       static_component[index];
       dynamic_component[index];
 
@@ -389,17 +388,17 @@ void MapImpl::rebuild() {
         auto cur = todo.top();
         todo.pop();
         // Explore neighbors, but only Manhattan adjacent ones.
-        for (const auto& n : data.get_adjacent(cur, false)) {
-          if (is_transparent_temporary(n) && color.at(n) == COLOR_UNKNOWN) {
+        for (const auto& n : graph.get_adjacent(cur, false)) {
+          if (is_transparent_temporary(n) && graph.get_color(n) == COLOR_UNKNOWN) {
             todo.push(n);
-            color.at(n) = index;
+            graph.set_color(n, index);
           }
         }
       }
       ++index;
-    } else if (color.at(restart) != COLOR_MULTIPLE &&
+    } else if (graph.get_color(restart) != COLOR_MULTIPLE &&
         !is_transparent_temporary(restart)) {
-      color.at(restart) = COLOR_IMPASSABLE;
+      graph.set_color(restart, COLOR_IMPASSABLE);
     }
   }
   next_component_color = index;
@@ -407,7 +406,7 @@ void MapImpl::rebuild() {
   // Each door is its own color.
   index = -1;
   for (const auto& door : doors) {
-    color.at(door.first) = index;
+    graph.set_color(door.first, index);
     static_component[index];
     dynamic_component[index];
     --index;
@@ -450,7 +449,7 @@ void MapImpl::print_map(std::ostream& os, bool number_doors, const Path& path_to
         os << "\033[0m";
       }
     } else {
-      os << (data.at(c) == PATH_COST_INFINITE ? '*' : ' ');
+      os << (graph.get_cost(c) == PATH_COST_INFINITE ? '*' : ' ');
     }
   }
   os << std::endl;
@@ -459,7 +458,7 @@ void MapImpl::print_map(std::ostream& os, bool number_doors, const Path& path_to
 
 void MapImpl::print_colors(std::ostream& os) const {
   for (const Coord& coord : CoordRange(get_size())) {
-    int_least32_t c = color.at(coord);
+    int_least32_t c = graph.get_color(coord);
     auto door = doors.find(coord);
     if (coord.col == 0) {
       if (coord.row == 0) {
@@ -473,7 +472,7 @@ void MapImpl::print_colors(std::ostream& os) const {
       } else {
         os << 'd';
       }
-    } else if (data.at(coord) != PATH_COST_INFINITE) {
+    } else if (graph.get_cost(coord) != PATH_COST_INFINITE) {
       os << (char)(c + 'A');
     } else {
       os << '*';
@@ -491,10 +490,10 @@ void MapImpl::print_static_components(std::ostream& os) const {
       }
       os << std::endl;
     }
-    if (color.at(coord) == COLOR_IMPASSABLE) {
+    if (graph.get_color(coord) == COLOR_IMPASSABLE) {
       os << '*';
     } else {
-      int_least32_t c = static_component.at(color.at(coord));
+      int_least32_t c = static_component.at(graph.get_color(coord));
       char start = c < 0 ? 'z' : 'A';
       if (c < 25) {
         os << (char)(c + start);
@@ -515,10 +514,10 @@ void MapImpl::print_dynamic_components(std::ostream& os) const {
       }
       os << std::endl;
     }
-    if (color.at(coord) == COLOR_IMPASSABLE) {
+    if (graph.get_color(coord) == COLOR_IMPASSABLE) {
       os << '*';
     } else {
-      int_least32_t c = dynamic_component.at(color.at(coord));
+      int_least32_t c = dynamic_component.at(graph.get_color(coord));
       char start = c < 0 ? 'z' : 'A';
       if (c < 25) {
         os << (char)(c + start);

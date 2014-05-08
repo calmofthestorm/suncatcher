@@ -45,11 +45,6 @@ inline const std::map<const Coord, Door>& MapView::get_doors() const {
 }
 
 
-inline const util::Grid<uint_least8_t>& MapView::get_data() const {
-  return map->get_data();
-}
-
-
 inline bool MapView::is_passable(Coord cell) const {
   return map->is_passable(cell);
 }
@@ -87,6 +82,18 @@ inline void MapView::print_map(
   ) const {
 
   return map->print_map(os, number_doors, path_to_print);
+}
+
+inline std::vector<pathfinder::Coord> MapView::get_adjacent(
+    const pathfinder::Coord cell,
+    bool include_diagonals
+    ) const {
+
+  return map->get_adjacent(cell, include_diagonals);
+}
+
+inline bool MapView::check_bounds(Coord cell) const {
+  return map->check_bounds(cell);
 }
 
 

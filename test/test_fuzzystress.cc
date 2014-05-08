@@ -99,7 +99,7 @@ void choose_one_legal_mutation(DeltaMap& map, Coord cell) {
   } else {
     legal.push_back(std::move(map.get_mutator().create_door(cell, true, cost)));
     legal.push_back(std::move(map.get_mutator().create_door(cell, false, cost)));
-    if (map.get_optimized().get_data().at(cell) == PATH_COST_INFINITE) {
+    if (map.get_cost(cell) == PATH_COST_INFINITE) {
       legal.push_back(std::move(map.get_mutator().set_cost(cell, cost)));
     } else {
       legal.push_back(std::move(map.get_mutator().set_cost(cell, PATH_COST_INFINITE)));
@@ -142,7 +142,7 @@ TEST_F(SLOW2DFuzzDoorland, CreateRemoveWalls) {
   for (size_t i = 0; i < 10000; ++i) {
     for (size_t j = 0; j < 2; ++j) {
       auto c = nondoors[rand() % nondoors.size()];
-      auto cost = map.get_data().at(c) == PATH_COST_INFINITE ? rand() % 200 : PATH_COST_INFINITE;
+      auto cost = map.get_cost(c) == PATH_COST_INFINITE ? rand() % 200 : PATH_COST_INFINITE;
       map.mutate(map.get_mutator().set_cost(c, cost));
     }
     check_random_paths(coords, map);
@@ -190,7 +190,7 @@ TEST_F(SLOW2DFuzzCheckerdoor64, CreateRemoveWalls) {
   for (size_t i = 0; i < 10000; ++i) {
     for (size_t j = 0; j < 2; ++j) {
       auto c = nondoors[rand() % nondoors.size()];
-      auto cost = map.get_data().at(c) == PATH_COST_INFINITE ? rand() % 200 : PATH_COST_INFINITE;
+      auto cost = map.get_cost(c) == PATH_COST_INFINITE ? rand() % 200 : PATH_COST_INFINITE;
       map.mutate(map.get_mutator().set_cost(c, cost));
     }
     check_random_paths(coords, map);

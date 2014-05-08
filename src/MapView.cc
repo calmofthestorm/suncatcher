@@ -58,7 +58,7 @@ Path MapView::path(Coord src, Coord dst) const {
   Grid<Coord> previous(size(), {(uint16_t)-1, (uint16_t)-1, (uint16_t)-1});
   size_t num_expanded = 0;
 
-  if (!map->get_data().check_bounds(src) || !map->get_data().check_bounds(dst)) {
+  if (!map->check_bounds(src) || !map->check_bounds(dst)) {
     return Path({}, -1);
   }
 
@@ -106,7 +106,7 @@ Path MapView::path(Coord src, Coord dst) const {
       return Path(std::move(rval), distance.at(dst));
     }
 
-    for (const auto& next : map->get_data().get_adjacent(cur.pos)) {
+    for (const auto& next : map->get_adjacent(cur.pos)) {
       float cost = move_cost(cur.pos, next);
       float my_dist = distance.at(cur.pos) + cost;
       if (distance.at(next) > my_dist &&

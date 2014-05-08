@@ -30,10 +30,10 @@ TEST_F(SimpleDoor, ToggleOpen) {
   Coord cell = {6, 4, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_FALSE(map.get_doors().at(cell).open);
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().toggle_door_open(cell)));
   ASSERT_TRUE(map.get_doors().at(cell).open);
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
 }
 
 
@@ -41,10 +41,10 @@ TEST_F(SimpleDoor, ToggleClosed) {
   Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_TRUE(map.get_doors().at(cell).open);
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
   map.mutate(std::move(map.get_mutator().toggle_door_open(cell)));
   ASSERT_FALSE(map.get_doors().at(cell).open);
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
 }
 
 
@@ -52,7 +52,7 @@ TEST_F(SimpleDoor, SetOpenStateChange) {
   Coord cell = {6, 4, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_FALSE(map.get_doors().at(cell).open);
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().set_door_open(cell, true)));
   ASSERT_TRUE(map.get_doors().at(cell).open);
 }
@@ -62,10 +62,10 @@ TEST_F(SimpleDoor, SetClosedStateChange) {
   Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_TRUE(map.get_doors().at(cell).open);
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
   map.mutate(std::move(map.get_mutator().set_door_open(cell, false)));
   ASSERT_FALSE(map.get_doors().at(cell).open);
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
 }
 
 
@@ -75,17 +75,17 @@ TEST_F(SimpleDoor, SetClosedNop) {
   ASSERT_FALSE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().set_door_open(cell, false)));
   ASSERT_FALSE(map.get_doors().at(cell).open);
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
 }
 
 TEST_F(SimpleDoor, SetOpenNop) {
   Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
   ASSERT_TRUE(map.get_doors().at(cell).open);
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
   map.mutate(std::move(map.get_mutator().set_door_open(cell, true)));
   ASSERT_TRUE(map.get_doors().at(cell).open);
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
 }
 
 
@@ -94,7 +94,7 @@ TEST_F(SimpleDoor, SetCost1) {
   ASSERT_TRUE(map.is_door(cell));
   map.mutate(std::move(map.get_mutator().set_door_open_cost(cell, 0)));
   ASSERT_TRUE(map.get_doors().at(cell).cost_open == 0);
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
 }
 
 
@@ -103,7 +103,7 @@ TEST_F(SimpleDoor, SetCost2) {
   ASSERT_TRUE(map.is_door(cell));
   map.mutate(std::move(map.get_mutator().set_door_open_cost(cell, 55)));
   ASSERT_TRUE(map.get_doors().at(cell).cost_open == 55);
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
 }
 
 
@@ -117,7 +117,7 @@ TEST_F(DoorCreateRemove, CreateOpenValidFree) {
   map.mutate(std::move(map.get_mutator().create_door(cell, true, 0)));
   ASSERT_TRUE(map.get_doors().at(cell).open);
   ASSERT_TRUE(map.get_doors().at(cell).cost_open == 0);
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
 }
 
 
@@ -127,7 +127,7 @@ TEST_F(DoorCreateRemove, CreateOpenValid) {
   map.mutate(std::move(map.get_mutator().create_door(cell, true, 5)));
   ASSERT_TRUE(map.get_doors().at(cell).open);
   ASSERT_TRUE(map.get_doors().at(cell).cost_open == 5);
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
 }
 
 
@@ -137,62 +137,62 @@ TEST_F(DoorCreateRemove, CreateClosedValid) {
   map.mutate(std::move(map.get_mutator().create_door(cell, false, 55)));
   ASSERT_FALSE(map.get_doors().at(cell).open);
   ASSERT_EQ(map.get_doors().at(cell).cost_open, 55);
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
 }
 
 
 TEST_F(DoorCreateRemove, WallToOpenValid) {
   Coord cell = {0, 0, 0};
   ASSERT_FALSE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().create_door(cell, true, 5)));
   ASSERT_TRUE(map.get_doors().at(cell).open);
   ASSERT_TRUE(map.get_doors().at(cell).cost_open == 5);
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
 }
 
 
 TEST_F(DoorCreateRemove, WallToClosedValid) {
   Coord cell = {0, 0, 0};
   ASSERT_FALSE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().create_door(cell, false, 55)));
   ASSERT_FALSE(map.get_doors().at(cell).open);
   ASSERT_EQ(map.get_doors().at(cell).cost_open, 55);
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
 }
 
 
 TEST_F(DoorCreateRemove, RemoveOpenToWallValid) {
   Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
   ASSERT_TRUE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().remove_door(cell, PATH_COST_INFINITE)));
   ASSERT_FALSE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
 }
 
 
 TEST_F(DoorCreateRemove, RemoveOpenToFreeSquare) {
   Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
   ASSERT_TRUE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().remove_door(cell, 0)));
   ASSERT_FALSE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), 0);
+  ASSERT_EQ(map.get_cost(cell), 0);
 }
 
 
 TEST_F(DoorCreateRemove, RemoveOpenToNormalPassable) {
   Coord cell = {12, 8, 0};
   ASSERT_TRUE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), map.get_doors().find(cell)->second.cost_open);
+  ASSERT_EQ(map.get_cost(cell), map.get_doors().find(cell)->second.cost_open);
   ASSERT_TRUE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().remove_door(cell, 1)));
   ASSERT_FALSE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), 1);
+  ASSERT_EQ(map.get_cost(cell), 1);
 }
 
 
@@ -202,7 +202,7 @@ TEST_F(DoorCreateRemove, RemoveClosedToWallValid) {
   ASSERT_FALSE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().remove_door(cell, PATH_COST_INFINITE)));
   ASSERT_FALSE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
 }
 
 
@@ -212,7 +212,7 @@ TEST_F(DoorCreateRemove, RemoveClosedToFreeSquare) {
   ASSERT_FALSE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().remove_door(cell, 0)));
   ASSERT_FALSE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), 0);
+  ASSERT_EQ(map.get_cost(cell), 0);
 }
 
 
@@ -222,7 +222,7 @@ TEST_F(DoorCreateRemove, RemoveClosedToNormalPassable) {
   ASSERT_FALSE(map.get_doors().at(cell).open);
   map.mutate(std::move(map.get_mutator().remove_door(cell, 1)));
   ASSERT_FALSE(map.is_door(cell));
-  ASSERT_EQ(map.get_data().at(cell), 1);
+  ASSERT_EQ(map.get_cost(cell), 1);
 }
 
 
@@ -232,49 +232,49 @@ class TerrainCost : public MapTest<MAP_MICRO> { };
 
 TEST_F(TerrainCost, WallToWall) {
   Coord cell = {0, 0, 0};
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().set_cost(cell, PATH_COST_INFINITE)));
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
 }
 
 
 TEST_F(TerrainCost, WallToFree) {
   Coord cell = {0, 0, 0};
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().set_cost(cell, 0)));
-  ASSERT_EQ(map.get_data().at(cell), 0);
+  ASSERT_EQ(map.get_cost(cell), 0);
 }
 
 
 TEST_F(TerrainCost, WallToNormal) {
   Coord cell = {0, 0, 0};
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
   map.mutate(std::move(map.get_mutator().set_cost(cell, 1)));
-  ASSERT_EQ(map.get_data().at(cell), 1);
+  ASSERT_EQ(map.get_cost(cell), 1);
 }
 
 
 TEST_F(TerrainCost, NormalCostToWall) {
   Coord cell = {1, 1, 0};
-  ASSERT_EQ(map.get_data().at(cell), 1);
+  ASSERT_EQ(map.get_cost(cell), 1);
   map.mutate(std::move(map.get_mutator().set_cost(cell, PATH_COST_INFINITE)));
-  ASSERT_EQ(map.get_data().at(cell), PATH_COST_INFINITE);
+  ASSERT_EQ(map.get_cost(cell), PATH_COST_INFINITE);
 }
 
 
 TEST_F(TerrainCost, NormalCostToFree) {
   Coord cell = {1, 1, 0};
-  ASSERT_EQ(map.get_data().at(cell), 1);
+  ASSERT_EQ(map.get_cost(cell), 1);
   map.mutate(std::move(map.get_mutator().set_cost(cell, 0)));
-  ASSERT_EQ(map.get_data().at(cell), 0);
+  ASSERT_EQ(map.get_cost(cell), 0);
 }
 
 
 TEST_F(TerrainCost, NormalCostTo4X) {
   Coord cell = {1, 1, 0};
-  ASSERT_EQ(map.get_data().at(cell), 1);
+  ASSERT_EQ(map.get_cost(cell), 1);
   map.mutate(std::move(map.get_mutator().set_cost(cell, 4)));
-  ASSERT_EQ(map.get_data().at(cell), 4);
+  ASSERT_EQ(map.get_cost(cell), 4);
 }
 
 
