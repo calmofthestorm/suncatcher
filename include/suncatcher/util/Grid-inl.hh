@@ -80,8 +80,14 @@ inline std::vector<pathfinder::Coord> Grid<T>::get_adjacent(
     ) const {
 
   using pathfinder::Coord;
-  static_assert(std::is_same<decltype(Coord::row), decltype(Coord::col)>::value, "");
-  static_assert(std::is_same<decltype(Coord::row), decltype(Coord::layer)>::value, "");
+  static_assert(
+      std::is_same<decltype(Coord::row), decltype(Coord::col)>::value,
+      ""
+    );
+  static_assert(
+      std::is_same<decltype(Coord::row), decltype(Coord::layer)>::value,
+      ""
+    );
 
   const static decltype(Coord::row) n1(-1);
 
@@ -116,7 +122,12 @@ inline bool Grid<T>::check_bounds(const pathfinder::Coord cell) const {
 
 
 template <typename T>
-inline bool Grid<T>::check_bounds(uint16_t row, uint16_t col, uint16_t layer) const {
+inline bool Grid<T>::check_bounds(
+    uint16_t row,
+    uint16_t col,
+    uint16_t layer
+  ) const {
+
   return (row < my_size.row && col < my_size.col && layer < my_size.layer);
 }
 

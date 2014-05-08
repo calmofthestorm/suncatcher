@@ -17,7 +17,7 @@ if (MSVC)
     add_definitions (/D_CRT_SECURE_NO_WARNINGS)
 else()
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -ggdb -fno-inline-functions")
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -ggdb -fno-inline-functions -Wall -pedantic -Wextra -Wunreachable-code -Wformat-nonliteral -Wcast-align -Wpointer-arith -Wmissing-declarations -Wundef -Wcast-qual -Wshadow -Wwrite-strings -Wno-unused-parameter -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused")
     set(CPPLINT_ARG_OUTPUT      "--output=eclipse")
     set(CPPCHECK_ARG_TEMPLATE   "--template=gcc")
     set(DEV_NULL                "/dev/null")
@@ -178,8 +178,9 @@ endif()
 
 # add the subdirectory containing the CMakeLists.txt for the gtest library
 add_subdirectory (thirdparty)
-include_directories ("${PROJECT_SOURCE_DIR}/thirdparty/gtest/include")
-include_directories ("${PROJECT_SOURCE_DIR}/thirdparty/gmock/include")
+set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX="isystem")
+include_directories (SYSTEM "${PROJECT_SOURCE_DIR}/thirdparty/gtest/include")
+include_directories (SYSTEM "${PROJECT_SOURCE_DIR}/thirdparty/gmock/include")
 
 # add the test executable
 add_executable (run_unit_tests

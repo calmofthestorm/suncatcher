@@ -15,8 +15,8 @@
 //
 // Copyright 2014 Alex Roper
 
-#ifndef PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a
-#define PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a
+#ifndef MAPIMPL_2c83331d8b5849b28b5f40b38a444a7a
+#define MAPIMPL_2c83331d8b5849b28b5f40b38a444a7a
 
 // Pathfinder abstraction of the map. The MapImpl class maintains a simplified
 // abstraction of the map, intended to support efficient pathfinding,
@@ -61,7 +61,7 @@ class MapMutator;
 
 class MapImpl {
   public:
-    explicit MapImpl(const MapMutator& mutator, bool incremental=true);
+    explicit MapImpl(const MapMutator& mutator, bool incremental = true);
     explicit MapImpl(MapBuilder&& builder);
 
     // Returns the map's size, as a coordinate.
@@ -107,7 +107,11 @@ class MapImpl {
     void print_colors(std::ostream& os) const;
     void print_static_components(std::ostream& os) const;
     void print_dynamic_components(std::ostream& os) const;
-    void print_map(std::ostream& os, bool number_doors=true, const Path& path={}) const;
+    void print_map(
+        std::ostream& os,
+        bool number_doors=true,
+        const Path& path= {}
+      ) const;
 
   private:
     friend class test::DeltaMap;
@@ -179,4 +183,4 @@ class MapImpl {
 
 #include "MapImpl-inl.hh"
 
-#endif  /* PATHFINDER_2c83331d8b5849b28b5f40b38a444a7a */
+#endif  /* MAPIMPL_2c83331d8b5849b28b5f40b38a444a7a */

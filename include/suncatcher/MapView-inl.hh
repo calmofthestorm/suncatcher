@@ -80,8 +80,13 @@ inline void MapView::print_dynamic_components(std::ostream& os) const {
 }
 
 
-inline void MapView::print_map(std::ostream& os, bool number_doors, const Path& path) const {
-  return map->print_map(os, number_doors, path);
+inline void MapView::print_map(
+    std::ostream& os,
+    bool number_doors,
+    const Path& path_to_print
+  ) const {
+
+  return map->print_map(os, number_doors, path_to_print);
 }
 
 

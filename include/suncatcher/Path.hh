@@ -24,7 +24,7 @@
 
 #include "suncatcher/Coord.hh"
 
-const float EPSILON = (float)0.0001;
+const float EPSILON = static_cast<float>(0.0001);
 
 namespace suncatcher {
 namespace pathfinder {

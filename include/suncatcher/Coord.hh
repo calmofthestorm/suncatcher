@@ -93,17 +93,22 @@ inline std::ostream& operator<< (std::ostream& os, const Coord& c) {
 }  // namespace suncatcher
 
 
+
 namespace std {
+
+
 
 template <>
 struct hash<suncatcher::pathfinder::Coord> {
-  size_t operator () (const suncatcher::pathfinder::Coord& key) const {
+  size_t operator() (const suncatcher::pathfinder::Coord& key) const {
     size_t seed = 0;
     boost::hash_combine(seed, key.row);
     boost::hash_combine(seed, key.col);
     return seed;
   }
 };
+
+
 
 }
 

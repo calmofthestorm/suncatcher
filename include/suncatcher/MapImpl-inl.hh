@@ -23,7 +23,8 @@ inline bool MapImpl::is_door(int_least32_t cell_color) const {
 
 inline bool MapImpl::path_exists(Coord a, Coord b) const {
   return (is_passable(a) && is_passable(b) &&
-          dynamic_component.at(color.at(a)) == dynamic_component.at(color.at(b)));
+          (dynamic_component.at(color.at(a)) ==
+           dynamic_component.at(color.at(b))));
 }
 
 
@@ -59,7 +60,7 @@ inline float MapImpl::move_cost(Coord start, Coord finish) const {
   // Can only move diagonally if Manhattan squares are passable.
   if (is_passable({start.row, finish.col, start.layer}) ||
       is_passable({finish.row, start.col, start.layer})) {
-    return get_data().at(finish) * (float)1.4142135623730951;
+    return get_data().at(finish) * static_cast<float>(1.4142135623730951);
   } else {
     return -1;
   }

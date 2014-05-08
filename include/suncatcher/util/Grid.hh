@@ -53,7 +53,7 @@ class Grid {
 
     inline std::vector<pathfinder::Coord> get_adjacent(
         const pathfinder::Coord cell,
-        bool include_diagonals=true
+        bool include_diagonals = true
       ) const;
 
     inline bool check_bounds(const pathfinder::Coord cell) const;

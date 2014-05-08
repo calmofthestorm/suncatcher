@@ -111,13 +111,13 @@ DeltaMutator& DeltaMutator::remove_door(Coord cell, uint_least8_t new_cost) {
 
 
 DeltaMap::DeltaMap()
-: simple_map(),
-  optimized_map() { }
+: optimized_map(),
+  simple_map() { }
 
 
 DeltaMap::DeltaMap(MapView view)
-: simple_map(view),
-  optimized_map(view) {
+: optimized_map(view),
+  simple_map(view) {
   char* slow = std::getenv("SLOWTEST");
   enable_delta = !slow || !strcmp("1", slow);
 }
@@ -137,9 +137,9 @@ void DeltaMap::check_invariant() const {
     if (scolor == COLOR_IMPASSABLE) {
       assert(ocolor == scolor);
     } else {
-      auto c = cmapping.find(ocolor);
-      if (c != cmapping.end()) {
-        assert(c->second == scolor);
+      auto corresponding = cmapping.find(ocolor);
+      if (corresponding != cmapping.end()) {
+        assert(corresponding->second == scolor);
       } else {
         // Door base color may differ, but doorliness should be preserved.
         assert(simple_map.is_door(scolor) == optimized_map.is_door(ocolor));
@@ -151,9 +151,9 @@ void DeltaMap::check_invariant() const {
       // Attempt to find an isomorphism for static components.
       int_least32_t sstatic = simple_map.map->static_component.at(scolor);
       int_least32_t ostatic = optimized_map.map->static_component.at(ocolor);
-      auto c = smapping.find(ostatic);
-      if (c != smapping.end()) {
-        assert(c->second == sstatic);
+      auto corresponding = smapping.find(ostatic);
+      if (corresponding != smapping.end()) {
+        assert(corresponding->second == sstatic);
       } else {
         smapping[ostatic] = sstatic;
       }
@@ -161,9 +161,9 @@ void DeltaMap::check_invariant() const {
       // Attempt to find an isomorphism for dynamic components.
       int_least32_t sdynamic = simple_map.map->dynamic_component.at(scolor);
       int_least32_t odynamic = optimized_map.map->dynamic_component.at(ocolor);
-      c = dmapping.find(odynamic);
-      if (c != dmapping.end()) {
-        assert(c->second == sdynamic);
+      corresponding = dmapping.find(odynamic);
+      if (corresponding != dmapping.end()) {
+        assert(corresponding->second == sdynamic);
       } else {
         dmapping[odynamic] = sdynamic;
       }

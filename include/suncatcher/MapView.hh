@@ -85,7 +85,11 @@ class MapView {
     inline void print_colors(std::ostream& os) const;
     inline void print_static_components(std::ostream& os) const;
     inline void print_dynamic_components(std::ostream& os) const;
-    inline void print_map(std::ostream& os, bool number_doors=true, const Path& path={}) const;
+    inline void print_map(
+        std::ostream& os,
+        bool number_doors = true,
+        const Path& path={}
+      ) const;
 
 
   private:

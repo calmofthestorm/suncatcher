@@ -82,7 +82,7 @@ class MapMutator {
     // Creates a new MapView with the changes applied. These are copy on write
     // with somewhat fine-grained granularity, so while mutation is still
     // kinda pricey it's not absurd. TODO: the entire map is still one chunk.
-    MapView execute(bool incremental=true) const;
+    MapView execute(bool incremental = true) const;
 
   private:
     friend class MapImpl;
