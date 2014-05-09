@@ -36,7 +36,30 @@ class GraphDomainInterface {
     virtual DomainIterator end() const = 0;
 
     virtual size_t size() = 0;
-}
+
+    virtual pathfinder::Coord get_coord_by_index(size_t index) const = 0;
+    virtual size_t get_index_by_coord(pathfinder::Coord cell) const = 0;
+};
+
+
+class GraphDomain {
+  public:
+    GraphDomain(std::unique_ptr<GraphDomainInterface> gdi_in)
+    : gdi(std::move(gdi_in)) { }
+
+    GraphDomainInterface::DomainIterator begin() const { return gdi->begin(); }
+    GraphDomainInterface::DomainIterator end() const { return gdi->end(); }
+
+    size_t size() const { return gdi->size(); };
+
+    pathfinder::Coord get_coord_by_index(size_t index) const { return gdi->get_coord_by_index(index); }
+    size_t get_index_by_coord(pathfinder::Coord cell) const { return gdi->get_index_by_coord(cell); }
+
+  private:
+    std::unique_ptr<GraphDomainInterface> gdi;
+};
+
+
 
 }  // namespace graph
 }  // namespace suncatcher

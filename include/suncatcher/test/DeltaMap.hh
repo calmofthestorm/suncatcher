@@ -31,6 +31,7 @@
 #include "suncatcher/MapView.hh"
 #include "suncatcher/Path.hh"
 #include "suncatcher/Coord.hh"
+#include "suncatcher/GraphDelegate.hh"
 
 namespace suncatcher {
 
@@ -124,7 +125,7 @@ class DeltaMap {
 
     void clear_cache();
 
-    pathfinder::CoordRange domain() const;
+    pathfinder::Domain domain() const;
 
     bool enable_delta;
 

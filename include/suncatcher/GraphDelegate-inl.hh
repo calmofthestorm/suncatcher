@@ -22,7 +22,7 @@ namespace suncatcher {
 namespace pathfinder {
 
 #ifdef POLYMORPHIC_API
-inline GraphDelegate::GraphDelegate(std::unique_ptr<GraphInterface> graph_i)
+inline GraphDelegate::GraphDelegate(std::unique_ptr<graph::GraphInterface> graph_i)
 #else
 inline GraphDelegate::GraphDelegate(graph::EuclideanGraph&& graph_i)
 #endif
@@ -114,15 +114,23 @@ inline bool GraphDelegate::is_passable(Coord cell) const {
 }
 
 
-#ifdef POLYMORPHIC_API
-inline std::unique_ptr<GraphDomainInterface> GraphDelegate::domain() const {
+inline Domain GraphDelegate::domain() const {
+  #ifdef POLYMORPHIC_API
   return graph->domain();
-}
-#else
-inline CoordRange GraphDelegate::domain() const {
+  #else
   return graph.domain();
+  #endif
 }
-#endif
+
+
+inline GraphDelegate GraphDelegate::lazy_clone() const {
+  #ifdef POLYMORPHIC_API
+  return graph->lazy_clone();
+  #else
+  return GraphDelegate(graph::EuclideanGraph(graph));
+  #endif
+}
+
 
 
 }  // namespace pathfinder

@@ -19,11 +19,10 @@
 #define GRAPHINTERFACE_0bb164df0d89492d8b330589e323e254
 
 #include "suncatcher/Coord.hh"
+#include "suncatcher/graph/GraphDomainInterface.hh"
 
 namespace suncatcher {
 namespace graph {
-
-class GraphDomainInterface;
 
 class GraphInterface {
   public:
@@ -47,9 +46,11 @@ class GraphInterface {
 
     virtual void fill_color(int_least32_t fill) = 0;
 
-    virtual void is_passable(pathfinder::Coord cell) = 0;
+    virtual bool is_passable(pathfinder::Coord cell) = 0;
 
-    inline std::unique_ptr<GraphDomainInterface> domain() const = 0;
+    virtual GraphDomain domain() const = 0;
+
+    virtual std::unique_ptr<GraphInterface> lazy_clone() const = 0;
 
 };
 

@@ -124,7 +124,14 @@ DeltaMap::DeltaMap(MapView view)
 
 
 void DeltaMap::check_invariant() const {
+  #ifdef POLYMORPHIC_API
+  for (const auto& cell : simple_map.map->graph.domain()) {
+    assert(simple_map.map->graph.get_cost(cell) ==
+           optimized_map.map->graph.get_cost(cell));
+  }
+  #else
   assert(simple_map.map->graph.graph.data == optimized_map.map->graph.graph.data);
+  #endif
   assert(simple_map.get_doors() == optimized_map.get_doors());
 
   std::map<int_least32_t, int_least32_t> cmapping, smapping, dmapping;
@@ -229,7 +236,7 @@ void DeltaMap::clear_cache() {
 }
 
 
-pathfinder::CoordRange DeltaMap::domain() const {
+pathfinder::Domain DeltaMap::domain() const {
   return simple_map.map->graph.domain();
 }
 

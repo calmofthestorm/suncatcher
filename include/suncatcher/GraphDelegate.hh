@@ -45,13 +45,19 @@ namespace test {
   class DeltaMap;
 }  // namespace test
 
+
 namespace pathfinder {
 
+#ifdef POLYMORPHIC_API
+  typedef graph::GraphDomain Domain;
+#else
+  typedef pathfinder::CoordRange Domain;
+#endif
 
 class GraphDelegate {
   public:
     #ifdef POLYMORPHIC_API
-    inline GraphDelegate(std::unique_ptr<GraphInterface> graph_i);
+    inline GraphDelegate(std::unique_ptr<graph::GraphInterface> graph_i);
     #else
     inline GraphDelegate(graph::EuclideanGraph&& graph_i);
     #endif
@@ -79,11 +85,9 @@ class GraphDelegate {
 
     inline bool is_passable(Coord cell) const;
 
-    #ifdef POLYMORPHIC_API
-    inline std::unique_ptr<GraphDomainInterface> domain() const;
-    #else
-    inline CoordRange domain() const;
-    #endif
+    inline Domain domain() const;
+
+    inline GraphDelegate lazy_clone() const;
 
 
   private:
@@ -91,7 +95,7 @@ class GraphDelegate {
 
     #ifdef POLYMORPHIC_API
     // Don't want to force implementers to adhere to const restriction.
-    mutable std::unique_ptr<GraphInterface> graph;
+    mutable std::unique_ptr<graph::GraphInterface> graph;
     #else
     graph::EuclideanGraph graph;
     #endif

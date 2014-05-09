@@ -15,55 +15,43 @@
 //
 // Copyright 2014 Alex Roper
 
-#ifndef MAPBUILDER_36ddaa5cac2d43bc999e75a96dafc375
-#define MAPBUILDER_36ddaa5cac2d43bc999e75a96dafc375
+#ifndef MAPBUILDER_295c500da7c446bd985189b58095766c
+#define MAPBUILDER_295c500da7c446bd985189b58095766c
 
-#include <cstdint>
-#include <iosfwd>
-#include <map>
-
-#include "suncatcher/util/Grid.hh"
-
+#include "suncatcher/GraphDelegate.hh"
 #include "suncatcher/Door.hh"
-#include "suncatcher/Coord.hh"
 
 namespace suncatcher {
 namespace pathfinder {
 
-class MapImpl;
-
 class MapBuilder {
   public:
     MapBuilder();
-    MapBuilder(Coord size, uint_least8_t default_cost);
+    MapBuilder(
+        pathfinder::GraphDelegate&& gd,
+        std::map<const Coord, Door>&& doors_in
+      )
+    : graph(std::move(gd)),
+      doors(std::move(doors_in)) { }
 
-    // Load a MapBuilder from a simple text format. Intended mostly for
-    // tests and debugging.
-    explicit MapBuilder(std::istream& is);
-
-    // Set/get the cost of the specified cell. Can't do this to a door.
-    inline const uint_least8_t& cost(Coord cell) const { return data.at(cell); }
-    inline uint_least8_t& cost(Coord cell) {
-      assert(doors.find(cell) == doors.end());
-      return data.at(cell);
+    MapBuilder& set_graph(pathfinder::GraphDelegate gd) {
+      std::swap(gd, graph);
+      return *this;
     }
 
-    // If dynamic updates are disabled, every mutation will recompute all cache
-    // state (linear in graph size).
-    void enable_dynamic_updates(bool enabled) { dynamic_updates = enabled; }
-
-    // Add a door to the given cell.
-    void add_door(Coord cell, bool open, uint_least8_t cost_open,
-                  uint_least8_t cost_closed);
+    MapBuilder& set_doors(std::map<const Coord, Door>&& doors_in) {
+      std::swap(doors, doors_in);
+      return *this;
+    }
 
   private:
     friend class MapImpl;
-    util::Grid<uint_least8_t> data;
-    bool dynamic_updates;
+    pathfinder::GraphDelegate graph;
     std::map<const Coord, Door> doors;
 };
 
 }  // namespace pathfinder
 }  // namespace suncatcher
 
-#endif  /* MAPBUILDER_36ddaa5cac2d43bc999e75a96dafc375 */
+
+#endif  /* MAPBUILDER_295c500da7c446bd985189b58095766c */

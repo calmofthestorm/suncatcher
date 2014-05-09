@@ -42,9 +42,8 @@ using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
 
 
-
 MapImpl::MapImpl(MapBuilder&& builder)
-: graph(GraphDelegate(graph::EuclideanGraph(std::move(builder.data)))),
+: graph(std::move(builder.graph)),
   doors(std::move(builder.doors)) {
 
   rebuild();
@@ -84,6 +83,26 @@ MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
   if (!incremental) {
     rebuild();
   }
+}
+
+
+MapImpl::MapImpl(const MapImpl& other)
+: graph(other.graph.lazy_clone()),
+  doors(other.doors),
+  static_component(other.static_component),
+  dynamic_component(other.dynamic_component),
+  next_component_color(other.next_component_color),
+  next_door_color(other.next_door_color) { }
+
+
+MapImpl& MapImpl::operator=(const MapImpl& other) {
+  graph = other.graph.lazy_clone();
+  doors = other.doors;
+  static_component = other.static_component;
+  dynamic_component = other.dynamic_component;
+  next_component_color = other.next_component_color;
+  next_door_color = other.next_door_color;
+  return *this;
 }
 
 

@@ -31,7 +31,6 @@ class CoordRange {
       public:
         inline Coord operator*() const;
         inline iterator& operator++();
-        inline iterator operator+(size_t offset);
         inline bool operator!=(const iterator& it) const;
 
       private:
@@ -49,6 +48,9 @@ class CoordRange {
     inline size_t size() const;
 
     inline Coord euclidean_size() const;
+
+    inline Coord get_coord_by_index(size_t index) const;
+    inline size_t get_index_by_coord(Coord cell) const;
 
   private:
     Coord range_size;

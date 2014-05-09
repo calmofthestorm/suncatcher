@@ -48,8 +48,6 @@
 #include "suncatcher/Path.hh"
 #include "suncatcher/Door.hh"
 #include "suncatcher/GraphDelegate.hh"
-
-//TODO bad
 #include "suncatcher/graph/EuclideanGraph.hh"
 
 namespace suncatcher {
@@ -67,6 +65,12 @@ class MapImpl {
   public:
     explicit MapImpl(const MapMutator& mutator, bool incremental = true);
     explicit MapImpl(MapBuilder&& builder);
+
+    MapImpl(MapImpl&& other) = default;
+    MapImpl& operator=(MapImpl&& other) = default;
+
+    MapImpl(const MapImpl& other);
+    MapImpl& operator=(const MapImpl& other);
 
     // Returns a constant reference to the mapping from coordinates to doors.
     // TODO: fix
@@ -101,7 +105,7 @@ class MapImpl {
 
     inline bool check_bounds(Coord cell) const { return graph.check_bounds(cell); }
 
-    inline pathfinder::CoordRange domain() const;
+    inline pathfinder::Domain domain() const;
 
     // Useful debugging features -- dump a simple representation of aspects
     // of the map to a stream.
@@ -116,10 +120,9 @@ class MapImpl {
 
   private:
     friend class test::DeltaMap;
+    typedef std::map<const Coord, Door>::iterator DoorIter;
 
     GraphDelegate graph;
-
-    typedef std::map<const Coord, Door>::iterator DoorIter;
 
     // Cost to traverse terrain.
 

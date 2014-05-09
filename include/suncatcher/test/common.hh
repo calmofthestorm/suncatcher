@@ -31,7 +31,6 @@
 
 #include "suncatcher/platform.hh"
 
-#ifdef MICROPATHER_DELTA_TEST
 #include "suncatcher/micropather/micropather.hh"
 #include "suncatcher/micropather/MicropatherGraph.hh"
 
@@ -41,6 +40,7 @@
 #include "suncatcher/MapMutator.hh"
 #include "suncatcher/util/util.hh"
 #include "suncatcher/test/ResourceManager.hh"
+#include "suncatcher/test/MPWrapper.hh"
 
 namespace suncatcher {
 namespace test {
@@ -68,7 +68,7 @@ using suncatcher::pathfinder::Path;
 using suncatcher::pathfinder::Coord;
 using suncatcher::PATH_COST_INFINITE;
 
-#include "suncatcher/test/MPWrapper.hh"
+#ifdef MICROPATHER_DELTA_TEST
 using suncatcher::test::MicropatherGraph;
 #endif
 

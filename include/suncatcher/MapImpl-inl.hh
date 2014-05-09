@@ -55,7 +55,7 @@ inline bool MapImpl::is_passable(Coord cell) const {
 }
 
 
-pathfinder::CoordRange MapImpl::domain() const {
+pathfinder::Domain MapImpl::domain() const {
   return graph.domain();
 }
 

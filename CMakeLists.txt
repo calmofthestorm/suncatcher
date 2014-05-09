@@ -183,6 +183,7 @@ add_subdirectory (thirdparty)
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX="isystem")
 include_directories (SYSTEM "${PROJECT_SOURCE_DIR}/thirdparty/gtest/include")
 include_directories (SYSTEM "${PROJECT_SOURCE_DIR}/thirdparty/gmock/include")
+include_directories (SYSTEM "${PROJECT_SOURCE_DIR}/thirdparty/any_iterator")
 
 # add the test executable
 add_executable (run_unit_tests

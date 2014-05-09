@@ -47,8 +47,8 @@ class MapBuilder;
 class MapView {
   public:
     MapView();
-    explicit MapView(MapBuilder&& builder);
     explicit MapView(std::shared_ptr<MapImpl> backing);
+    explicit MapView(pathfinder::MapBuilder&& builder);
 
     // Compute the shortest path between two points if one exists. Returns false
     // path on failure (out of bounds, no path, impassable src/dest, etc).

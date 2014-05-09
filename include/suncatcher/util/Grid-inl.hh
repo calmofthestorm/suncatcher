@@ -144,6 +144,18 @@ inline bool Grid<T>::operator==(const Grid<T>& other) const {
 }
 
 
+template <typename T>
+inline const T& Grid<T>::operator[](const pathfinder::Coord cell) const {
+  return at(cell);
+}
+
+
+template <typename T>
+inline T& Grid<T>::operator[](const pathfinder::Coord cell) {
+  return at(cell);
+}
+
+
 
 }  // namespace util
 }  // namespace suncatcher

@@ -26,7 +26,6 @@
 #include "suncatcher/Coord.hh"
 
 #include "suncatcher/MapView.hh"
-#include "suncatcher/MapBuilder.hh"
 
 namespace suncatcher {
 namespace pathfinder {
@@ -50,7 +49,6 @@ class MapImpl;
 class MapMutator {
   public:
     MapMutator();
-    explicit MapMutator(MapBuilder&& builder);
     explicit MapMutator(MapView view);
 
     // Sets/toggles a door's openness state Asserts cell is a door. Opening a

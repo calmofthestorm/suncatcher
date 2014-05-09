@@ -44,22 +44,6 @@ inline CoordRange::iterator& CoordRange::iterator::operator++() {
 }
 
 
-inline CoordRange::iterator CoordRange::iterator::operator+(size_t offset) {
-  size_t new_col = pos.col + offset;
-  size_t new_row = pos.row + new_col / size.col;
-  iterator rval(*this);
-  rval.pos.col = new_col % size.col;
-  rval.pos.row = new_row % size.row;
-  new_row /= size.row;
-  if (rval.pos.layer + new_row < rval.pos.layer) {
-    return iterator(Coord(0, 0, size.layer), size);
-  } else {
-    rval.pos.layer += new_row / size.row;
-    return rval;
-  }
-}
-
-
 inline CoordRange::iterator::iterator(Coord pos_i, Coord size_i)
 : pos(pos_i),
   size(size_i) { }
@@ -93,6 +77,25 @@ inline size_t CoordRange::size() const {
 
 inline Coord CoordRange::euclidean_size() const {
   return range_size;
+}
+
+
+inline Coord CoordRange::get_coord_by_index(size_t index) const {
+  size_t layer = index / (range_size.row * range_size.col);
+  index %= range_size.row * range_size.col;
+  size_t row = index / range_size.col;
+  size_t col = index % range_size.col;
+  return Coord((uint16_t)row, (uint16_t)col, (uint16_t)layer);
+}
+
+
+inline size_t CoordRange::get_index_by_coord(Coord cell) const {
+  size_t acc = cell.layer;
+  acc *= range_size.row;
+  acc += cell.row;
+  acc *= range_size.col;
+  acc += cell.col;
+  return acc;
 }
 
 

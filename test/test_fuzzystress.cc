@@ -79,10 +79,10 @@ void check_random_paths(std::vector<Coord>& cs, DeltaMap& map) {
 
 
 void choose_one_legal_mutation_anywhere(DeltaMap& map) {
-  // Suboptimal, but we only ever use this on small maps.
-  CoordRange cr = map.domain();
-  size_t choice = rand() % cr.size();
-  Coord cell = *(cr.begin() + choice);
+  // Suboptimal, but we only ever use this on small maps and only for
+  // tests.
+  auto cr = map.domain();
+  Coord cell = cr.get_coord_by_index(rand() % cr.size());
   choose_one_legal_mutation(map, cell);
 }
 

@@ -15,7 +15,7 @@
 //
 // Copyright 2014 Alex Roper
 
-#include "suncatcher/MapBuilder.hh"
+#include "suncatcher/graph/EuclideanGraphBuilder.hh"
 
 #include <fstream>
 #include <string>
@@ -29,19 +29,19 @@ namespace pathfinder {
 
 
 
-MapBuilder::MapBuilder()
+EuclideanGraphBuilder::EuclideanGraphBuilder()
 : data({0, 0, 0}, 0),
   dynamic_updates(true),
   doors() { }
 
 
-MapBuilder::MapBuilder(Coord size, uint_least8_t default_cost)
+EuclideanGraphBuilder::EuclideanGraphBuilder(Coord size, uint_least8_t default_cost)
 : data(size, default_cost),
   dynamic_updates(true),
   doors() { }
 
 
-void MapBuilder::add_door(Coord cell, bool open, uint_least8_t cost_open,
+void EuclideanGraphBuilder::add_door(Coord cell, bool open, uint_least8_t cost_open,
                           uint_least8_t cost_closed) {
   assert(doors.find(cell) == doors.end());
   doors[cell] = {open, cost_open, cost_closed};
@@ -49,14 +49,14 @@ void MapBuilder::add_door(Coord cell, bool open, uint_least8_t cost_open,
 }
 
 
-MapBuilder::MapBuilder(std::istream& is) {
+EuclideanGraphBuilder::EuclideanGraphBuilder(std::istream& is) {
 
   std::string line;
   Coord size;
   is >> size.row >> size.col >> size.layer;
   std::getline(is, line);
   assert(is);
-  *this = MapBuilder(size, 1);
+  *this = EuclideanGraphBuilder(size, 1);
   line.clear();
   auto it = line.begin();
   for (const Coord& cell : CoordRange(size)) {

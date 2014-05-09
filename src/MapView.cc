@@ -45,18 +45,25 @@ MapView::MapView()
 : map(nullptr) { }
 
 
-MapView::MapView(MapBuilder&& builder)
-: map(std::make_shared<MapImpl>(std::move(builder))) { }
+MapView::MapView(pathfinder::MapBuilder&& builder)
+: map(std::make_shared<MapImpl>(builder)) { }
 
 
 MapView::MapView(std::shared_ptr<MapImpl> backing)
 : map(backing) { }
 
 
-#ifndef POLYMORPHIC_API
 Path MapView::path(Coord src, Coord dst) const {
+  #ifndef POLYMORPHIC_API
   Grid<uint_fast8_t> expanded(map->domain().euclidean_size(), 0);
   Grid<Coord> previous(expanded.size(), {(uint16_t)-1, (uint16_t)-1, (uint16_t)-1});
+  Grid<float> distance(expanded.size(), INFINITY);
+  #else
+  std::unordered_map<Coord, bool> expanded;
+  std::unordered_map<Coord, Coord> previous;
+  std::unordered_map<Coord, float> distance;
+  #endif
+
   size_t num_expanded = 0;
 
   if (!map->check_bounds(src) || !map->check_bounds(dst)) {
@@ -74,8 +81,7 @@ Path MapView::path(Coord src, Coord dst) const {
     return Path(std::vector<Coord> {src}, 0);
   }
 
-  Grid<float> distance(expanded.size(), INFINITY);
-  distance.at(src) = 0;
+  distance[src] = 0;
 
   struct Entry {
     Coord pos;
@@ -86,6 +92,7 @@ Path MapView::path(Coord src, Coord dst) const {
       return cost > e.cost;
     }
   };
+
   std::priority_queue<Entry> fringe;
   fringe.push({src, manhattan(src, dst)});
 
@@ -93,30 +100,30 @@ Path MapView::path(Coord src, Coord dst) const {
     Entry cur = fringe.top();
     assert(is_passable(cur.pos));
     fringe.pop();
-    if (!expanded.at(cur.pos)) {
-      expanded.at(cur.pos) = 1;
+    if (!expanded[cur.pos]) {
+      expanded[cur.pos] = 1;
       ++num_expanded;
 
       if (cur.pos == dst) {
         // TODO: unnecessary copy
         std::vector<Coord> rval{dst};
-        rval.reserve((unsigned int)(distance.at(dst) + 1));
+        rval.reserve((unsigned int)(distance[dst] + 1));
         while (rval.back() != src) {
-          rval.push_back(previous.at(rval.back()));
+          rval.push_back(previous[rval.back()]);
         }
         std::reverse(rval.begin(), rval.end());
-        return Path(std::move(rval), distance.at(dst));
+        return Path(std::move(rval), distance[dst]);
       }
 
       for (const auto& next : map->get_adjacent(cur.pos)) {
         float cost = move_cost(cur.pos, next);
-        float my_dist = distance.at(cur.pos) + cost;
-        if (distance.at(next) > my_dist &&
-            !expanded.at(next) &&
+        float my_dist = distance[cur.pos] + cost;
+        if (distance[next] > my_dist &&
+            !expanded[next] &&
             cost != -1) {
-          distance.at(next) = my_dist;
+          distance[next] = my_dist;
           fringe.push({next, manhattan(next, dst) + my_dist});
-          previous.at(next) = cur.pos;
+          previous[next] = cur.pos;
         }
       }
     }
@@ -124,7 +131,7 @@ Path MapView::path(Coord src, Coord dst) const {
   assert(0);
   return Path(std::vector<Coord>(), -1);
 }
-#endif
+
 
 
 }  // namespace pathfinder

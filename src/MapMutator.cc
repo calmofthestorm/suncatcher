@@ -31,10 +31,6 @@ MapMutator::MapMutator()
 : view(MapView()) { }
 
 
-MapMutator::MapMutator(MapBuilder&& builder)
-: view(MapView(std::move(builder))) { }
-
-
 MapMutator::MapMutator(MapView view_in)
 : view(view_in) { }
 
