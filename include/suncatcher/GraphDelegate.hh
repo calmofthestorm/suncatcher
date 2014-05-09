@@ -56,6 +56,8 @@ namespace pathfinder {
 
 class GraphDelegate {
   public:
+    inline GraphDelegate() { };
+
     #ifdef POLYMORPHIC_API
     inline GraphDelegate(std::unique_ptr<graph::GraphInterface> graph_i);
     #else

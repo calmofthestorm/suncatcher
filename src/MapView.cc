@@ -46,7 +46,7 @@ MapView::MapView()
 
 
 MapView::MapView(pathfinder::MapBuilder&& builder)
-: map(std::make_shared<MapImpl>(builder)) { }
+: map(std::make_shared<MapImpl>(std::move(builder))) { }
 
 
 MapView::MapView(std::shared_ptr<MapImpl> backing)

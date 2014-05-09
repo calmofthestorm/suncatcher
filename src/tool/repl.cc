@@ -33,6 +33,7 @@
 #include "suncatcher/Coord.hh"
 #include "suncatcher/MapView.hh"
 #include "suncatcher/MapBuilder.hh"
+#include "suncatcher/graph/EuclideanGraphBuilder.hh"
 #include "suncatcher/MapMutator.hh"
 #include "suncatcher/util/util.hh"
 #include "suncatcher/micropather/MicropatherGraph.hh"
@@ -44,7 +45,10 @@ using suncatcher::pathfinder::MapView;
 using suncatcher::pathfinder::MapMutator;
 using suncatcher::pathfinder::Path;
 using suncatcher::pathfinder::Coord;
+using suncatcher::pathfinder::MapBuilder;
 using suncatcher::test::MicropatherGraph;
+using suncatcher::graph::EuclideanGraphBuilder;
+using suncatcher::graph::EuclideanGraph;
 
 int timer() {
   static auto begin = std::chrono::high_resolution_clock::now();
@@ -58,11 +62,16 @@ int timer() {
 
 int main(int argc, char** argv) {
   assert(argc == 2 || argc == 4);
+
   std::ifstream is(argv[1]);
-  suncatcher::pathfinder::MapBuilder mb(is);
+  if (!is) {
+    std::cerr << "Unable to open map " << argv[1] << std::endl;
+    exit(-1);
+  }
+  auto builder = MapBuilder(EuclideanGraphBuilder(is));
 
   timer();
-  MapView my_map(std::move(mb));
+  MapView my_map(std::move(builder));
   std::cout << "Flood fill time: " << timer() << std::endl;
 
   std::vector<Coord> door_index_to_coords;

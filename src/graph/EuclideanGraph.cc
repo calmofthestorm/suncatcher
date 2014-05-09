@@ -15,8 +15,10 @@
 //
 // Copyright 2014 Alex Roper
 
-#include "suncatcher.hh"
 #include "suncatcher/graph/EuclideanGraph.hh"
+
+#include "suncatcher.hh"
+#include "suncatcher/graph/EuclideanGraphBuilder.hh"
 
 namespace suncatcher {
 namespace graph {
@@ -25,6 +27,13 @@ namespace graph {
 EuclideanGraph::EuclideanGraph()
 : color({0, 0, 0}, 0),
   data({0, 0, 0}, 0) { }
+
+
+EuclideanGraph::EuclideanGraph(EuclideanGraphBuilder&& builder)
+: data(std::move(builder.data)) {
+  // VS bug workaround -- ctor lists arbitrary order.
+  color = decltype(color)(data.size(), COLOR_UNKNOWN);
+}
 
 
 EuclideanGraph::EuclideanGraph(util::Grid<uint_least8_t>&& data_i)

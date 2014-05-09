@@ -25,8 +25,13 @@
 #include "suncatcher/CoordRange.hh"
 
 namespace suncatcher {
-namespace pathfinder {
+namespace graph {
 
+
+namespace {
+  using pathfinder::Door;
+  using pathfinder::Coord;
+}  // anonymous namespace
 
 
 EuclideanGraphBuilder::EuclideanGraphBuilder()
@@ -59,7 +64,7 @@ EuclideanGraphBuilder::EuclideanGraphBuilder(std::istream& is) {
   *this = EuclideanGraphBuilder(size, 1);
   line.clear();
   auto it = line.begin();
-  for (const Coord& cell : CoordRange(size)) {
+  for (const Coord& cell : pathfinder::CoordRange(size)) {
     while (it == line.end()) {
       std::getline(is, line);
       it = line.begin();

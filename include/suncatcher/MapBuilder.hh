@@ -20,6 +20,7 @@
 
 #include "suncatcher/GraphDelegate.hh"
 #include "suncatcher/Door.hh"
+#include "suncatcher/graph/EuclideanGraphBuilder.hh"
 
 namespace suncatcher {
 namespace pathfinder {
@@ -27,6 +28,13 @@ namespace pathfinder {
 class MapBuilder {
   public:
     MapBuilder();
+
+    MapBuilder(graph::EuclideanGraphBuilder&& egb)
+    : doors(std::move(egb.doors)) {
+
+      graph = graph::EuclideanGraph(std::move(egb));
+    }
+
     MapBuilder(
         pathfinder::GraphDelegate&& gd,
         std::map<const Coord, Door>&& doors_in

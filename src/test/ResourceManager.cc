@@ -22,6 +22,7 @@
 #include "suncatcher/test/DeltaMap.hh"
 #include "suncatcher/MapBuilder.hh"
 #include "suncatcher/MapView.hh"
+#include "suncatcher/graph/EuclideanGraphBuilder.hh"
 
 namespace suncatcher {
 namespace test {
@@ -34,7 +35,7 @@ const DeltaMap& ResourceManager::get_map(std::string fn) {
       exit(-1);
     }
     assert(is);
-    auto builder = pathfinder::MapBuilder(is);
+    auto builder = pathfinder::MapBuilder(graph::EuclideanGraphBuilder(is));
     auto view = pathfinder::MapView(pathfinder::MapView(std::move(builder)));
     get_me().map_cache[fn] = DeltaMap(view);
   }

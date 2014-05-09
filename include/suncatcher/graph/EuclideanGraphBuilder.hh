@@ -28,22 +28,28 @@
 #include "suncatcher/Coord.hh"
 
 namespace suncatcher {
-namespace pathfinder {
 
-class MapImpl;
+namespace pathfinder {
+  class MapImpl;
+  class MapBuilder;
+}  // namespace pathfinder
+
+namespace graph {
+
+class EuclideanGraph;
 
 class EuclideanGraphBuilder {
   public:
     EuclideanGraphBuilder();
-    EuclideanGraphBuilder(Coord size, uint_least8_t default_cost);
+    EuclideanGraphBuilder(pathfinder::Coord size, uint_least8_t default_cost);
 
     // Load a EuclideanGraphBuilder from a simple text format. Intended mostly
     // for tests and debugging.
     explicit EuclideanGraphBuilder(std::istream& is);
 
     // Set/get the cost of the specified cell. Can't do this to a door.
-    inline const uint_least8_t& cost(Coord cell) const { return data.at(cell); }
-    inline uint_least8_t& cost(Coord cell) {
+    inline const uint_least8_t& cost(pathfinder::Coord cell) const { return data.at(cell); }
+    inline uint_least8_t& cost(pathfinder::Coord cell) {
       assert(doors.find(cell) == doors.end());
       return data.at(cell);
     }
@@ -53,14 +59,17 @@ class EuclideanGraphBuilder {
     void enable_dynamic_updates(bool enabled) { dynamic_updates = enabled; }
 
     // Add a door to the given cell.
-    void add_door(Coord cell, bool open, uint_least8_t cost_open,
+    void add_door(pathfinder::Coord cell, bool open, uint_least8_t cost_open,
                   uint_least8_t cost_closed);
 
   private:
-    friend class MapImpl;
+    friend class pathfinder::MapImpl;
+    friend class pathfinder::MapBuilder;
+    friend class EuclideanGraph;
+
     util::Grid<uint_least8_t> data;
     bool dynamic_updates;
-    std::map<const Coord, Door> doors;
+    std::map<const pathfinder::Coord, pathfinder::Door> doors;
 };
 
 }  // namespace pathfinder

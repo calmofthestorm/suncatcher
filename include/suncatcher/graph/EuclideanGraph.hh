@@ -31,10 +31,12 @@ namespace test {
 
 namespace graph {
 
+class EuclideanGraphBuilder;
 
 class EuclideanGraph {
   public:
     EuclideanGraph();
+    EuclideanGraph(EuclideanGraphBuilder&& builder);
     EuclideanGraph(util::Grid<uint_least8_t>&& data_i);
     EuclideanGraph(
         pathfinder::Coord size,
