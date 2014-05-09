@@ -15,17 +15,31 @@
 //
 // Copyright 2014 Alex Roper
 
-#ifdef _MSC_VER
-  #define NOEXCEPT _NOEXCEPT
-  #define ALIGNED_8 __attribute__ __declspec( align(8) )
-#else
-  // g++ & clang
-  #define ALIGNED_8 __attribute__((__aligned__(8)))
-  #define NOEXCEPT noexcept
-#endif
+#ifndef GRAPHDOMAININTERFACE_524af6b0ad504f30a87f10c7991caf20
+#define GRAPHDOMAININTERFACE_524af6b0ad504f30a87f10c7991caf20
 
-// #define POLYMORPHIC_API
+#include <any_iterator/any_iterator.hpp>
 
-#ifndef POLYMORPHIC_API
-  #define MICROPATHER_DELTA_TEST
-#endif
+namespace suncatcher {
+namespace graph {
+
+class GraphDomainInterface {
+  public:
+    typedef IteratorTypeErasure::any_iterator<
+        pathfinder::Coord,
+        std::forward_iterator_tag
+      > DomainIterator;
+
+    virtual ~GraphDomainInterface() { }
+
+    virtual DomainIterator begin() const = 0;
+    virtual DomainIterator end() const = 0;
+
+    virtual size_t size() = 0;
+}
+
+}  // namespace graph
+}  // namespace suncatcher
+
+
+#endif  /* GRAPHDOMAININTERFACE_524af6b0ad504f30a87f10c7991caf20 */

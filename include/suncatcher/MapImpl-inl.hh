@@ -55,6 +55,11 @@ inline bool MapImpl::is_passable(Coord cell) const {
 }
 
 
+pathfinder::CoordRange MapImpl::domain() const {
+  return graph.domain();
+}
+
+
 }  // namespace pathfinder
 }  // namespace suncatcher
 

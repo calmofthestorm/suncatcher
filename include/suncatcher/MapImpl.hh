@@ -68,9 +68,6 @@ class MapImpl {
     explicit MapImpl(const MapMutator& mutator, bool incremental = true);
     explicit MapImpl(MapBuilder&& builder);
 
-    // Returns the map's size, as a coordinate.
-    inline Coord get_size() const { return graph.size(); }
-
     // Returns a constant reference to the mapping from coordinates to doors.
     // TODO: fix
     const std::map<const Coord, Door>& get_doors() const { return doors; }
@@ -103,6 +100,8 @@ class MapImpl {
       ) const;
 
     inline bool check_bounds(Coord cell) const { return graph.check_bounds(cell); }
+
+    inline pathfinder::CoordRange domain() const;
 
     // Useful debugging features -- dump a simple representation of aspects
     // of the map to a stream.

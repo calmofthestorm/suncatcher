@@ -30,6 +30,7 @@
 #include "suncatcher.hh"
 #include "suncatcher/Coord.hh"
 #include "suncatcher/util/Grid.hh"
+#include "suncatcher/CoordRange.hh"
 
 // #define POLYMORPHIC_API
 #ifdef POLYMORPHIC_API
@@ -77,6 +78,12 @@ class GraphDelegate {
     inline void fill_color(int_least32_t fill);
 
     inline bool is_passable(Coord cell) const;
+
+    #ifdef POLYMORPHIC_API
+    inline std::unique_ptr<GraphDomainInterface> domain() const;
+    #else
+    inline CoordRange domain() const;
+    #endif
 
 
   private:

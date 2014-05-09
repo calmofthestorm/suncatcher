@@ -373,8 +373,7 @@ void MapImpl::rebuild() {
   // squares), stopping at walls and doors. We also mark walls with the
   // appropriate color value (COLOR_IMPASSABLE)
   int_least32_t index = 0;
-  CoordRange cr(get_size());
-  for (const Coord& restart : cr) {
+  for (const Coord& restart : graph.domain()) {
     if (graph.get_color(restart) == COLOR_UNKNOWN &&
         is_transparent_temporary(restart)) {
       // Flood fill colors.
@@ -421,7 +420,7 @@ void MapImpl::print_map(std::ostream& os, bool number_doors, const Path& path_to
       path_to_show.get_path().end()
     );
   size_t index = 0;
-  for (const Coord& c : CoordRange(get_size())) {
+  for (const Coord& c : graph.domain()) {
     auto door = doors.find(c);
     if (c.col == 0) {
       if (c.row == 0) {
@@ -457,7 +456,7 @@ void MapImpl::print_map(std::ostream& os, bool number_doors, const Path& path_to
 
 
 void MapImpl::print_colors(std::ostream& os) const {
-  for (const Coord& coord : CoordRange(get_size())) {
+  for (const Coord& coord : graph.domain()) {
     int_least32_t c = graph.get_color(coord);
     auto door = doors.find(coord);
     if (coord.col == 0) {
@@ -483,7 +482,7 @@ void MapImpl::print_colors(std::ostream& os) const {
 
 
 void MapImpl::print_static_components(std::ostream& os) const {
-  for (const Coord& coord : CoordRange(get_size())) {
+  for (const Coord& coord : graph.domain()) {
     if (coord.col == 0) {
       if (coord.row == 0) {
         os << std::endl;
@@ -507,7 +506,7 @@ void MapImpl::print_static_components(std::ostream& os) const {
 
 
 void MapImpl::print_dynamic_components(std::ostream& os) const {
-  for (const Coord& coord : CoordRange(get_size())) {
+  for (const Coord& coord : graph.domain()) {
     if (coord.col == 0) {
       if (coord.row == 0) {
         os << std::endl;
@@ -528,7 +527,6 @@ void MapImpl::print_dynamic_components(std::ostream& os) const {
   }
   os << std::endl;
 }
-
 
 
 }  // namespace pathfinder

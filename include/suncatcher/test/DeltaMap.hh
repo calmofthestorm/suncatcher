@@ -123,7 +123,8 @@ class DeltaMap {
     uint_least8_t get_cost(pathfinder::Coord cell) const;
 
     void clear_cache();
-    pathfinder::Coord size() const;
+
+    pathfinder::CoordRange domain() const;
 
     bool enable_delta;
 

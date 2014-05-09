@@ -59,19 +59,21 @@ class MicropatherGraph : public micropather::Graph {
     void* encode(const pathfinder::Coord& c) const {
       static_assert(sizeof(c.row) + sizeof(c.col) + sizeof(c.layer) <=
                     sizeof(void*), "");
-      uintptr_t encoded = c.col + graph.size().col * (c.row + graph.size().row * c.layer);
+      static const uint16_t dim = std::numeric_limits<uint16_t>::max();
+      uintptr_t encoded = c.col + dim * (c.row + dim * c.layer);
       return (void*)encoded;
     }
 
     pathfinder::Coord decode(void* c) const {
+      static const uint16_t dim = std::numeric_limits<uint16_t>::max();
+
       uintptr_t encoded = (uintptr_t)c;
-      uintptr_t width = graph.size().col;
-      uintptr_t height = graph.size().row;
+
       pathfinder::Coord rval;
-      rval.layer = encoded / (width * height);
-      encoded %= (width * height);
-      rval.row = encoded / width;
-      rval.col = encoded % width;
+      rval.layer = encoded / ((size_t)dim * (size_t)dim);
+      encoded %= ((size_t)dim * (size_t)dim);
+      rval.row = encoded / dim;
+      rval.col = encoded % dim;
       return rval;
     }
 

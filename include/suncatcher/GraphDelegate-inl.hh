@@ -114,6 +114,17 @@ inline bool GraphDelegate::is_passable(Coord cell) const {
 }
 
 
+#ifdef POLYMORPHIC_API
+inline std::unique_ptr<GraphDomainInterface> GraphDelegate::domain() const {
+  return graph->domain();
+}
+#else
+inline CoordRange GraphDelegate::domain() const {
+  return graph.domain();
+}
+#endif
+
+
 }  // namespace pathfinder
 }  // namespace suncatcher
 

@@ -24,7 +24,7 @@ namespace pathfinder {
 
 
 inline CoordRange::CoordRange(Coord c)
-: size(c) { }
+: range_size(c) { }
 
 
 inline Coord CoordRange::iterator::operator*() const {
@@ -44,6 +44,22 @@ inline CoordRange::iterator& CoordRange::iterator::operator++() {
 }
 
 
+inline CoordRange::iterator CoordRange::iterator::operator+(size_t offset) {
+  size_t new_col = pos.col + offset;
+  size_t new_row = pos.row + new_col / size.col;
+  iterator rval(*this);
+  rval.pos.col = new_col % size.col;
+  rval.pos.row = new_row % size.row;
+  new_row /= size.row;
+  if (rval.pos.layer + new_row < rval.pos.layer) {
+    return iterator(Coord(0, 0, size.layer), size);
+  } else {
+    rval.pos.layer += new_row / size.row;
+    return rval;
+  }
+}
+
+
 inline CoordRange::iterator::iterator(Coord pos_i, Coord size_i)
 : pos(pos_i),
   size(size_i) { }
@@ -57,18 +73,27 @@ inline bool CoordRange::iterator::operator!=(
 
 
 inline CoordRange::iterator CoordRange::begin() {
-  return iterator(Coord(0, 0, 0), size);
+  return iterator(Coord(0, 0, 0), range_size);
 }
 
 
 inline CoordRange::iterator CoordRange::end() {
-  if (size.row == 0 || size.col == 0 || size.layer == 0) {
+  if (range_size.row == 0 || range_size.col == 0 || range_size.layer == 0) {
     return begin();
   } else {
-    return iterator(Coord(0, 0, size.layer), size);
+    return iterator(Coord(0, 0, range_size.layer), range_size);
   }
 }
 
+
+inline size_t CoordRange::size() const {
+  return range_size.row * range_size.col * range_size.layer;
+}
+
+
+inline Coord CoordRange::euclidean_size() const {
+  return range_size;
+}
 
 
 }  // namespace pathfinder

@@ -23,6 +23,8 @@
 namespace suncatcher {
 namespace graph {
 
+class GraphDomainInterface;
+
 class GraphInterface {
   public:
     virtual ~GraphInterface() { }
@@ -46,6 +48,9 @@ class GraphInterface {
     virtual void fill_color(int_least32_t fill) = 0;
 
     virtual void is_passable(pathfinder::Coord cell) = 0;
+
+    inline std::unique_ptr<GraphDomainInterface> domain() const = 0;
+
 };
 
 }  // namespace graph

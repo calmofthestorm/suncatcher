@@ -35,11 +35,6 @@ inline bool MapView::is_door(int_least32_t cell_color) const {
 }
 
 
-inline Coord MapView::size() const {
-  return map->get_size();
-}
-
-
 inline const std::map<const Coord, Door>& MapView::get_doors() const {
   return map->get_doors();
 }

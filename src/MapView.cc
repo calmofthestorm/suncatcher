@@ -53,9 +53,10 @@ MapView::MapView(std::shared_ptr<MapImpl> backing)
 : map(backing) { }
 
 
+#ifndef POLYMORPHIC_API
 Path MapView::path(Coord src, Coord dst) const {
-  Grid<uint_fast8_t> expanded(size(), 0);
-  Grid<Coord> previous(size(), {(uint16_t)-1, (uint16_t)-1, (uint16_t)-1});
+  Grid<uint_fast8_t> expanded(map->domain().euclidean_size(), 0);
+  Grid<Coord> previous(expanded.size(), {(uint16_t)-1, (uint16_t)-1, (uint16_t)-1});
   size_t num_expanded = 0;
 
   if (!map->check_bounds(src) || !map->check_bounds(dst)) {
@@ -73,7 +74,7 @@ Path MapView::path(Coord src, Coord dst) const {
     return Path(std::vector<Coord> {src}, 0);
   }
 
-  Grid<float> distance(size(), INFINITY);
+  Grid<float> distance(expanded.size(), INFINITY);
   distance.at(src) = 0;
 
   struct Entry {
@@ -123,7 +124,7 @@ Path MapView::path(Coord src, Coord dst) const {
   assert(0);
   return Path(std::vector<Coord>(), -1);
 }
-
+#endif
 
 
 }  // namespace pathfinder

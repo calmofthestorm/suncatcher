@@ -54,7 +54,7 @@ void scrambler(
 
   srand(4); // Chosen by fair dice roll. Guaranteed to be random.
   ASSERT_TRUE(map.enable_delta) << "These tests requires export SLOWTEST=1, and tests nothing meaningful without it. As a safety measure we will fail now. You can run the test binary with --gtest_filter=-*SLOW* to run only tests that do not require it.";
-  for (const auto& it : CoordRange(map.size())) {
+  for (const auto& it : map.domain()) {
     coords.push_back(it);
     if (map.is_door(it)) {
       doors.push_back(it);
@@ -79,11 +79,10 @@ void check_random_paths(std::vector<Coord>& cs, DeltaMap& map) {
 
 
 void choose_one_legal_mutation_anywhere(DeltaMap& map) {
-  Coord cell(
-      rand() % map.size().row,
-      rand() % map.size().col,
-      rand() % map.size().layer
-    );
+  // Suboptimal, but we only ever use this on small maps.
+  CoordRange cr = map.domain();
+  size_t choice = rand() % cr.size();
+  Coord cell = *(cr.begin() + choice);
   choose_one_legal_mutation(map, cell);
 }
 

@@ -64,6 +64,11 @@ inline float EuclideanGraph::move_cost(
   }
 }
 
+
+inline pathfinder::CoordRange EuclideanGraph::domain() const {
+  return pathfinder::CoordRange(size());
+}
+
 }  // namespace graph
 }  // namespace suncatcher
 

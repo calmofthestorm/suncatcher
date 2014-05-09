@@ -127,9 +127,8 @@ void DeltaMap::check_invariant() const {
   assert(simple_map.map->graph.graph.data == optimized_map.map->graph.graph.data);
   assert(simple_map.get_doors() == optimized_map.get_doors());
 
-  assert(simple_map.size() == optimized_map.size());
   std::map<int_least32_t, int_least32_t> cmapping, smapping, dmapping;
-  for (const Coord& c : pathfinder::CoordRange(simple_map.size())) {
+  for (const Coord& c : simple_map.map->graph.domain()) {
     // Check color. Colors may vary provided that it's many-to-one from
     // optimized to simple.
     int_least32_t scolor = simple_map.map->graph.get_color(c);
@@ -230,10 +229,9 @@ void DeltaMap::clear_cache() {
 }
 
 
-pathfinder::Coord DeltaMap::size() const {
-  return optimized_map.size();
+pathfinder::CoordRange DeltaMap::domain() const {
+  return simple_map.map->graph.domain();
 }
-
 
 
 }  // namespace test

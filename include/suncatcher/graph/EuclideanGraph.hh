@@ -21,6 +21,7 @@
 #include "suncatcher.hh"
 #include "suncatcher/Coord.hh"
 #include "suncatcher/util/Grid.hh"
+#include "suncatcher/CoordRange.hh"
 
 namespace suncatcher {
 
@@ -80,6 +81,8 @@ class EuclideanGraph {
     inline bool is_passable(pathfinder::Coord cell) const {
       return (get_cost(cell) != PATH_COST_INFINITE);
     }
+
+    inline pathfinder::CoordRange domain() const;
 
 
   private:

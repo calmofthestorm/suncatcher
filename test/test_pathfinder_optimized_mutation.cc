@@ -362,7 +362,7 @@ class SolidWorld : public MapTest<MAP_SMALL_OPEN> {
   protected:
     virtual void SetUp() final override {
       auto m = map.get_mutator();
-      for (const Coord& c : suncatcher::pathfinder::CoordRange(map.size())) {
+      for (const Coord& c : map.domain()) {
         m.set_cost(c, PATH_COST_INFINITE);
       }
       map.mutate(std::move(m));

@@ -31,6 +31,7 @@ class CoordRange {
       public:
         inline Coord operator*() const;
         inline iterator& operator++();
+        inline iterator operator+(size_t offset);
         inline bool operator!=(const iterator& it) const;
 
       private:
@@ -45,8 +46,12 @@ class CoordRange {
     inline iterator begin();
     inline iterator end();
 
+    inline size_t size() const;
+
+    inline Coord euclidean_size() const;
+
   private:
-    Coord size;
+    Coord range_size;
 };
 
 }  // namespace pathfinder

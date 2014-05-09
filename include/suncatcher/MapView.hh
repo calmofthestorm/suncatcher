@@ -58,9 +58,6 @@ class MapView {
     // this will always run in constant time. Invalid inputs result in false.
     inline bool path_exists(Coord src, Coord dst) const;
 
-    // Returns the map's size, as a coordinate.
-    inline Coord size() const;
-
     // Returns a constant reference to the mapping from coordinates to doors.
     // TODO: replace with stable interface.
     inline const std::map<const Coord, Door>& get_doors() const;
