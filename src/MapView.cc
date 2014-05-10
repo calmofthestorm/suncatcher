@@ -120,8 +120,12 @@ Path MapView::path(Coord src, Coord dst) const {
       for (const auto& next : adjacent) {
         float cost = move_cost(cur.pos, next);
         float my_dist = distance[cur.pos] + cost;
-        if (distance[next] > my_dist &&
-            !expanded[next] &&
+        if (!expanded[next] &&
+            #ifdef POLYMORPHIC_API
+            (distance.find(next) == distance.end() || distance[next] > my_dist) &&
+            #else
+            distance[next] > my_dist &&
+            #endif
             cost != -1) {
           distance[next] = my_dist;
           fringe.push({next, manhattan(next, dst) + my_dist});
