@@ -570,7 +570,7 @@ TEST_F(DoorPathfinding, DoorDisconnectsDiagonalComponents) {
 
 
 TEST_F(DoorPathfinding, MultipleDoorsDisconnectingComponents) {
-  std::array<Coord, 3> doors{Coord{10, 6, 0}, Coord{11, 6, 0}, Coord{12, 6, 0}};
+  std::array<Coord, 3> doors{{Coord(10, 6, 0), Coord(11, 6, 0), Coord(12, 6, 0)}};
   Coord outer{9, 7, 0};
   Coord inner{11, 5, 0};
 
@@ -645,7 +645,7 @@ TEST_F(DoorPathfindingBigMap, AdjacentDoorsInCorridor) {
 
 TEST_F(DoorPathfindingBigMap, OneDoorFiveColors) {
   Coord door{68, 64, 0};
-  std::array<Coord, 4> cells{Coord{67, 64, 0}, Coord{69, 64, 0}, Coord{68, 63, 0}, Coord{68, 65, 0}};
+  std::array<Coord, 4> cells{{Coord{67, 64, 0}, Coord{69, 64, 0}, Coord{68, 63, 0}, Coord{68, 65, 0}}};
 
   for (auto it = cells.begin(); it != cells.end(); ++it) {
     ASSERT_TRUE((bool)map.path(door, *it));
