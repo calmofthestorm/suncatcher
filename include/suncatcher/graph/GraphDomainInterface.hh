@@ -26,19 +26,19 @@ namespace graph {
 class GraphDomainInterface {
   public:
     typedef IteratorTypeErasure::any_iterator<
-        pathfinder::Coord,
-        std::forward_iterator_tag
+        pathfinder::Coord const,
+        std::input_iterator_tag
       > DomainIterator;
 
     virtual ~GraphDomainInterface() { }
 
-    virtual DomainIterator begin() const = 0;
-    virtual DomainIterator end() const = 0;
+    virtual DomainIterator begin() = 0;
+    virtual DomainIterator end() = 0;
 
     virtual size_t size() = 0;
 
-    virtual pathfinder::Coord get_coord_by_index(size_t index) const = 0;
-    virtual size_t get_index_by_coord(pathfinder::Coord cell) const = 0;
+    virtual pathfinder::Coord get_coord_by_index(size_t index) = 0;
+    virtual size_t get_index_by_coord(pathfinder::Coord cell) = 0;
 };
 
 
@@ -56,7 +56,8 @@ class GraphDomain {
     size_t get_index_by_coord(pathfinder::Coord cell) const { return gdi->get_index_by_coord(cell); }
 
   private:
-    std::unique_ptr<GraphDomainInterface> gdi;
+    // Mutable to avoid enforcing constness on implementors.
+    mutable std::unique_ptr<GraphDomainInterface> gdi;
 };
 
 

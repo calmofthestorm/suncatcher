@@ -25,25 +25,31 @@ namespace pathfinder {
 
 class CoordRange {
   public:
-    inline explicit CoordRange(Coord c);
-
-    class iterator {
+    class const_iterator {
       public:
-        inline Coord operator*() const;
-        inline iterator& operator++();
-        inline bool operator!=(const iterator& it) const;
+        typedef const_iterator self_type;
+        typedef Coord value_type;
+        typedef Coord& reference;
+        typedef Coord* pointer;
+        typedef ptrdiff_t difference_type;
+        typedef std::input_iterator_tag iterator_category;
+
+        const_iterator(Coord start, Coord size);
+        self_type operator++();
+        self_type operator++(int);
+        const value_type& operator*() const;
+        bool operator==(const self_type& rhs) const;
+        bool operator!=(const self_type& rhs) const;
 
       private:
-        friend class CoordRange;
-
-        inline iterator(Coord start, Coord size);
-
         Coord pos;
         Coord size;
     };
 
-    inline iterator begin();
-    inline iterator end();
+    inline explicit CoordRange(Coord c);
+
+    inline const_iterator begin() const;
+    inline const_iterator end() const;
 
     inline size_t size() const;
 

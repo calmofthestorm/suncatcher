@@ -23,9 +23,26 @@
 #include "suncatcher/MapBuilder.hh"
 #include "suncatcher/MapView.hh"
 #include "suncatcher/graph/EuclideanGraphBuilder.hh"
+#include "suncatcher/graph/PolymorphicEuclideanGraph.hh"
 
 namespace suncatcher {
 namespace test {
+
+namespace {
+
+pathfinder::MapView view_from_stream(std::istream& is) {
+  using graph::PolymorphicEuclideanGraph;
+  assert(is);
+  auto graph_builder = graph::EuclideanGraphBuilder(is);
+  #ifdef POLYMORPHIC_API
+  auto builder = pathfinder::MapBuilder(std::move(graph_builder));
+  #else
+  auto builder = pathfinder::MapBuilder(std::move(graph_builder));
+  #endif
+  return pathfinder::MapView(std::move(builder));
+}
+
+}  // anonymous namespace
 
 const DeltaMap& ResourceManager::get_map(std::string fn) {
   if (get_me().map_cache.find(fn) == get_me().map_cache.end()) {
@@ -34,18 +51,17 @@ const DeltaMap& ResourceManager::get_map(std::string fn) {
       std::cerr << "Unable to find maps file. Run tests from project root." << std::endl;
       exit(-1);
     }
-    assert(is);
-    auto builder = pathfinder::MapBuilder(graph::EuclideanGraphBuilder(is));
-    auto view = pathfinder::MapView(pathfinder::MapView(std::move(builder)));
-    get_me().map_cache[fn] = DeltaMap(view);
+    get_me().map_cache[fn] = DeltaMap(view_from_stream(is));
   }
   return get_me().map_cache[fn];
 }
+
 
 ResourceManager& ResourceManager::get_me() {
   static ResourceManager self;
   return self;
 }
+
 
 ResourceManager::ResourceManager() { }
 

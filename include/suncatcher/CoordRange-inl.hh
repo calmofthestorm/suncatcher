@@ -21,18 +21,12 @@
 namespace suncatcher {
 namespace pathfinder {
 
+inline CoordRange::const_iterator::const_iterator(Coord start, Coord size_i)
+: pos(start),
+  size(size_i) { }
 
 
-inline CoordRange::CoordRange(Coord c)
-: range_size(c) { }
-
-
-inline Coord CoordRange::iterator::operator*() const {
-  return pos;
-}
-
-
-inline CoordRange::iterator& CoordRange::iterator::operator++() {
+inline CoordRange::const_iterator::self_type CoordRange::const_iterator::operator++() {
   if (++pos.col == size.col) {
     pos.col = 0;
     if (++pos.row == size.row) {
@@ -44,28 +38,42 @@ inline CoordRange::iterator& CoordRange::iterator::operator++() {
 }
 
 
-inline CoordRange::iterator::iterator(Coord pos_i, Coord size_i)
-: pos(pos_i),
-  size(size_i) { }
-
-
-inline bool CoordRange::iterator::operator!=(
-    const CoordRange::iterator& it
-  ) const {
-  return pos != it.pos || size != it.size;
+inline CoordRange::const_iterator::self_type CoordRange::const_iterator::operator++(int) {
+  CoordRange::const_iterator::self_type old = *this;
+  ++(*this);
+  return old;
 }
 
 
-inline CoordRange::iterator CoordRange::begin() {
-  return iterator(Coord(0, 0, 0), range_size);
+inline const CoordRange::const_iterator::value_type& CoordRange::const_iterator::operator*() const {
+  return pos;
 }
 
 
-inline CoordRange::iterator CoordRange::end() {
+inline bool CoordRange::const_iterator::operator==(const CoordRange::const_iterator::self_type& rhs) const {
+  return pos == rhs.pos && size == rhs.size;
+}
+
+
+inline bool CoordRange::const_iterator::operator!=(const CoordRange::const_iterator::self_type& rhs) const {
+  return !(rhs == *this);
+}
+
+
+inline CoordRange::CoordRange(Coord c)
+: range_size(c) { }
+
+
+inline CoordRange::const_iterator CoordRange::begin() const {
+  return const_iterator(Coord(0, 0, 0), range_size);
+}
+
+
+inline CoordRange::const_iterator CoordRange::end() const {
   if (range_size.row == 0 || range_size.col == 0 || range_size.layer == 0) {
     return begin();
   } else {
-    return iterator(Coord(0, 0, range_size.layer), range_size);
+    return const_iterator(Coord(0, 0, range_size.layer), range_size);
   }
 }
 

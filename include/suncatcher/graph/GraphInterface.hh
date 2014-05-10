@@ -39,9 +39,10 @@ class GraphInterface {
     virtual pathfinder::Coord size() = 0;
     virtual bool check_bounds(pathfinder::Coord cell) = 0;
 
-    virtual  std::vector<pathfinder::Coord> get_adjacent(
+    virtual void get_adjacent(
         const pathfinder::Coord cell,
-        bool include_diagonals = true
+        bool include_diagonals,
+        std::vector<pathfinder::Coord>& adj
       ) = 0;
 
     virtual void fill_color(int_least32_t fill) = 0;

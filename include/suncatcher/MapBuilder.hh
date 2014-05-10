@@ -21,6 +21,7 @@
 #include "suncatcher/GraphDelegate.hh"
 #include "suncatcher/Door.hh"
 #include "suncatcher/graph/EuclideanGraphBuilder.hh"
+#include "suncatcher/graph/PolymorphicEuclideanGraph.hh"
 
 namespace suncatcher {
 namespace pathfinder {
@@ -29,11 +30,21 @@ class MapBuilder {
   public:
     MapBuilder();
 
+    #ifndef POLYMORPHIC_API
     MapBuilder(graph::EuclideanGraphBuilder&& egb)
     : doors(std::move(egb.doors)) {
 
-      graph = graph::EuclideanGraph(std::move(egb));
+      graph = std::move(graph::EuclideanGraph(std::move(egb)));
     }
+    #else
+    MapBuilder(graph::EuclideanGraphBuilder&& egb)
+    : doors(std::move(egb.doors)) {
+      using graph::PolymorphicEuclideanGraph;
+
+      std::unique_ptr<PolymorphicEuclideanGraph> gp(new PolymorphicEuclideanGraph(std::move(egb)));
+      graph = GraphDelegate(std::move(gp));
+    }
+    #endif
 
     MapBuilder(
         pathfinder::GraphDelegate&& gd,

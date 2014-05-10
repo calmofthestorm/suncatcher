@@ -444,6 +444,7 @@ void MapImpl::rebuild() {
   incremental_regenerate_dynamic_components();
 }
 
+
 void MapImpl::print_map(std::ostream& os, bool number_doors, const Path& path_to_show) const {
   std::set<Coord> in_path(
       path_to_show.get_path().begin(),
