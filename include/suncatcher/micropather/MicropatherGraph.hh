@@ -15,8 +15,13 @@
 //
 // Copyright 2014 Alex Roper
 
+
 #ifndef MICROPATHERGRAPH_0b8eae0922b042fe860d049a997b4c28
 #define MICROPATHERGRAPH_0b8eae0922b042fe860d049a997b4c28
+
+#include "suncatcher/platform.hh"
+
+#ifdef MICROPATHER_DELTA_TEST
 
 #include "suncatcher/micropather/micropather.hh"
 
@@ -85,5 +90,7 @@ class MicropatherGraph : public micropather::Graph {
 
 }  // namespace test
 }  // namespace suncatcher
+
+#endif
 
 #endif  /* MICROPATHERGRAPH_0b8eae0922b042fe860d049a997b4c28 */

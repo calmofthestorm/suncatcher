@@ -18,6 +18,8 @@
 #ifndef GRAPHINTERFACE_0bb164df0d89492d8b330589e323e254
 #define GRAPHINTERFACE_0bb164df0d89492d8b330589e323e254
 
+#include <vector>
+
 #include "suncatcher/Coord.hh"
 #include "suncatcher/graph/GraphDomainInterface.hh"
 

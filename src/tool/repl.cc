@@ -28,15 +28,18 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "suncatcher/micropather/micropather.hh"
-
 #include "suncatcher/Coord.hh"
 #include "suncatcher/MapView.hh"
 #include "suncatcher/MapBuilder.hh"
 #include "suncatcher/graph/EuclideanGraphBuilder.hh"
 #include "suncatcher/MapMutator.hh"
 #include "suncatcher/util/util.hh"
+#include "suncatcher/platform.hh"
+
+#ifdef MICROPATHER_DELTA_TEST
 #include "suncatcher/micropather/MicropatherGraph.hh"
+#include "suncatcher/micropather/micropather.hh"
+#endif
 
 namespace {
 
@@ -46,14 +49,17 @@ using suncatcher::pathfinder::MapMutator;
 using suncatcher::pathfinder::Path;
 using suncatcher::pathfinder::Coord;
 using suncatcher::pathfinder::MapBuilder;
-using suncatcher::test::MicropatherGraph;
 using suncatcher::graph::EuclideanGraphBuilder;
 using suncatcher::graph::EuclideanGraph;
+
+#ifdef MICROPATHER_DELTA_TEST
+using suncatcher::test::MicropatherGraph;
+#endif
 
 int timer() {
   static auto begin = std::chrono::high_resolution_clock::now();
   auto tmp = std::chrono::high_resolution_clock::now();
-  int rval = std::chrono::duration_cast<std::chrono::microseconds>(tmp - begin).count();
+  long rval = std::chrono::duration_cast<std::chrono::microseconds>(tmp - begin).count();
   begin = tmp;
   return rval;
 }
@@ -79,23 +85,29 @@ int main(int argc, char** argv) {
     door_index_to_coords.push_back(it.first);
   }
 
+  #ifdef MICROPATHER_DELTA_TEST
   MicropatherGraph mgraph(my_map);
-
   std::unique_ptr<micropather::MicroPather> mp(new micropather::MicroPather(&mgraph, 4000000, 8, false));
+  MP_VECTOR<void*> pa;
+  #endif
+
   Path my_path;
 
   if (argc == 4) {
     Coord start{1, 1, 0};
     Coord finish{(uint16_t)atoi(argv[2]), (uint16_t)atoi(argv[3]), 0};
-    MP_VECTOR<void*> pa;
     float co = 23;
 
     timer();
     my_path = my_map.path(start, finish);
     std::cout << "Alex: " << timer() << std::endl;
+
+    #ifdef MICROPATHER_DELTA_TEST
     mp->Solve(mgraph.encode(start), mgraph.encode(finish), &pa, &co);
     std::cout << "Micropather: " << timer() << std::endl;
     std::cout << "MicroPather says distance is " << co << std::endl;
+    #endif
+
     return 0;
   }
 
@@ -112,7 +124,6 @@ int main(int argc, char** argv) {
         {
           uint16_t a, b, c, d;
           std::cin >> a >> b >> c >> d;
-          MP_VECTOR<void*> pa;
           float co = 23;
           Coord start{a, b, 0};
           Coord finish{c, d, 0};
@@ -120,9 +131,13 @@ int main(int argc, char** argv) {
           timer();
           my_path = my_map.path(start, finish);
           std::cout << "Alex: " << timer() << std::endl;
+
+          #ifdef MICROPATHER_DELTA_TEST
           mp->Solve(mgraph.encode(start), mgraph.encode(finish), &pa, &co);
           std::cout << "Micropather: " << timer() << std::endl;
           std::cout << "MicroPather says distance is " << co << std::endl;
+          #endif
+
           break;
         }
 

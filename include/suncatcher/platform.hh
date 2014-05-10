@@ -17,7 +17,7 @@
 
 #ifdef _MSC_VER
   #define NOEXCEPT _NOEXCEPT
-  #define ALIGNED_8 __attribute__ __declspec( align(8) )
+  #define ALIGNED_8
 #else
   // g++ & clang
   #define ALIGNED_8 __attribute__((__aligned__(8)))
@@ -33,7 +33,7 @@
 //
 // If you choose to use the polymorphic API, I strongly suggest using your own
 // pathing algorithm that operates directly on your abstraction, mine is 
-// very general at substantial cost for speed, and improving its polymorphic
+// very general at substantial cost of speed, and improving its polymorphic
 // performance is not a priority for me.
 //
 // If you can, strongly consider avoiding the polymorphic API if your model

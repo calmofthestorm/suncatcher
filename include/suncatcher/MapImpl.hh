@@ -66,11 +66,14 @@ class MapImpl {
     explicit MapImpl(const MapMutator& mutator, bool incremental = true);
     explicit MapImpl(MapBuilder&& builder);
 
-    MapImpl(MapImpl&& other) = default;
-    MapImpl& operator=(MapImpl&& other) = default;
+    // Irritating bug in VS2013 requires hand coding of otherwise defaultable
+    // members, leading to more fragile, bug-prone code. Maybe by the time
+    // C++14 comes out VS will finally support C++11.
+    inline MapImpl(MapImpl&& other);
+    inline MapImpl& operator=(MapImpl&& other);
 
-    MapImpl(const MapImpl& other);
-    MapImpl& operator=(const MapImpl& other);
+    inline MapImpl(const MapImpl& other);
+    inline MapImpl& operator=(const MapImpl& other);
 
     // Returns a constant reference to the mapping from coordinates to doors.
     // TODO: fix

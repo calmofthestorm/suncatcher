@@ -57,7 +57,7 @@ Path MapView::path(Coord src, Coord dst) const {
   #ifndef POLYMORPHIC_API
   Grid<uint_fast8_t> expanded(map->domain().euclidean_size(), 0);
   Grid<Coord> previous(expanded.size(), {(uint16_t)-1, (uint16_t)-1, (uint16_t)-1});
-  Grid<float> distance(expanded.size(), INFINITY);
+  Grid<float> distance(expanded.size(), static_cast<float>(INFINITY));
   #else
   std::unordered_map<Coord, bool> expanded;
   std::unordered_map<Coord, Coord> previous;

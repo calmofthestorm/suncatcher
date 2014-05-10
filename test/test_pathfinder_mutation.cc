@@ -15,6 +15,8 @@
 //
 // Copyright 2014 Alex Roper
 
+#include "suncatcher/platform.hh"
+
 #include "suncatcher/test/common.hh"
 
 using namespace suncatcher::test;

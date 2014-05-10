@@ -1,8 +1,76 @@
+// Pathfinder abstraction of the map. The MapImpl class maintains a simplified
+// abstraction of the map, intended to support efficient pathfinding,
+// reachability, and updates in a dynamic world.
+//
+// In an early version of this code, I ran a benchmark suite to determine
+// whether using smaller integral types for better cache performance versus
+// using native word types resulted in better performance. I found ~5%
+// improvement on a moderate sample size (p < 0.01) to using smaller types,
+// which makes sense given all the computations are simple and most of this
+// algorithm is fetching the map from memory.
+//
+// The other concern is that predictive pathing in multiple threads could run
+// into memory pressure.
+//
+// The code has undergone substantial refactoring since then, however, so this
+// may need revisiting in the future.
+
 #ifndef MAPIMPL_INL_1970f504553d4baeb7f8dc6f64630b3f
 #define MAPIMPL_INL_1970f504553d4baeb7f8dc6f64630b3f
 
+#include "suncatcher/MapBuilder.hh"
+
 namespace suncatcher {
 namespace pathfinder {
+
+inline MapImpl::MapImpl(MapBuilder&& builder)
+: graph(std::move(builder.graph)),
+  doors(std::move(builder.doors)) {
+
+  rebuild();
+}
+
+
+inline MapImpl::MapImpl(MapImpl&& other) {
+  graph = std::move(other.graph);
+  doors = std::move(other.doors);
+  static_component = std::move(other.static_component);
+  dynamic_component = std::move(other.dynamic_component);
+  next_door_color = other.next_door_color;
+  next_component_color = other.next_component_color;
+}
+
+
+inline MapImpl& MapImpl::operator=(MapImpl&& other) {
+  graph = std::move(other.graph);
+  doors = std::move(other.doors);
+  static_component = std::move(other.static_component);
+  dynamic_component = std::move(other.dynamic_component);
+  next_door_color = other.next_door_color;
+  next_component_color = other.next_component_color;
+  return *this;
+}
+
+
+inline MapImpl::MapImpl(const MapImpl& other)
+: graph(other.graph.lazy_clone()),
+  doors(other.doors),
+  static_component(other.static_component),
+  dynamic_component(other.dynamic_component),
+  next_component_color(other.next_component_color),
+  next_door_color(other.next_door_color) { }
+
+
+inline MapImpl& MapImpl::operator=(const MapImpl& other) {
+  graph = other.graph.lazy_clone();
+  doors = other.doors;
+  static_component = other.static_component;
+  dynamic_component = other.dynamic_component;
+  next_component_color = other.next_component_color;
+  next_door_color = other.next_door_color;
+  return *this;
+}
+
 
 inline bool MapImpl::is_transparent(Coord cell) const {
   assert(graph.check_bounds(cell));

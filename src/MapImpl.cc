@@ -42,14 +42,6 @@ using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
 
 
-MapImpl::MapImpl(MapBuilder&& builder)
-: graph(std::move(builder.graph)),
-  doors(std::move(builder.doors)) {
-
-  rebuild();
-}
-
-
 MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
 : MapImpl(*mutation.view.map) {
 
@@ -84,26 +76,6 @@ MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
   if (!incremental) {
     rebuild();
   }
-}
-
-
-MapImpl::MapImpl(const MapImpl& other)
-: graph(other.graph.lazy_clone()),
-  doors(other.doors),
-  static_component(other.static_component),
-  dynamic_component(other.dynamic_component),
-  next_component_color(other.next_component_color),
-  next_door_color(other.next_door_color) { }
-
-
-MapImpl& MapImpl::operator=(const MapImpl& other) {
-  graph = other.graph.lazy_clone();
-  doors = other.doors;
-  static_component = other.static_component;
-  dynamic_component = other.dynamic_component;
-  next_component_color = other.next_component_color;
-  next_door_color = other.next_door_color;
-  return *this;
 }
 
 
@@ -204,7 +176,7 @@ void MapImpl::incremental_transparent_to_wall(Coord cell) {
   int_least32_t old_static_component = static_component.at(graph.get_color(cell));
   graph.set_cost(cell, PATH_COST_INFINITE);
   graph.set_color(cell, COLOR_IMPASSABLE);
-  std::vector<Coord> adjacent;
+  std::vector<Coord> adjacent, neighbors;
   graph.get_adjacent(cell, false, adjacent);
   for (const auto& seed : adjacent) {
     if (is_transparent(seed) && 
@@ -219,8 +191,8 @@ void MapImpl::incremental_transparent_to_wall(Coord cell) {
         auto cur = todo.top();
         todo.pop();
         // Explore neighbors, but only Manhattan adjacent ones.
-        graph.get_adjacent(cur, false, adjacent);
-        for (const auto& n : adjacent) {
+        graph.get_adjacent(cur, false, neighbors);
+        for (const auto& n : neighbors) {
           if (is_transparent(n) && static_component.at(graph.get_color(n)) == old_static_component) {
             todo.push(n);
             graph.set_color(n, next_component_color);

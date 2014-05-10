@@ -15,6 +15,10 @@
 //
 // Copyright 2014 Alex Roper
 
+#include "suncatcher/platform.hh"
+
+#ifdef MICROPATHER_DELTA_TEST
+
 #include "suncatcher/test/MPWrapper.hh"
 
 #include "suncatcher/test/DeltaMap.hh"
@@ -68,3 +72,5 @@ Path MPWrapper::path(Coord start, Coord finish) {
 
 }  // namespace test
 }  // namespace suncatcher
+
+#endif

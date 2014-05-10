@@ -15,6 +15,10 @@
 //
 // Copyright 2014 Alex Roper
 
+#include "suncatcher/platform.hh"
+
+#ifdef MICROPATHER_DELTA_TEST
+
 #ifndef MPWRAPPER_616e1e92191d445dac0fe08e40c6429b
 #define MPWRAPPER_616e1e92191d445dac0fe08e40c6429b
 
@@ -52,3 +56,5 @@ class MPWrapper {
 }  // namespace suncatcher
 
 #endif  /* MPWRAPPER_616e1e92191d445dac0fe08e40c6429b */
+
+#endif

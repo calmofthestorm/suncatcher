@@ -102,7 +102,7 @@ bool PolymorphicEuclideanGraph::is_passable(pathfinder::Coord cell) {
 
 GraphDomain PolymorphicEuclideanGraph::domain() const {
   std::unique_ptr<GraphDomainInterface> up(new PolymorphicEuclideanGraphDomain(delegate.domain()));
-  return GraphDomain(std::move(up));
+  return std::move(up);
 }
 
 
