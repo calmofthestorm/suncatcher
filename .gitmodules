@@ -10,3 +10,6 @@
 	path = thirdparty/gatherer
 	url = https://gist.github.com/45e1688f6964d1506a67.git
 	ignore = dirty
+[submodule "thirdparty/checkedthreads"]
+	path = thirdparty/checkedthreads
+	url = https://github.com/yosefk/checkedthreads.git

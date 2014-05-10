@@ -96,6 +96,7 @@ Path MapView::path(Coord src, Coord dst) const {
   std::priority_queue<Entry> fringe;
   fringe.push({src, manhattan(src, dst)});
 
+  std::vector<Coord> adjacent;
   while (!fringe.empty()) {
     Entry cur = fringe.top();
     assert(is_passable(cur.pos));
@@ -115,7 +116,8 @@ Path MapView::path(Coord src, Coord dst) const {
         return Path(std::move(rval), distance[dst]);
       }
 
-      for (const auto& next : map->get_adjacent(cur.pos)) {
+      map->get_adjacent(cur.pos, true, adjacent);
+      for (const auto& next : adjacent) {
         float cost = move_cost(cur.pos, next);
         float my_dist = distance[cur.pos] + cost;
         if (distance[next] > my_dist &&

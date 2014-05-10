@@ -78,9 +78,10 @@ class GraphDelegate {
 
     inline Coord size() const;
 
-    inline std::vector<pathfinder::Coord> get_adjacent(
+    inline void get_adjacent(
         const pathfinder::Coord cell,
-        bool include_diagonals = true
+        bool include_diagonals,
+        std::vector<Coord>& adj
       ) const;
 
     inline void fill_color(int_least32_t fill);

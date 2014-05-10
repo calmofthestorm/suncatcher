@@ -85,16 +85,17 @@ inline Coord GraphDelegate::size() const {
   #endif
 }
 
-inline std::vector<pathfinder::Coord> GraphDelegate::get_adjacent(
+inline void GraphDelegate::get_adjacent(
     const pathfinder::Coord cell,
-    bool include_diagonals
+    bool include_diagonals,
+    std::vector<pathfinder::Coord>& adj
   ) const {
     #ifdef POLYMORPHIC_API
-    return graph->get_adjacent(cell, include_diagonals);
+    graph->get_adjacent(cell, include_diagonals, adj);
     #else
-    return graph.get_adjacent(cell, include_diagonals);
+    graph.get_adjacent(cell, include_diagonals, adj);
     #endif
-  }
+}
 
 inline void GraphDelegate::fill_color(int_least32_t fill) {
   #ifdef POLYMORPHIC_API

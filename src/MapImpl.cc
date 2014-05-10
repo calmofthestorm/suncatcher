@@ -80,6 +80,7 @@ MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
     }
   }
 
+  rebuild();
   if (!incremental) {
     rebuild();
   }
@@ -113,7 +114,8 @@ void MapImpl::incremental_wall_to_transparent(Coord cell) {
 
   // Set its color to the first transparent neighbor (Manhattan) found.
   // For the rest, union the static components.
-  auto adjacent = graph.get_adjacent(cell, false);
+  std::vector<Coord> adjacent;
+  graph.get_adjacent(cell, false, adjacent);
   for (const auto& n : adjacent) {
     if (is_transparent(n)) {
       if (graph.get_color(cell) == COLOR_IMPASSABLE) {
@@ -146,7 +148,9 @@ void MapImpl::incremental_wall_to_transparent(Coord cell) {
 
 void MapImpl::incremental_closed_door_to_open_door(Coord cell, DoorIter door_iter) {
   int_least32_t door_static_component = static_component.at(graph.get_color(cell));
-  for (const auto& n : graph.get_adjacent(cell, false)) {
+  std::vector<Coord> adjacent;
+  graph.get_adjacent(cell, false, adjacent);
+  for (const auto& n : adjacent) {
     if (is_passable(n)) {
       dynamic_component.union_sets(
           static_component.at(graph.get_color(n)),
@@ -181,7 +185,9 @@ void MapImpl::incremental_regenerate_dynamic_components() {
   dynamic_component = static_component;
   for (const auto& door : doors) {
     if (door.second.open) {
-      for (const auto& n : graph.get_adjacent(door.first, false)) {
+      std::vector<Coord> adjacent;
+      graph.get_adjacent(door.first, false, adjacent);
+      for (const auto& n : adjacent) {
         if (is_passable(n)) {
           dynamic_component.union_sets(
               graph.get_color(n),
@@ -198,7 +204,9 @@ void MapImpl::incremental_transparent_to_wall(Coord cell) {
   int_least32_t old_static_component = static_component.at(graph.get_color(cell));
   graph.set_cost(cell, PATH_COST_INFINITE);
   graph.set_color(cell, COLOR_IMPASSABLE);
-  for (const auto& seed : graph.get_adjacent(cell, false)) {
+  std::vector<Coord> adjacent;
+  graph.get_adjacent(cell, false, adjacent);
+  for (const auto& seed : adjacent) {
     if (is_transparent(seed) && 
         static_component.at(graph.get_color(seed)) == old_static_component) {
       std::stack<Coord> todo;
@@ -211,7 +219,8 @@ void MapImpl::incremental_transparent_to_wall(Coord cell) {
         auto cur = todo.top();
         todo.pop();
         // Explore neighbors, but only Manhattan adjacent ones.
-        for (const auto& n : graph.get_adjacent(cur, false)) {
+        graph.get_adjacent(cur, false, adjacent);
+        for (const auto& n : adjacent) {
           if (is_transparent(n) && static_component.at(graph.get_color(n)) == old_static_component) {
             todo.push(n);
             graph.set_color(n, next_component_color);
@@ -392,6 +401,7 @@ void MapImpl::rebuild() {
   // squares), stopping at walls and doors. We also mark walls with the
   // appropriate color value (COLOR_IMPASSABLE)
   int_least32_t index = 0;
+  std::vector<Coord> adjacent;
   for (const Coord& restart : graph.domain()) {
     if (graph.get_color(restart) == COLOR_UNKNOWN &&
         is_transparent_temporary(restart)) {
@@ -406,7 +416,8 @@ void MapImpl::rebuild() {
         auto cur = todo.top();
         todo.pop();
         // Explore neighbors, but only Manhattan adjacent ones.
-        for (const auto& n : graph.get_adjacent(cur, false)) {
+        graph.get_adjacent(cur, false, adjacent);
+        for (const auto& n : adjacent) {
           if (is_transparent_temporary(n) && graph.get_color(n) == COLOR_UNKNOWN) {
             todo.push(n);
             graph.set_color(n, index);

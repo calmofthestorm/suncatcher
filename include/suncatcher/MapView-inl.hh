@@ -79,12 +79,13 @@ inline void MapView::print_map(
   return map->print_map(os, number_doors, path_to_print);
 }
 
-inline std::vector<pathfinder::Coord> MapView::get_adjacent(
+inline void MapView::get_adjacent(
     const pathfinder::Coord cell,
-    bool include_diagonals
+    bool include_diagonals,
+    std::vector<Coord>& adj
     ) const {
 
-  return map->get_adjacent(cell, include_diagonals);
+  return map->get_adjacent(cell, include_diagonals, adj);
 }
 
 inline bool MapView::check_bounds(Coord cell) const {

@@ -74,12 +74,16 @@ inline T& Grid<T>::at(uint16_t row, uint16_t col, uint16_t layer) {
 
 //TODO: evaluate cache performance of ordering.
 template <typename T>
-inline std::vector<pathfinder::Coord> Grid<T>::get_adjacent(
+inline void Grid<T>::get_adjacent(
     const pathfinder::Coord cell,
-    bool include_diagonals
+    bool include_diagonals,
+    std::vector<pathfinder::Coord>& neighbors
     ) const {
-
   using pathfinder::Coord;
+
+  neighbors.clear();
+  neighbors.reserve(10);
+
   static_assert(
       std::is_same<decltype(Coord::row), decltype(Coord::col)>::value,
       ""
@@ -102,7 +106,6 @@ inline std::vector<pathfinder::Coord> Grid<T>::get_adjacent(
     {1, 1, 0}, {n1, 1, 0}, {1, n1, 0}, {n1, n1, 0}
   };
 
-  std::vector<Coord> neighbors;
 
   for (size_t i = 0; i < (size_t)(include_diagonals ? 10 : 6); ++i) {
     auto n = ADJ_DELTA[i] + cell;
@@ -110,8 +113,6 @@ inline std::vector<pathfinder::Coord> Grid<T>::get_adjacent(
       neighbors.push_back(n);
     }
   }
-
-  return neighbors;
 }
 
 

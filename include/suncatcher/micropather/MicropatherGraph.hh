@@ -44,7 +44,9 @@ class MicropatherGraph : public micropather::Graph {
       ) const {
       auto cur = decode(state);
       assert(graph.is_passable(cur));
-      for (const auto& n : graph.get_adjacent(cur)) {
+      std::vector<pathfinder::Coord> adj;
+      graph.get_adjacent(cur, true, adj);
+      for (const auto& n : adj) {
         if (graph.is_passable(n) && graph.is_passable(cur)) {
           float cost = graph.move_cost(cur, n);
           if (cost != -1) {

@@ -32,11 +32,13 @@ inline float MapImpl::move_cost(Coord start, Coord finish) const {
   return graph.move_cost(start, finish);
 }
 
-inline std::vector<pathfinder::Coord> MapImpl::get_adjacent(
+inline void MapImpl::get_adjacent(
     const pathfinder::Coord cell,
-    bool include_diagonals
-  ) const {
-    return graph.get_adjacent(cell, include_diagonals);
+    bool include_diagonals,
+    std::vector<Coord>& adj
+    ) const {
+
+  graph.get_adjacent(cell, include_diagonals, adj);
 }
 
 

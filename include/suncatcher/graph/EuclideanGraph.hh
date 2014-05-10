@@ -75,10 +75,11 @@ class EuclideanGraph {
       return data.check_bounds(cell);
     }
 
-    inline std::vector<pathfinder::Coord> get_adjacent(
+    inline void get_adjacent(
         const pathfinder::Coord cell,
-        bool include_diagonals = true
-      ) const { return data.get_adjacent(cell, include_diagonals); }
+        bool include_diagonals,
+        std::vector<pathfinder::Coord>& adj
+      ) const { data.get_adjacent(cell, include_diagonals, adj); }
 
     inline bool is_passable(pathfinder::Coord cell) const {
       return (get_cost(cell) != PATH_COST_INFINITE);
