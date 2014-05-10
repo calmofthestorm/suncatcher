@@ -24,8 +24,23 @@
   #define NOEXCEPT noexcept
 #endif
 
+// Uncomment this line to build with the polymorphic graph API. You may then
+// implement GraphInterface and GraphDomainInterface to specify graph
+// connectivity. Current benchmarks show this as about 12x slower in
+// MapView::path, and roughly 3x slower in the expensive update operations
+// that involve virtual calls in tight loops (eg, building a wall), loading
+// a map, etc).
+//
+// If you choose to use the polymorphic API, I strongly suggest using your own
+// pathing algorithm that operates directly on your abstraction, mine is 
+// very general at substantial cost for speed, and improving its polymorphic
+// performance is not a priority for me.
+//
+// If you can, strongly consider avoiding the polymorphic API if your model
+// can be construed as a grid of up to 3 dimensions.
 // #define POLYMORPHIC_API
 
-#ifndef POLYMORPHIC_API
-  #define MICROPATHER_DELTA_TEST
-#endif
+// Some tests (and the repl) are able to delta against micropather for sanity.
+// This will make tests run a bit slower, but is recommended. You must also
+// enable it at runtime with SLOWTEST=1.
+#define MICROPATHER_DELTA_TEST
