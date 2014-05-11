@@ -48,7 +48,7 @@ template <typename T>
 inline void CowGrid<T>::fill(const T& val) {
   for (auto& chunk : chunks.backing) {
     if (!chunk.unique()) {
-      chunk.reset(new util::Grid<T>(chunk_size, val));
+      chunk = std::make_shared<util::Grid<T>>(chunk_size, val);
     } else {
       chunk->fill(val);
     }
@@ -68,7 +68,7 @@ inline T& CowGrid<T>::at(const Coord cell) {
   chunks.check_bounds(chunk_index);
   chunks.at(chunk_index)->check_bounds(inner);
   if (!chunks.at(chunk_index).unique()) {
-    chunks.at(chunk_index).reset(new util::Grid<T>(*chunks.at(chunk_index)));
+    chunks.at(chunk_index)= std::make_shared<util::Grid<T>>(*chunks.at(chunk_index));
   }
   assert(chunks.at(chunk_index).unique());
   return chunks.at(chunk_index)->at(inner);
