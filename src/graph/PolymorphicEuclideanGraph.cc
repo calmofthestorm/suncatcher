@@ -19,6 +19,7 @@
 // the tests and way of example.
 
 #include "suncatcher/Coord.hh"
+#include "suncatcher/util/util.hh"
 #include "suncatcher/graph/GraphInterface.hh"
 #include "suncatcher/graph/GraphDomainInterface.hh"
 #include "suncatcher/graph/EuclideanGraphBuilder.hh"
@@ -101,14 +102,12 @@ bool PolymorphicEuclideanGraph::is_passable(Coord cell) {
 
 
 GraphDomain PolymorphicEuclideanGraph::domain() const {
-  std::unique_ptr<GraphDomainInterface> up(new PolymorphicEuclideanGraphDomain(delegate.domain()));
-  return std::move(up);
+  return GraphDomain(make_unique<PolymorphicEuclideanGraphDomain>(delegate.domain()));
 }
 
 
 std::unique_ptr<GraphInterface> PolymorphicEuclideanGraph::lazy_clone() const {
-  std::unique_ptr<GraphInterface> gi(new PolymorphicEuclideanGraph(*this));
-  return std::move(gi);
+  return make_unique<PolymorphicEuclideanGraph>(*this);
 }
 
 

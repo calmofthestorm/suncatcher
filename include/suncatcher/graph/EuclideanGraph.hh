@@ -19,7 +19,7 @@
 #define EUCLIDEANGRAPH_272b6e8aad5b4590a75bf12e43dc1adc
 
 #include "suncatcher.hh"
-#include "suncatcher/util/Grid.hh"
+#include "suncatcher/graph/CowGrid.hh"
 #include "suncatcher/graph/EuclideanCoord.hh"
 #include "suncatcher/graph/EuclideanCoordRange.hh"
 
@@ -36,13 +36,16 @@ class EuclideanGraphBuilder;
 class EuclideanGraph {
   public:
     EuclideanGraph();
+
     EuclideanGraph(EuclideanGraphBuilder&& builder);
-    EuclideanGraph(util::Grid<uint_least8_t>&& data_i);
+
     EuclideanGraph(
-        EuclideanCoord size,
-        uint_least8_t cost_i,
+        EuclideanCoord chunks,
+        EuclideanCoord chunk_size,
+        uint8_t cost_i,
         int_least32_t color_i
       );
+
 
     inline float move_cost(
         const EuclideanCoord start,
@@ -96,10 +99,10 @@ class EuclideanGraph {
     // of a small indirect lookup table). Typically there will be anywhere from
     // 1-5 colors per door on the map, plus one for each isolated walled off
     // region.
-    util::Grid<int_least32_t> color;
+    CowGrid<int_least32_t> color;
 
     // Cost to traverse terrain.
-    util::Grid<uint_least8_t> data;
+    CowGrid<uint_least8_t> data;
 };
 
 

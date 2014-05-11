@@ -41,8 +41,7 @@ class MapBuilder {
     : doors(std::move(egb.doors)) {
       using graph::PolymorphicEuclideanGraph;
 
-      std::unique_ptr<PolymorphicEuclideanGraph> gp(new PolymorphicEuclideanGraph(std::move(egb)));
-      graph = GraphDelegate(std::move(gp));
+      graph = GraphDelegate(make_unique<PolymorphicEuclideanGraph>(std::move(egb)));
     }
     #endif
 

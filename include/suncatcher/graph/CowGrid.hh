@@ -15,38 +15,26 @@
 //
 // Copyright 2014 Alex Roper
 
-#ifndef GRID_d99e6d99bd454e83ab91ad5a87f993dc
-#define GRID_d99e6d99bd454e83ab91ad5a87f993dc
+#ifndef COWGRID_0de968617d4d4890833675ae6952afe5
+#define COWGRID_0de968617d4d4890833675ae6952afe5
 
-// TODO: move to graph ns since this is euclidean
+#include <memory>
 
-// A multidimensional array capable of being indexed by Coords or individual
-// dimensions. Currently used primarily to represent map data for the
-// pathfinding abstraction.
-
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
-#include <vector>
-
-#include "suncatcher/Coord.hh"
+#include "suncatcher/util/Grid.hh"
 
 namespace suncatcher {
-
 namespace graph {
-  template <typename T>class CowGrid;
-}  // namespace graph
 
-namespace util {
-
-//TODO: rewrite as a more cache-friendly backing, add 3D, and think about how
-// to prevent excess capacity draining RAM we don't need.
 template <typename T>
-class Grid {
+class CowGrid {
   public:
-    inline Grid();
+    inline CowGrid() = default;
 
-    inline Grid(const Coord size_in, const T& val);
+    inline CowGrid(
+        const Coord size_in_chunks,
+        const Coord chunk_size,
+        const T& fill_value
+      );
 
     inline void fill(const T& val);
 
@@ -66,17 +54,18 @@ class Grid {
 
     inline const Coord& size() const;
 
-    inline bool operator==(const Grid<T>& other) const;
+    inline bool operator==(const CowGrid<T>& other) const;
 
-  // private:
-    friend class graph::CowGrid<T>;
-    Coord my_size;
-    std::vector<T> backing;
+  private:
+    inline void dirty_chunk(const Coord chunk);
+    EuclideanCoord chunk_size, full_size;
+    util::Grid<std::shared_ptr<util::Grid<T>>> chunks;
+  
 };
 
-}  // namespace util
+}  // namespace graph
 }  // namespace suncatcher
 
-#include "suncatcher/util/Grid-inl.hh"
+#include "suncatcher/graph/CowGrid-inl.hh"
 
-#endif  /* GRID_d99e6d99bd454e83ab91ad5a87f993dc */
+#endif  /* COWGRID_0de968617d4d4890833675ae6952afe5 */

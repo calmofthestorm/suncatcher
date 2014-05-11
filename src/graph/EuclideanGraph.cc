@@ -25,30 +25,23 @@ namespace graph {
 
 
 EuclideanGraph::EuclideanGraph()
-: color({0, 0, 0}, 0),
-  data({0, 0, 0}, 0) { }
+: color({0, 0, 0}, {0, 0, 0}, 0),
+  data({0, 0, 0}, {0, 0, 0}, 0) { }
 
 
 EuclideanGraph::EuclideanGraph(EuclideanGraphBuilder&& builder)
-: data(std::move(builder.data)) {
-  // VS bug workaround -- ctor lists arbitrary order.
-  color = decltype(color)(data.size(), COLOR_UNKNOWN);
-}
+: color(std::move(builder.color)),
+  data(std::move(builder.data)) { }
 
-
-EuclideanGraph::EuclideanGraph(util::Grid<uint_least8_t>&& data_i)
-: data(std::move(data_i)) {
-  // VS bug workaround -- ctor lists arbitrary order.
-  color = decltype(color)(data.size(), COLOR_UNKNOWN);
-}
 
 EuclideanGraph::EuclideanGraph(
-    EuclideanCoord size_i,
+    EuclideanCoord chunks,
+    EuclideanCoord chunk_size,
     uint8_t cost_i,
     int_least32_t color_i
   )
-: color(size_i, color_i),
-  data(size_i, cost_i) { }
+: color(chunks, chunk_size, color_i),
+  data(chunks, chunk_size, cost_i) { }
 
 
 }  // namespace pathfinder

@@ -35,13 +35,8 @@ namespace {
 
 
 EuclideanGraphBuilder::EuclideanGraphBuilder()
-: data({0, 0, 0}, 0),
-  dynamic_updates(true),
-  doors() { }
-
-
-EuclideanGraphBuilder::EuclideanGraphBuilder(Coord size, uint_least8_t default_cost)
-: data(size, default_cost),
+: data({0, 0, 0}, {0, 0, 0}, 0),
+  color({0, 0, 0}, {0, 0, 0}, 0),
   dynamic_updates(true),
   doors() { }
 
@@ -57,14 +52,16 @@ void EuclideanGraphBuilder::add_door(Coord cell, bool open, uint_least8_t cost_o
 EuclideanGraphBuilder::EuclideanGraphBuilder(std::istream& is) {
 
   std::string line;
-  Coord size;
-  is >> size.row >> size.col >> size.layer;
+  Coord chunks, chunk_size;
+  is >> chunks.row >> chunks.col >> chunks.layer;
+  is >> chunk_size.row >> chunk_size.col >> chunk_size.layer;
   std::getline(is, line);
   assert(is);
-  *this = EuclideanGraphBuilder(size, 1);
+  data = decltype(data)(chunks, chunk_size, 1);
+  color = decltype(color)(chunks, chunk_size, COLOR_UNKNOWN);
   line.clear();
   auto it = line.begin();
-  for (const Coord& cell : EuclideanCoordRange(size)) {
+  for (const Coord& cell : EuclideanCoordRange(data.size())) {
     while (it == line.end()) {
       std::getline(is, line);
       it = line.begin();

@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
 
   #ifdef MICROPATHER_DELTA_TEST
   MicropatherGraph mgraph(my_map);
-  std::unique_ptr<micropather::MicroPather> mp(new micropather::MicroPather(&mgraph, 4000000, 8, false));
+  auto mp(make_unique<micropather::MicroPather>(&mgraph, 4000000, 8, false));
   MP_VECTOR<void*> pa;
   #endif
 
@@ -166,12 +166,24 @@ int main(int argc, char** argv) {
         my_map.print_colors(std::cout);
         break;
 
+      case 'w':
+        uint16_t row, col;
+        std::cin >> row >> col;
+        timer();
+        my_map = MapMutator(my_map).set_cost({row, col, 0}, suncatcher::PATH_COST_INFINITE).execute();
+        std::cout << "Mutation time: " << timer() << std::endl;
+        break;
+
       case 'E':
         my_map.print_static_components(std::cout);
         break;
 
       case 'e':
         my_map.print_dynamic_components(std::cout);
+        break;
+
+      case 'x':
+        return 0;
         break;
 
       default:

@@ -45,6 +45,7 @@ using suncatcher::util::manhattan;
 MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
 : MapImpl(*mutation.view.map) {
 
+
   for (const auto& it : mutation.mutations) {
     bool state = it.second.state;
     uint_least8_t cost = it.second.cost;
@@ -72,7 +73,6 @@ MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
     }
   }
 
-  rebuild();
   if (!incremental) {
     rebuild();
   }

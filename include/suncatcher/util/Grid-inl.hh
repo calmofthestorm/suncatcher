@@ -18,7 +18,7 @@
 #ifndef GRID_INL_93b27f51b9f84797b7b0b059118d798a
 #define GRID_INL_93b27f51b9f84797b7b0b059118d798a
 
-#include <type_traits>
+#include "suncatcher/util/util.hh"
 
 namespace suncatcher {
 namespace util {
@@ -62,44 +62,13 @@ inline void Grid<T>::get_adjacent(
     std::vector<Coord>& neighbors
     ) const {
 
-  neighbors.clear();
-  neighbors.reserve(10);
-
-  static_assert(
-      std::is_same<decltype(Coord::row), decltype(Coord::col)>::value,
-      ""
-    );
-  static_assert(
-      std::is_same<decltype(Coord::row), decltype(Coord::layer)>::value,
-      ""
-    );
-
-  const static decltype(Coord::row) n1(-1);
-
-  const static std::vector<Coord> ADJ_DELTA{
-    // Manhattan adjacent same layer.
-    {0, n1, 0}, {n1, 0, 0}, {0, 1, 0}, {1, 0, 0},
-
-    // Manhattan adjacent vertical and horizontal.
-    {0, 0, 1}, {0, 0, n1},
-
-    // Same layer diagonal.
-    {1, 1, 0}, {n1, 1, 0}, {1, n1, 0}, {n1, n1, 0}
-  };
-
-
-  for (size_t i = 0; i < (size_t)(include_diagonals ? 10 : 6); ++i) {
-    auto n = ADJ_DELTA[i] + cell;
-    if (check_bounds(n)) {
-      neighbors.push_back(n);
-    }
-  }
+  util::get_adjacent(cell, include_diagonals, neighbors, my_size);
 }
 
 
 template <typename T>
 inline bool Grid<T>::check_bounds(const Coord cell) const {
-  return (cell.row < my_size.row && cell.col < my_size.col && cell.layer < my_size.layer);
+  return util::check_bounds(cell, my_size);
 }
 
 
