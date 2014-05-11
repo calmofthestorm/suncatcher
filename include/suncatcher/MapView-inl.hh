@@ -20,6 +20,8 @@
 
 #include "MapImpl.hh"
 
+#include "suncatcher/Coord.hh"
+
 namespace suncatcher {
 namespace pathfinder {
 
@@ -80,7 +82,7 @@ inline void MapView::print_map(
 }
 
 inline void MapView::get_adjacent(
-    const pathfinder::Coord cell,
+    const Coord cell,
     bool include_diagonals,
     std::vector<Coord>& adj
     ) const {

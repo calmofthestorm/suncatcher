@@ -38,31 +38,31 @@ class PolymorphicEuclideanGraph : public GraphInterface {
     virtual ~PolymorphicEuclideanGraph() override;
 
     virtual float move_cost(
-        pathfinder::Coord start,
-        pathfinder::Coord finish
+        Coord start,
+        Coord finish
       ) override;
 
-    virtual uint_least8_t get_cost(pathfinder::Coord cell) override;
-    virtual void set_cost(pathfinder::Coord cell, uint_least8_t cost) override;
+    virtual uint_least8_t get_cost(Coord cell) override;
+    virtual void set_cost(Coord cell, uint_least8_t cost) override;
 
-    virtual int_least32_t get_color(pathfinder::Coord cell) override;
+    virtual int_least32_t get_color(Coord cell) override;
     virtual void set_color(
-        pathfinder::Coord cell,
+        Coord cell,
         int_least32_t color
       ) override;
 
-    virtual pathfinder::Coord size() override;
-    virtual bool check_bounds(pathfinder::Coord cell) override;
+    virtual Coord size() override;
+    virtual bool check_bounds(Coord cell) override;
 
     virtual void get_adjacent(
-        const pathfinder::Coord cell,
+        const Coord cell,
         bool include_diagonals,
-        std::vector<pathfinder::Coord>& adj
+        std::vector<Coord>& adj
       ) override;
 
     virtual void fill_color(int_least32_t fill) override;
 
-    virtual bool is_passable(pathfinder::Coord cell) override;
+    virtual bool is_passable(Coord cell) override;
 
     virtual GraphDomain domain() const override;
 

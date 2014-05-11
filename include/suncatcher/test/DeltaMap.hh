@@ -75,17 +75,17 @@ class DeltaMutator {
 
     DeltaMutator& operator=(DeltaMutator&& other);
 
-    DeltaMutator& set_door_open_cost(pathfinder::Coord door, uint_least8_t cost);
+    DeltaMutator& set_door_open_cost(Coord door, uint_least8_t cost);
 
-    DeltaMutator& set_door_open(pathfinder::Coord door, bool open);
+    DeltaMutator& set_door_open(Coord door, bool open);
 
-    DeltaMutator& toggle_door_open(pathfinder::Coord door);
+    DeltaMutator& toggle_door_open(Coord door);
 
-    DeltaMutator& set_cost(pathfinder::Coord cell, uint_least8_t cost);
+    DeltaMutator& set_cost(Coord cell, uint_least8_t cost);
 
-    DeltaMutator& create_door(pathfinder::Coord cell, bool open, uint_least8_t open_cost);
+    DeltaMutator& create_door(Coord cell, bool open, uint_least8_t open_cost);
 
-    DeltaMutator& remove_door(pathfinder::Coord cell, uint_least8_t new_cost);
+    DeltaMutator& remove_door(Coord cell, uint_least8_t new_cost);
 
   private:
     friend class DeltaMap;
@@ -104,11 +104,11 @@ class DeltaMap {
     void check_invariant() const;
 
     // Find a path.
-    pathfinder::Path path(pathfinder::Coord start, pathfinder::Coord finish) const;
+    pathfinder::Path path(Coord start, Coord finish) const;
 
-    bool path_exists(pathfinder::Coord start, pathfinder::Coord finish) const;
+    bool path_exists(Coord start, Coord finish) const;
 
-    bool is_door(pathfinder::Coord cell) const;
+    bool is_door(Coord cell) const;
 
     // Mutate both maps and check the invarant.
     DeltaMutator get_mutator();
@@ -119,9 +119,9 @@ class DeltaMap {
 
     const pathfinder::MapView& get_optimized() const { return optimized_map; }
 
-    const std::map<const pathfinder::Coord, pathfinder::Door>& get_doors() const;
+    const std::map<const Coord, pathfinder::Door>& get_doors() const;
 
-    uint_least8_t get_cost(pathfinder::Coord cell) const;
+    uint_least8_t get_cost(Coord cell) const;
 
     void clear_cache();
 

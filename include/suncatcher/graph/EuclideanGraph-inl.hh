@@ -23,8 +23,8 @@ namespace graph {
 
 
 inline float EuclideanGraph::move_cost(
-    const pathfinder::Coord start,
-    const pathfinder::Coord finish
+    const EuclideanCoord start,
+    const EuclideanCoord finish
   ) const {
 
   assert(check_bounds(start));
@@ -65,8 +65,8 @@ inline float EuclideanGraph::move_cost(
 }
 
 
-inline pathfinder::CoordRange EuclideanGraph::domain() const {
-  return pathfinder::CoordRange(size());
+inline EuclideanCoordRange EuclideanGraph::domain() const {
+  return EuclideanCoordRange(size());
 }
 
 }  // namespace graph

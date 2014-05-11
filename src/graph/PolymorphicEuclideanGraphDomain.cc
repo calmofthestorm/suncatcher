@@ -16,16 +16,14 @@
 // Copyright 2014 Alex Roper
 
 #include "suncatcher/graph/PolymorphicEuclideanGraphDomain.hh"
+#include "suncatcher/graph/EuclideanCoordRange.hh"
 
 namespace suncatcher {
 namespace graph {
 
-namespace {
-  using pathfinder::CoordRange;
-  using pathfinder::Coord;
-}  // anonymous namespace
 
-PolymorphicEuclideanGraphDomain::PolymorphicEuclideanGraphDomain(CoordRange cr)
+
+PolymorphicEuclideanGraphDomain::PolymorphicEuclideanGraphDomain(EuclideanCoordRange cr)
 : domain(std::move(cr)) { }
 
 

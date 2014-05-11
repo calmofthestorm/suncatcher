@@ -30,7 +30,7 @@ inline Grid<T>::Grid()
 
 
 template <typename T>
-inline Grid<T>::Grid(const pathfinder::Coord size_in, const T& val)
+inline Grid<T>::Grid(const Coord size_in, const T& val)
 : my_size(size_in),
   backing(size_in.row * size_in.col * size_in.layer, val) { }
 
@@ -47,13 +47,13 @@ inline void Grid<T>::fill(const T& val) {
 
 
 template <typename T>
-inline T& Grid<T>::at(const pathfinder::Coord cell) {
+inline T& Grid<T>::at(const Coord cell) {
   return at(cell.row, cell.col, cell.layer);
 }
 
 
 template <typename T>
-inline const T& Grid<T>::at(const pathfinder::Coord cell) const {
+inline const T& Grid<T>::at(const Coord cell) const {
   return at(cell.row, cell.col, cell.layer);
 }
 
@@ -75,11 +75,10 @@ inline T& Grid<T>::at(uint16_t row, uint16_t col, uint16_t layer) {
 //TODO: evaluate cache performance of ordering.
 template <typename T>
 inline void Grid<T>::get_adjacent(
-    const pathfinder::Coord cell,
+    const Coord cell,
     bool include_diagonals,
-    std::vector<pathfinder::Coord>& neighbors
+    std::vector<Coord>& neighbors
     ) const {
-  using pathfinder::Coord;
 
   neighbors.clear();
   neighbors.reserve(10);
@@ -117,7 +116,7 @@ inline void Grid<T>::get_adjacent(
 
 
 template <typename T>
-inline bool Grid<T>::check_bounds(const pathfinder::Coord cell) const {
+inline bool Grid<T>::check_bounds(const Coord cell) const {
   return check_bounds(cell.row, cell.col, cell.layer);
 }
 
@@ -134,7 +133,7 @@ inline bool Grid<T>::check_bounds(
 
 
 template <typename T>
-inline const pathfinder::Coord& Grid<T>::size() const {
+inline const Coord& Grid<T>::size() const {
   return my_size;
 }
 
@@ -146,13 +145,13 @@ inline bool Grid<T>::operator==(const Grid<T>& other) const {
 
 
 template <typename T>
-inline const T& Grid<T>::operator[](const pathfinder::Coord cell) const {
+inline const T& Grid<T>::operator[](const Coord cell) const {
   return at(cell);
 }
 
 
 template <typename T>
-inline T& Grid<T>::operator[](const pathfinder::Coord cell) {
+inline T& Grid<T>::operator[](const Coord cell) {
   return at(cell);
 }
 

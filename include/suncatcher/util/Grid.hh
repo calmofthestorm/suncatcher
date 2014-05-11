@@ -39,36 +39,36 @@ class Grid {
   public:
     inline Grid();
 
-    inline Grid(const pathfinder::Coord size_in, const T& val);
+    inline Grid(const Coord size_in, const T& val);
 
     inline Grid(uint16_t row, uint16_t col, uint16_t layer, const T& val);
 
     inline void fill(const T& val);
 
-    inline T& at(const pathfinder::Coord cell);
-    inline const T& at(const pathfinder::Coord cell) const;
+    inline T& at(const Coord cell);
+    inline const T& at(const Coord cell) const;
 
     inline T& at(uint16_t row, uint16_t col, uint16_t layer);
     inline const T& at(uint16_t row, uint16_t col, uint16_t layer) const;
 
-    inline const T& operator[](const pathfinder::Coord cell) const;
-    inline T& operator[](const pathfinder::Coord cell);
+    inline const T& operator[](const Coord cell) const;
+    inline T& operator[](const Coord cell);
 
     inline void get_adjacent(
-        const pathfinder::Coord cell,
+        const Coord cell,
         bool include_diagonals,
-        std::vector<pathfinder::Coord>& adj
+        std::vector<Coord>& adj
       ) const;
 
-    inline bool check_bounds(const pathfinder::Coord cell) const;
+    inline bool check_bounds(const Coord cell) const;
     inline bool check_bounds(uint16_t row, uint16_t col, uint16_t layer) const;
 
-    inline const pathfinder::Coord& size() const;
+    inline const Coord& size() const;
 
     inline bool operator==(const Grid<T>& other) const;
 
   private:
-    pathfinder::Coord my_size;
+    Coord my_size;
     std::vector<T> backing;
 };
 

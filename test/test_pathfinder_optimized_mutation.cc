@@ -22,7 +22,6 @@
 #include "suncatcher/MapMutator.hh"
 #include "suncatcher/util/util.hh"
 #include "suncatcher/test/ResourceManager.hh"
-#include "suncatcher/CoordRange.hh"
 
 
 using namespace suncatcher::test;
@@ -102,7 +101,7 @@ TEST_F(OptOpenCloseDoor, SLOWSmartBruteForceTorture) {
       // Handle paths between doors.
       for (const auto& it : map.get_doors()) {
         for (const auto& jt : map.get_doors()) {
-          if (it.first <= jt.first) {
+          if (it.first < jt.first || it.first == jt.first) {
             bool is_path = map.path_exists(it.first, jt.first);
             ASSERT_EQ(is_path, it.second.open && jt.second.open);
           }

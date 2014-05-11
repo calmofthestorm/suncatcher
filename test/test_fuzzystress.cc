@@ -24,7 +24,6 @@
 #include "suncatcher/MapMutator.hh"
 #include "suncatcher/util/util.hh"
 #include "suncatcher/test/ResourceManager.hh"
-#include "suncatcher/CoordRange.hh"
 
 
 using namespace suncatcher::test;

@@ -32,7 +32,7 @@
 #include "suncatcher/util/util.hh"
 #include "suncatcher/MapBuilder.hh"
 #include "suncatcher/MapMutator.hh"
-#include "suncatcher/CoordRange.hh"
+#include "suncatcher/Coord.hh"
 
 namespace suncatcher {
 namespace pathfinder {

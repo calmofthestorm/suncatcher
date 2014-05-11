@@ -44,3 +44,5 @@
 // This will make tests run a bit slower, but is recommended. You must also
 // enable it at runtime with SLOWTEST=1.
 #define MICROPATHER_DELTA_TEST
+
+// If you need to customize the type used to hoold Coordinates, see Coord.hh

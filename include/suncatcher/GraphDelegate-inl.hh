@@ -86,9 +86,9 @@ inline Coord GraphDelegate::size() const {
 }
 
 inline void GraphDelegate::get_adjacent(
-    const pathfinder::Coord cell,
+    const Coord cell,
     bool include_diagonals,
-    std::vector<pathfinder::Coord>& adj
+    std::vector<Coord>& adj
   ) const {
     #ifdef POLYMORPHIC_API
     graph->get_adjacent(cell, include_diagonals, adj);

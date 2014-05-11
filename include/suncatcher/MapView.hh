@@ -65,7 +65,7 @@ class MapView {
     inline bool is_passable(Coord cell) const;
 
     inline void get_adjacent(
-        const pathfinder::Coord cell,
+        const Coord cell,
         bool include_diagonals,
         std::vector<Coord>& adj
       ) const;

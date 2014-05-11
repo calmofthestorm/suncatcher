@@ -20,13 +20,15 @@
 
 #include <any_iterator/any_iterator.hpp>
 
+#include "suncatcher/Coord.hh"
+
 namespace suncatcher {
 namespace graph {
 
 class GraphDomainInterface {
   public:
     typedef IteratorTypeErasure::any_iterator<
-        pathfinder::Coord const,
+        Coord const,
         std::input_iterator_tag
       > DomainIterator;
 
@@ -37,8 +39,8 @@ class GraphDomainInterface {
 
     virtual size_t size() = 0;
 
-    virtual pathfinder::Coord get_coord_by_index(size_t index) = 0;
-    virtual size_t get_index_by_coord(pathfinder::Coord cell) = 0;
+    virtual Coord get_coord_by_index(size_t index) = 0;
+    virtual size_t get_index_by_coord(Coord cell) = 0;
 };
 
 
@@ -52,8 +54,8 @@ class GraphDomain {
 
     size_t size() const { return gdi->size(); };
 
-    pathfinder::Coord get_coord_by_index(size_t index) const { return gdi->get_coord_by_index(index); }
-    size_t get_index_by_coord(pathfinder::Coord cell) const { return gdi->get_index_by_coord(cell); }
+    Coord get_coord_by_index(size_t index) const { return gdi->get_coord_by_index(index); }
+    size_t get_index_by_coord(Coord cell) const { return gdi->get_index_by_coord(cell); }
 
   private:
     // Mutable to avoid enforcing constness on implementors.

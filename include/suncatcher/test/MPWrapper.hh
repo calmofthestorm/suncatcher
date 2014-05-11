@@ -44,7 +44,7 @@ class MPWrapper {
 
     void new_pather();
 
-    pathfinder::Path path(pathfinder::Coord start, pathfinder::Coord finish);
+    pathfinder::Path path(Coord start, Coord finish);
 
   private:
     pathfinder::MapView view;

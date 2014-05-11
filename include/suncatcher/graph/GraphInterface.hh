@@ -30,26 +30,26 @@ class GraphInterface {
   public:
     virtual ~GraphInterface() { }
 
-    virtual float move_cost(pathfinder::Coord start, pathfinder::Coord finish) = 0;
+    virtual float move_cost(Coord start, Coord finish) = 0;
 
-    virtual uint_least8_t get_cost(pathfinder::Coord cell) = 0;
-    virtual void set_cost(pathfinder::Coord cell, uint_least8_t cost) = 0;
+    virtual uint_least8_t get_cost(Coord cell) = 0;
+    virtual void set_cost(Coord cell, uint_least8_t cost) = 0;
 
-    virtual int_least32_t get_color(pathfinder::Coord cell) = 0;
-    virtual void set_color(pathfinder::Coord cell, int_least32_t color) = 0;
+    virtual int_least32_t get_color(Coord cell) = 0;
+    virtual void set_color(Coord cell, int_least32_t color) = 0;
 
-    virtual pathfinder::Coord size() = 0;
-    virtual bool check_bounds(pathfinder::Coord cell) = 0;
+    virtual Coord size() = 0;
+    virtual bool check_bounds(Coord cell) = 0;
 
     virtual void get_adjacent(
-        const pathfinder::Coord cell,
+        const Coord cell,
         bool include_diagonals,
-        std::vector<pathfinder::Coord>& adj
+        std::vector<Coord>& adj
       ) = 0;
 
     virtual void fill_color(int_least32_t fill) = 0;
 
-    virtual bool is_passable(pathfinder::Coord cell) = 0;
+    virtual bool is_passable(Coord cell) = 0;
 
     virtual GraphDomain domain() const = 0;
 

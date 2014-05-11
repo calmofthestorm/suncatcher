@@ -18,23 +18,23 @@
 #ifndef COORDRANGE_b4aa66ac1ad04cc2b1f3bee4f59b9af4
 #define COORDRANGE_b4aa66ac1ad04cc2b1f3bee4f59b9af4
 
-#include "suncatcher/Coord.hh"
+#include "suncatcher/graph/EuclideanCoord.hh"
 
 namespace suncatcher {
-namespace pathfinder {
+namespace graph {
 
-class CoordRange {
+class EuclideanCoordRange {
   public:
     class const_iterator {
       public:
         typedef const_iterator self_type;
-        typedef Coord value_type;
-        typedef Coord& reference;
-        typedef Coord* pointer;
+        typedef EuclideanCoord value_type;
+        typedef EuclideanCoord& reference;
+        typedef EuclideanCoord* pointer;
         typedef ptrdiff_t difference_type;
         typedef std::input_iterator_tag iterator_category;
 
-        const_iterator(Coord start, Coord size);
+        const_iterator(EuclideanCoord start, EuclideanCoord size);
         self_type operator++();
         self_type operator++(int);
         const value_type& operator*() const;
@@ -42,29 +42,29 @@ class CoordRange {
         bool operator!=(const self_type& rhs) const;
 
       private:
-        Coord pos;
-        Coord size;
+        EuclideanCoord pos;
+        EuclideanCoord size;
     };
 
-    inline explicit CoordRange(Coord c);
+    inline explicit EuclideanCoordRange(EuclideanCoord c);
 
     inline const_iterator begin() const;
     inline const_iterator end() const;
 
     inline size_t size() const;
 
-    inline Coord euclidean_size() const;
+    inline EuclideanCoord euclidean_size() const;
 
-    inline Coord get_coord_by_index(size_t index) const;
-    inline size_t get_index_by_coord(Coord cell) const;
+    inline EuclideanCoord get_coord_by_index(size_t index) const;
+    inline size_t get_index_by_coord(EuclideanCoord cell) const;
 
   private:
-    Coord range_size;
+    EuclideanCoord range_size;
 };
 
-}  // namespace pathfinder
+}  // namespace graph
 }  // namespace suncatcher
 
-#include "CoordRange-inl.hh"
+#include "suncatcher/graph/EuclideanCoordRange-inl.hh"
 
 #endif  /* COORDRANGE_b4aa66ac1ad04cc2b1f3bee4f59b9af4 */

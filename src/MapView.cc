@@ -30,6 +30,7 @@
 
 #include "suncatcher/util/util.hh"
 
+#include "suncatcher/Coord.hh"
 #include "suncatcher/MapImpl.hh"
 #include "suncatcher/MapBuilder.hh"
 

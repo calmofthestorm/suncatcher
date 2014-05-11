@@ -33,7 +33,7 @@ using suncatcher::test::DeltaMap;
 using suncatcher::test::MicropatherGraph;
 using suncatcher::pathfinder::Map;
 using suncatcher::pathfinder::Path;
-using suncatcher::pathfinder::Coord;
+using suncatcher::Coord;
 
 MPWrapper::MPWrapper(pathfinder::MapView view_i)
 : view(view_i) {

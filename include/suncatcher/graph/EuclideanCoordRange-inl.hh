@@ -19,14 +19,14 @@
 #define COORDRANGE_517054c801a0440dbd2dd96476f6b6e1
 
 namespace suncatcher {
-namespace pathfinder {
+namespace graph {
 
-inline CoordRange::const_iterator::const_iterator(Coord start, Coord size_i)
+inline EuclideanCoordRange::const_iterator::const_iterator(EuclideanCoord start, EuclideanCoord size_i)
 : pos(start),
   size(size_i) { }
 
 
-inline CoordRange::const_iterator::self_type CoordRange::const_iterator::operator++() {
+inline EuclideanCoordRange::const_iterator::self_type EuclideanCoordRange::const_iterator::operator++() {
   if (++pos.col == size.col) {
     pos.col = 0;
     if (++pos.row == size.row) {
@@ -38,66 +38,66 @@ inline CoordRange::const_iterator::self_type CoordRange::const_iterator::operato
 }
 
 
-inline CoordRange::const_iterator::self_type CoordRange::const_iterator::operator++(int) {
-  CoordRange::const_iterator::self_type old = *this;
+inline EuclideanCoordRange::const_iterator::self_type EuclideanCoordRange::const_iterator::operator++(int) {
+  EuclideanCoordRange::const_iterator::self_type old = *this;
   ++(*this);
   return old;
 }
 
 
-inline const CoordRange::const_iterator::value_type& CoordRange::const_iterator::operator*() const {
+inline const EuclideanCoordRange::const_iterator::value_type& EuclideanCoordRange::const_iterator::operator*() const {
   return pos;
 }
 
 
-inline bool CoordRange::const_iterator::operator==(const CoordRange::const_iterator::self_type& rhs) const {
+inline bool EuclideanCoordRange::const_iterator::operator==(const EuclideanCoordRange::const_iterator::self_type& rhs) const {
   return pos == rhs.pos && size == rhs.size;
 }
 
 
-inline bool CoordRange::const_iterator::operator!=(const CoordRange::const_iterator::self_type& rhs) const {
+inline bool EuclideanCoordRange::const_iterator::operator!=(const EuclideanCoordRange::const_iterator::self_type& rhs) const {
   return !(rhs == *this);
 }
 
 
-inline CoordRange::CoordRange(Coord c)
+inline EuclideanCoordRange::EuclideanCoordRange(EuclideanCoord c)
 : range_size(c) { }
 
 
-inline CoordRange::const_iterator CoordRange::begin() const {
-  return const_iterator(Coord(0, 0, 0), range_size);
+inline EuclideanCoordRange::const_iterator EuclideanCoordRange::begin() const {
+  return const_iterator(EuclideanCoord(0, 0, 0), range_size);
 }
 
 
-inline CoordRange::const_iterator CoordRange::end() const {
+inline EuclideanCoordRange::const_iterator EuclideanCoordRange::end() const {
   if (range_size.row == 0 || range_size.col == 0 || range_size.layer == 0) {
     return begin();
   } else {
-    return const_iterator(Coord(0, 0, range_size.layer), range_size);
+    return const_iterator(EuclideanCoord(0, 0, range_size.layer), range_size);
   }
 }
 
 
-inline size_t CoordRange::size() const {
+inline size_t EuclideanCoordRange::size() const {
   return range_size.row * range_size.col * range_size.layer;
 }
 
 
-inline Coord CoordRange::euclidean_size() const {
+inline EuclideanCoord EuclideanCoordRange::euclidean_size() const {
   return range_size;
 }
 
 
-inline Coord CoordRange::get_coord_by_index(size_t index) const {
+inline EuclideanCoord EuclideanCoordRange::get_coord_by_index(size_t index) const {
   size_t layer = index / (range_size.row * range_size.col);
   index %= range_size.row * range_size.col;
   size_t row = index / range_size.col;
   size_t col = index % range_size.col;
-  return Coord((uint16_t)row, (uint16_t)col, (uint16_t)layer);
+  return EuclideanCoord((uint16_t)row, (uint16_t)col, (uint16_t)layer);
 }
 
 
-inline size_t CoordRange::get_index_by_coord(Coord cell) const {
+inline size_t EuclideanCoordRange::get_index_by_coord(EuclideanCoord cell) const {
   size_t acc = cell.layer;
   acc *= range_size.row;
   acc += cell.row;
@@ -107,7 +107,7 @@ inline size_t CoordRange::get_index_by_coord(Coord cell) const {
 }
 
 
-}  // namespace pathfinder
+}  // namespace graph
 }  // namespace suncatcher
 
 #endif  /* COORDRANGE_517054c801a0440dbd2dd96476f6b6e1 */

@@ -38,53 +38,53 @@ PolymorphicEuclideanGraph::~PolymorphicEuclideanGraph() { }
 
 
 float PolymorphicEuclideanGraph::move_cost(
-pathfinder::Coord start,
-pathfinder::Coord finish
+Coord start,
+Coord finish
 ) {
   return delegate.move_cost(start, finish);
 }
 
 
-uint_least8_t PolymorphicEuclideanGraph::get_cost(pathfinder::Coord cell) {
+uint_least8_t PolymorphicEuclideanGraph::get_cost(Coord cell) {
   return delegate.get_cost(cell);
 }
 
 
 void PolymorphicEuclideanGraph::set_cost(
-  pathfinder::Coord cell,
+  Coord cell,
   uint_least8_t cost
 ) {
   delegate.set_cost(cell, cost);
 }
 
 
-int_least32_t PolymorphicEuclideanGraph::get_color(pathfinder::Coord cell) {
+int_least32_t PolymorphicEuclideanGraph::get_color(Coord cell) {
   return delegate.get_color(cell);
 }
 
 
 void PolymorphicEuclideanGraph::set_color(
-pathfinder::Coord cell,
+Coord cell,
 int_least32_t color
 ) {
   delegate.set_color(cell, color);
 }
 
 
-pathfinder::Coord PolymorphicEuclideanGraph::size() {
+Coord PolymorphicEuclideanGraph::size() {
   return delegate.size();
 }
 
 
-bool PolymorphicEuclideanGraph::check_bounds(pathfinder::Coord cell) {
+bool PolymorphicEuclideanGraph::check_bounds(Coord cell) {
   return delegate.check_bounds(cell);
 }
 
 
 void PolymorphicEuclideanGraph::get_adjacent(
-  const pathfinder::Coord cell,
+  const Coord cell,
   bool include_diagonals,
-std::vector<pathfinder::Coord>& adj
+std::vector<Coord>& adj
 ) {
   return delegate.get_adjacent(cell, include_diagonals, adj);
 }
@@ -95,7 +95,7 @@ void PolymorphicEuclideanGraph::fill_color(int_least32_t fill) {
 }
 
 
-bool PolymorphicEuclideanGraph::is_passable(pathfinder::Coord cell) {
+bool PolymorphicEuclideanGraph::is_passable(Coord cell) {
   return delegate.is_passable(cell);
 }
 

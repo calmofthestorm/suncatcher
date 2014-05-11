@@ -47,7 +47,7 @@ using suncatcher::util::manhattan;
 using suncatcher::pathfinder::MapView;
 using suncatcher::pathfinder::MapMutator;
 using suncatcher::pathfinder::Path;
-using suncatcher::pathfinder::Coord;
+using suncatcher::Coord;
 using suncatcher::pathfinder::MapBuilder;
 using suncatcher::graph::EuclideanGraphBuilder;
 using suncatcher::graph::EuclideanGraph;

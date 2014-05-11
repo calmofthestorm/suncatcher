@@ -21,18 +21,17 @@
 #ifndef POLYMORPHICEUCLIDEANGRAPHDOMAIN_ce2429e5db8e404486c9ff629ada6435
 #define POLYMORPHICEUCLIDEANGRAPHDOMAIN_ce2429e5db8e404486c9ff629ada6435
 
-#include "suncatcher/Coord.hh"
-#include "suncatcher/CoordRange.hh"
+#include "suncatcher/graph/EuclideanCoord.hh"
+#include "suncatcher/graph/EuclideanCoordRange.hh"
 #include "suncatcher/graph/GraphDomainInterface.hh"
 
 namespace suncatcher {
 namespace graph {
 
 
-
 class PolymorphicEuclideanGraphDomain : public GraphDomainInterface {
   public:
-    PolymorphicEuclideanGraphDomain(pathfinder::CoordRange cr);
+    PolymorphicEuclideanGraphDomain(EuclideanCoordRange cr);
     virtual ~PolymorphicEuclideanGraphDomain() override;
 
     virtual DomainIterator begin() override;
@@ -40,12 +39,12 @@ class PolymorphicEuclideanGraphDomain : public GraphDomainInterface {
 
     virtual size_t size() override;
 
-    virtual pathfinder::Coord get_coord_by_index(size_t index) override;
-    virtual size_t get_index_by_coord(pathfinder::Coord cell) override;
+    virtual EuclideanCoord get_coord_by_index(size_t index) override;
+    virtual size_t get_index_by_coord(EuclideanCoord cell) override;
 
 
   private:
-    pathfinder::CoordRange domain;
+    EuclideanCoordRange domain;
 };
 
 

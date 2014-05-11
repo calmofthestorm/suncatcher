@@ -30,7 +30,7 @@
 #include "suncatcher.hh"
 #include "suncatcher/Coord.hh"
 #include "suncatcher/util/Grid.hh"
-#include "suncatcher/CoordRange.hh"
+#include "suncatcher/graph/EuclideanCoordRange.hh"
 
 // #define POLYMORPHIC_API
 #ifdef POLYMORPHIC_API
@@ -51,7 +51,7 @@ namespace pathfinder {
 #ifdef POLYMORPHIC_API
   typedef graph::GraphDomain Domain;
 #else
-  typedef pathfinder::CoordRange Domain;
+  typedef CoordRange Domain;
 #endif
 
 class GraphDelegate {
@@ -79,7 +79,7 @@ class GraphDelegate {
     inline Coord size() const;
 
     inline void get_adjacent(
-        const pathfinder::Coord cell,
+        const Coord cell,
         bool include_diagonals,
         std::vector<Coord>& adj
       ) const;

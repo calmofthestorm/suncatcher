@@ -15,102 +15,32 @@
 //
 // Copyright 2014 Alex Roper
 
-#ifndef COORD_d0dcb74311134c19b0239c6c7238cfad
-#define COORD_d0dcb74311134c19b0239c6c7238cfad
+#ifndef COORD_c0afad281d7b4f03901d6c674d45841c
+#define COORD_c0afad281d7b4f03901d6c674d45841c
 
-#include <cstdint>
-#include <iostream>
-
-#include <boost/functional/hash.hpp>
-#include <limits>
-#include <type_traits>
-
-#include "platform.hh"
+#include "graph/EuclideanCoord.hh"
+#include "graph/EuclideanCoordRange.hh"
 
 namespace suncatcher {
+
+// The type to use for coords. For the non-polymorhic API or to use
+// PolymorphicEuclideanGraph and friends, choose EuclideanCoord. If you're
+// using the polymorphic API with your own code, it can be any type that obeys
+// sane value semantics. Best choices are integral types, pointers, etc.
+//
+// If you want to make a class: Note that coords are typically passed by value
+// -- suggest using something like a pointer, integral type, etc. Must support
+// ==, !=, and < (for std::map/set). Must also have std::hash specialized for
+// it.
+using Coord = graph::EuclideanCoord;
+
 namespace pathfinder {
 
-
-// POD class representing a position on the pathfinding map abstraction.
-class Coord {
-  public:
-    inline Coord()
-    : row(0),
-      col(0),
-      layer(0) { }
-
-    inline Coord(uint16_t row_i, uint16_t col_i, uint16_t layer_i)
-    : row(row_i),
-      col(col_i),
-      layer(layer_i) { }
-
-    uint16_t row, col, layer;
-
-    inline bool operator!= (const Coord& other) const {
-      return to_number() != other.to_number();
-      return row != other.row || col != other.col || layer != other.layer;
-    }
-
-    inline bool operator== (const Coord& other) const {
-      return to_number() == other.to_number();
-    }
-
-    inline bool operator< (const Coord& other) const {
-      return to_number() < other.to_number();
-    }
-
-    inline bool operator<= (const Coord& other) const {
-      return to_number() <= other.to_number();
-    }
-
-    inline Coord operator+ (const Coord& other) const {
-      Coord r(*this);
-      r.row += other.row;
-      r.col += other.col;
-      r.layer += other.layer;
-      return r;
-    }
-
-    inline uint64_t to_number() const {
-      // Make sure my logic works here.
-      static_assert(std::is_same<decltype(row), decltype(col)>::value, "");
-      static_assert(std::is_same<decltype(row), decltype(layer)>::value, "");
-      static_assert(sizeof(uint64_t) >= 3 * sizeof(decltype(row)), "");
-
-      static const uint64_t coord_max = std::numeric_limits<decltype(row)>::max();
-      return ((uint64_t)col + coord_max *
-              ((uint64_t)row + coord_max * (uint64_t)layer));
-    }
-} ALIGNED_8;
-
-inline std::ostream& operator<< (std::ostream& os, const Coord& c) {
-  os << '(' << c.row << ", " << c.col << ", " << c.layer << ')';
-  return os;
-}
-
+// Needed for the Euclidean graph.
+using CoordRange = graph::EuclideanCoordRange;
 
 }  // namespace pathfinder
+
 }  // namespace suncatcher
 
-
-
-namespace std {
-
-
-
-template <>
-struct hash<suncatcher::pathfinder::Coord> {
-  size_t operator() (const suncatcher::pathfinder::Coord& key) const {
-    size_t seed = 0;
-    boost::hash_combine(seed, key.row);
-    boost::hash_combine(seed, key.col);
-    return seed;
-  }
-};
-
-
-
-}
-
-
-#endif  /* COORD_d0dcb74311134c19b0239c6c7238cfad */
+#endif  /* COORD_c0afad281d7b4f03901d6c674d45841c */

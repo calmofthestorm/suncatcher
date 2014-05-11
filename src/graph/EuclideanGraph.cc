@@ -43,7 +43,7 @@ EuclideanGraph::EuclideanGraph(util::Grid<uint_least8_t>&& data_i)
 }
 
 EuclideanGraph::EuclideanGraph(
-    pathfinder::Coord size_i,
+    EuclideanCoord size_i,
     uint8_t cost_i,
     int_least32_t color_i
   )

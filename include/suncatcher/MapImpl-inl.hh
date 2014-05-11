@@ -101,7 +101,7 @@ inline float MapImpl::move_cost(Coord start, Coord finish) const {
 }
 
 inline void MapImpl::get_adjacent(
-    const pathfinder::Coord cell,
+    const Coord cell,
     bool include_diagonals,
     std::vector<Coord>& adj
     ) const {

@@ -65,7 +65,7 @@ using suncatcher::test::DeltaMap;
 using suncatcher::pathfinder::MapMutator;
 using suncatcher::pathfinder::MapBuilder;
 using suncatcher::pathfinder::Path;
-using suncatcher::pathfinder::Coord;
+using suncatcher::Coord;
 using suncatcher::PATH_COST_INFINITE;
 
 #ifdef MICROPATHER_DELTA_TEST

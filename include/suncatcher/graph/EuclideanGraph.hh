@@ -19,9 +19,9 @@
 #define EUCLIDEANGRAPH_272b6e8aad5b4590a75bf12e43dc1adc
 
 #include "suncatcher.hh"
-#include "suncatcher/Coord.hh"
 #include "suncatcher/util/Grid.hh"
-#include "suncatcher/CoordRange.hh"
+#include "suncatcher/graph/EuclideanCoord.hh"
+#include "suncatcher/graph/EuclideanCoordRange.hh"
 
 namespace suncatcher {
 
@@ -39,53 +39,53 @@ class EuclideanGraph {
     EuclideanGraph(EuclideanGraphBuilder&& builder);
     EuclideanGraph(util::Grid<uint_least8_t>&& data_i);
     EuclideanGraph(
-        pathfinder::Coord size,
+        EuclideanCoord size,
         uint_least8_t cost_i,
         int_least32_t color_i
       );
 
     inline float move_cost(
-        const pathfinder::Coord start,
-        const pathfinder::Coord finish
+        const EuclideanCoord start,
+        const EuclideanCoord finish
       ) const;
 
-    inline uint_least8_t get_cost(const pathfinder::Coord cell) const {
+    inline uint_least8_t get_cost(const EuclideanCoord cell) const {
       return data.at(cell);
     }
 
     inline void set_cost(
-        const pathfinder::Coord cell,
+        const EuclideanCoord cell,
         const uint_least8_t new_cost
       ) { data.at(cell) = new_cost; }
 
-    inline int_least32_t get_color(const pathfinder::Coord cell) const {
+    inline int_least32_t get_color(const EuclideanCoord cell) const {
       return color.at(cell);
     }
 
     inline void set_color(
-        const pathfinder::Coord cell,
+        const EuclideanCoord cell,
         const int_least32_t new_color
       ) { color.at(cell) = new_color; }
 
-    inline pathfinder::Coord size() const { return data.size(); }
+    inline EuclideanCoord size() const { return data.size(); }
 
     inline void fill_color(int_least32_t fill) { color.fill(fill); }
 
-    inline  bool check_bounds(const pathfinder::Coord cell) const {
+    inline  bool check_bounds(const EuclideanCoord cell) const {
       return data.check_bounds(cell);
     }
 
     inline void get_adjacent(
-        const pathfinder::Coord cell,
+        const EuclideanCoord cell,
         bool include_diagonals,
-        std::vector<pathfinder::Coord>& adj
+        std::vector<EuclideanCoord>& adj
       ) const { data.get_adjacent(cell, include_diagonals, adj); }
 
-    inline bool is_passable(pathfinder::Coord cell) const {
+    inline bool is_passable(EuclideanCoord cell) const {
       return (get_cost(cell) != PATH_COST_INFINITE);
     }
 
-    inline pathfinder::CoordRange domain() const;
+    inline EuclideanCoordRange domain() const;
 
 
   private:

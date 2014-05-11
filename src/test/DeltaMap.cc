@@ -21,10 +21,10 @@
 
 #include "suncatcher/MapView.hh"
 #include "suncatcher/util/UnionFind.hh"
-#include "suncatcher/CoordRange.hh"
+#include "suncatcher/Coord.hh"
 
 namespace {
-  using suncatcher::pathfinder::Coord;
+  using suncatcher::Coord;
   using suncatcher::pathfinder::Path;
   using suncatcher::pathfinder::MapMutator;
   using suncatcher::pathfinder::MapBuilder;
@@ -226,7 +226,7 @@ const std::map<const Coord, pathfinder::Door>& DeltaMap::get_doors() const {
   return optimized_map.get_doors();
 }
 
-uint_least8_t DeltaMap::get_cost(pathfinder::Coord cell) const {
+uint_least8_t DeltaMap::get_cost(Coord cell) const {
   return optimized_map.map->graph.get_cost(cell);
 }
 

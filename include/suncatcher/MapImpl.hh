@@ -102,9 +102,9 @@ class MapImpl {
     inline bool path_exists(Coord src, Coord dst) const;
 
     inline void get_adjacent(
-        const pathfinder::Coord cell,
+        const Coord cell,
         bool include_diagonals,
-        std::vector<pathfinder::Coord>& adj
+        std::vector<Coord>& adj
       ) const;
 
     inline bool check_bounds(Coord cell) const { return graph.check_bounds(cell); }

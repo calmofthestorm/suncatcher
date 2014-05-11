@@ -49,7 +49,7 @@ class MicropatherGraph : public micropather::Graph {
       ) const {
       auto cur = decode(state);
       assert(graph.is_passable(cur));
-      std::vector<pathfinder::Coord> adj;
+      std::vector<Coord> adj;
       graph.get_adjacent(cur, true, adj);
       for (const auto& n : adj) {
         if (graph.is_passable(n) && graph.is_passable(cur)) {
@@ -63,7 +63,7 @@ class MicropatherGraph : public micropather::Graph {
 
     virtual void PrintStateInfo(void*) const { }
 
-    void* encode(const pathfinder::Coord& c) const {
+    void* encode(const Coord& c) const {
       static_assert(sizeof(c.row) + sizeof(c.col) + sizeof(c.layer) <=
                     sizeof(void*), "");
       static const uint16_t dim = std::numeric_limits<uint16_t>::max();
@@ -71,12 +71,12 @@ class MicropatherGraph : public micropather::Graph {
       return (void*)encoded;
     }
 
-    pathfinder::Coord decode(void* c) const {
+    Coord decode(void* c) const {
       static const uint16_t dim = std::numeric_limits<uint16_t>::max();
 
       uintptr_t encoded = (uintptr_t)c;
 
-      pathfinder::Coord rval;
+      Coord rval;
       rval.layer = encoded / ((size_t)dim * (size_t)dim);
       encoded %= ((size_t)dim * (size_t)dim);
       rval.row = encoded / dim;
