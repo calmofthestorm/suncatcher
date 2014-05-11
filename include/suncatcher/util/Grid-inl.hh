@@ -26,13 +26,18 @@ namespace util {
 template <typename T>
 inline Grid<T>::Grid()
 : my_size({0, 0, 0}),
-  backing() { }
+  length(0),
+  backing(nullptr) { }
 
 
 template <typename T>
 inline Grid<T>::Grid(const Coord size_in, const T& val)
 : my_size(size_in),
-  backing(size_in.row * size_in.col * size_in.layer, val) { }
+  length(size_in.row * size_in.col * size_in.layer),
+  backing(new T[size_in.row * size_in.col * size_in.layer]) {
+
+  fill(val);
+}
 
 
 template <typename T>
@@ -40,35 +45,67 @@ inline Grid<T>::Grid(uint16_t r, uint16_t c, uint16_t l, const T& val)
   : Grid({r, c, l}, val) { }
 
 
+
+template <typename T>
+inline Grid<T>& Grid<T>::operator=(const Grid<T>& other) {
+  my_size = other.my_size;
+  if (length != other.length) {
+    length = other.length;
+    backing.reset(new T[other.length]);
+  }
+
+  for (size_t i = 0; i < length; ++i) {
+    backing[i] = other.backing[i];
+  }
+  return *this;
+}
+
+
+template <typename T>
+inline Grid<T>::Grid(const Grid<T>& other)
+: my_size(other.my_size),
+  length(other.length),
+  backing(new T[other.length]) {
+
+  for (size_t i = 0; i < length; ++i) {
+    backing[i] = other.backing[i];
+  }
+}
+
+
 template <typename T>
 inline void Grid<T>::fill(const T& val) {
-  std::fill(backing.begin(), backing.end(), val);
+  for (size_t i = 0; i < length; ++i) {
+    backing[i] = val;
+  }
 }
 
 
 template <typename T>
 inline T& Grid<T>::at(const Coord cell) {
-  return at(cell.row, cell.col, cell.layer);
+  check_bounds(cell);
+  size_t index = cell.col + my_size.col * (cell.row + my_size.row * cell.layer);
+  return backing[index];
 }
 
 
 template <typename T>
 inline const T& Grid<T>::at(const Coord cell) const {
-  return at(cell.row, cell.col, cell.layer);
+  check_bounds(cell);
+  size_t index = cell.col + my_size.col * (cell.row + my_size.row * cell.layer);
+  return backing[index];
 }
 
 
 template <typename T>
 inline const T& Grid<T>::at(uint16_t row, uint16_t col, uint16_t layer) const {
-  assert(check_bounds(row, col, layer));
-  return backing[col + my_size.col * (row + my_size.row * layer)];
+  return at({row, col, layer});
 }
 
 
 template <typename T>
 inline T& Grid<T>::at(uint16_t row, uint16_t col, uint16_t layer) {
-  assert(check_bounds(row, col, layer));
-  return backing[col + my_size.col * (row + my_size.row * layer)];
+  return at({row, col, layer});
 }
 
 
@@ -117,7 +154,7 @@ inline void Grid<T>::get_adjacent(
 
 template <typename T>
 inline bool Grid<T>::check_bounds(const Coord cell) const {
-  return check_bounds(cell.row, cell.col, cell.layer);
+  return (cell.row < my_size.row && cell.col < my_size.col && cell.layer < my_size.layer);
 }
 
 
@@ -128,7 +165,7 @@ inline bool Grid<T>::check_bounds(
     uint16_t layer
   ) const {
 
-  return (row < my_size.row && col < my_size.col && layer < my_size.layer);
+  return check_bounds({row, col, layer});
 }
 
 
@@ -140,7 +177,15 @@ inline const Coord& Grid<T>::size() const {
 
 template <typename T>
 inline bool Grid<T>::operator==(const Grid<T>& other) const {
-  return (other.size() == size() && other.backing == backing);
+  if (other.size() != size()) {
+    return false;
+  }
+  for (size_t i = 0; i < length; ++i) {
+    if (other.backing[i] != backing[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 
