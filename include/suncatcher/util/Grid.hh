@@ -25,9 +25,9 @@
 // pathfinding abstraction.
 
 #include <algorithm>
+#include <memory>
 #include <cassert>
 #include <cstdint>
-#include <vector>
 
 #include "suncatcher/Coord.hh"
 
@@ -45,6 +45,9 @@ template <typename T>
 class Grid {
   public:
     inline Grid();
+
+    inline Grid(const Grid& other);
+    inline Grid& operator=(const Grid& other);
 
     inline Grid(const Coord size_in, const T& val);
 
@@ -71,7 +74,8 @@ class Grid {
   // private:
     friend class graph::CowGrid<T>;
     Coord my_size;
-    std::vector<T> backing;
+    size_t length;
+    std::unique_ptr<T[]> backing;
 };
 
 }  // namespace util
