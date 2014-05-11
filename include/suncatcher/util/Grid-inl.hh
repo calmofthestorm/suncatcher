@@ -36,11 +36,6 @@ inline Grid<T>::Grid(const Coord size_in, const T& val)
 
 
 template <typename T>
-inline Grid<T>::Grid(uint16_t r, uint16_t c, uint16_t l, const T& val)
-  : Grid({r, c, l}, val) { }
-
-
-template <typename T>
 inline void Grid<T>::fill(const T& val) {
   std::fill(backing.begin(), backing.end(), val);
 }
@@ -48,31 +43,18 @@ inline void Grid<T>::fill(const T& val) {
 
 template <typename T>
 inline T& Grid<T>::at(const Coord cell) {
-  return at(cell.row, cell.col, cell.layer);
+  assert(check_bounds(cell));
+  return backing[cell.col + my_size.col * (cell.row + my_size.row * cell.layer)];
 }
 
 
 template <typename T>
 inline const T& Grid<T>::at(const Coord cell) const {
-  return at(cell.row, cell.col, cell.layer);
+  assert(check_bounds(cell));
+  return backing[cell.col + my_size.col * (cell.row + my_size.row * cell.layer)];
 }
 
 
-template <typename T>
-inline const T& Grid<T>::at(uint16_t row, uint16_t col, uint16_t layer) const {
-  assert(check_bounds(row, col, layer));
-  return backing[col + my_size.col * (row + my_size.row * layer)];
-}
-
-
-template <typename T>
-inline T& Grid<T>::at(uint16_t row, uint16_t col, uint16_t layer) {
-  assert(check_bounds(row, col, layer));
-  return backing[col + my_size.col * (row + my_size.row * layer)];
-}
-
-
-//TODO: evaluate cache performance of ordering.
 template <typename T>
 inline void Grid<T>::get_adjacent(
     const Coord cell,
@@ -117,18 +99,7 @@ inline void Grid<T>::get_adjacent(
 
 template <typename T>
 inline bool Grid<T>::check_bounds(const Coord cell) const {
-  return check_bounds(cell.row, cell.col, cell.layer);
-}
-
-
-template <typename T>
-inline bool Grid<T>::check_bounds(
-    uint16_t row,
-    uint16_t col,
-    uint16_t layer
-  ) const {
-
-  return (row < my_size.row && col < my_size.col && layer < my_size.layer);
+  return (cell.row < my_size.row && cell.col < my_size.col && cell.layer < my_size.layer);
 }
 
 

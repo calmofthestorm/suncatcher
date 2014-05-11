@@ -18,6 +18,8 @@
 #ifndef GRID_d99e6d99bd454e83ab91ad5a87f993dc
 #define GRID_d99e6d99bd454e83ab91ad5a87f993dc
 
+// TODO: move to graph ns since this is euclidean
+
 // A multidimensional array capable of being indexed by Coords or individual
 // dimensions. Currently used primarily to represent map data for the
 // pathfinding abstraction.
@@ -41,15 +43,10 @@ class Grid {
 
     inline Grid(const Coord size_in, const T& val);
 
-    inline Grid(uint16_t row, uint16_t col, uint16_t layer, const T& val);
-
     inline void fill(const T& val);
 
     inline T& at(const Coord cell);
     inline const T& at(const Coord cell) const;
-
-    inline T& at(uint16_t row, uint16_t col, uint16_t layer);
-    inline const T& at(uint16_t row, uint16_t col, uint16_t layer) const;
 
     inline const T& operator[](const Coord cell) const;
     inline T& operator[](const Coord cell);
@@ -61,7 +58,6 @@ class Grid {
       ) const;
 
     inline bool check_bounds(const Coord cell) const;
-    inline bool check_bounds(uint16_t row, uint16_t col, uint16_t layer) const;
 
     inline const Coord& size() const;
 
