@@ -13,3 +13,9 @@
 [submodule "thirdparty/checkedthreads"]
 	path = thirdparty/checkedthreads
 	url = https://github.com/yosefk/checkedthreads.git
+[submodule "benchmark"]
+	path = benchmark
+	url = https://github.com/google/benchmark.git
+[submodule "thirdparty/benchmark"]
+	path = thirdparty/benchmark
+	url = https://github.com/google/benchmark.git

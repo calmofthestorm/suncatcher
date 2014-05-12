@@ -18,7 +18,7 @@
 #ifndef GRID_INL_93b27f51b9f84797b7b0b059118d798a
 #define GRID_INL_93b27f51b9f84797b7b0b059118d798a
 
-#include <type_traits>
+#include "suncatcher/util/util.hh"
 
 namespace suncatcher {
 namespace util {
@@ -41,9 +41,8 @@ inline Grid<T>::Grid(const Coord size_in, const T& val)
 
 
 template <typename T>
-inline Grid<T>::Grid(uint16_t r, uint16_t c, uint16_t l, const T& val)
-  : Grid({r, c, l}, val) { }
-
+inline Grid<T>::Grid(const Coord chunks, const Coord chunk_size, const T& val)
+: Grid(Coord(chunks.row * chunk_size.row, chunks.col * chunk_size.col, chunks.layer * chunk_size.layer), val) { }
 
 
 template <typename T>
@@ -97,18 +96,6 @@ inline const T& Grid<T>::at(const Coord cell) const {
 }
 
 
-template <typename T>
-inline const T& Grid<T>::at(uint16_t row, uint16_t col, uint16_t layer) const {
-  return at({row, col, layer});
-}
-
-
-template <typename T>
-inline T& Grid<T>::at(uint16_t row, uint16_t col, uint16_t layer) {
-  return at({row, col, layer});
-}
-
-
 //TODO: evaluate cache performance of ordering.
 template <typename T>
 inline void Grid<T>::get_adjacent(
@@ -155,17 +142,6 @@ inline void Grid<T>::get_adjacent(
 template <typename T>
 inline bool Grid<T>::check_bounds(const Coord cell) const {
   return (cell.row < my_size.row && cell.col < my_size.col && cell.layer < my_size.layer);
-}
-
-
-template <typename T>
-inline bool Grid<T>::check_bounds(
-    uint16_t row,
-    uint16_t col,
-    uint16_t layer
-  ) const {
-
-  return check_bounds({row, col, layer});
 }
 
 

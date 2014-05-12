@@ -22,6 +22,7 @@
 #include <iosfwd>
 #include <map>
 
+#include "suncatcher/platform.hh"
 #include "suncatcher/graph/CowGrid.hh"
 
 #include "suncatcher/Door.hh"
@@ -66,8 +67,13 @@ class EuclideanGraphBuilder {
     friend class pathfinder::MapBuilder;
     friend class EuclideanGraph;
 
-    CowGrid<uint_least8_t> data;
-    CowGrid<int_least32_t> color;
+    #ifdef EuclideanGridUseCOW
+      CowGrid<uint_least8_t> data;
+      CowGrid<int_least32_t> color;
+    #else
+      util::Grid<uint_least8_t> data;
+      util::Grid<int_least32_t> color;
+    #endif
     bool dynamic_updates;
     std::map<const Coord, pathfinder::Door> doors;
 };

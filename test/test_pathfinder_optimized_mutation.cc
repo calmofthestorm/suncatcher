@@ -41,17 +41,17 @@ TEST_F(OptOpenCloseDoor, ConnectedComponentsMaintained) {
   Coord cell2 = {7, 4, 0};
   ASSERT_TRUE(map.path_exists(cell1, cell2));
   map.mutate(std::move(map.get_mutator().toggle_door_open(door1)));
-  // ASSERT_FALSE(map.path_exists(cell1, cell2));
-  // map.mutate(std::move(map.get_mutator().toggle_door_open(door2)));
-  // ASSERT_FALSE(map.path_exists(cell1, cell2));
-  // map.mutate(std::move(map.get_mutator().toggle_door_open(door1)));
-  // ASSERT_FALSE(map.path_exists(cell1, cell2));
-  // map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4, 0})));
-  // ASSERT_TRUE(map.path_exists(cell1, cell2));
-  // map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4, 0})));
-  // ASSERT_FALSE(map.path_exists(cell1, cell2));
-  // map.mutate(std::move(map.get_mutator().toggle_door_open(door2)));
-  // ASSERT_TRUE(map.path_exists(cell1, cell2));
+  ASSERT_FALSE(map.path_exists(cell1, cell2));
+  map.mutate(std::move(map.get_mutator().toggle_door_open(door2)));
+  ASSERT_FALSE(map.path_exists(cell1, cell2));
+  map.mutate(std::move(map.get_mutator().toggle_door_open(door1)));
+  ASSERT_FALSE(map.path_exists(cell1, cell2));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4, 0})));
+  ASSERT_TRUE(map.path_exists(cell1, cell2));
+  map.mutate(std::move(map.get_mutator().toggle_door_open({6, 4, 0})));
+  ASSERT_FALSE(map.path_exists(cell1, cell2));
+  map.mutate(std::move(map.get_mutator().toggle_door_open(door2)));
+  ASSERT_TRUE(map.path_exists(cell1, cell2));
 }
 
 TEST_F(OptOpenCloseDoor, SLOWSmartBruteForceTorture) {

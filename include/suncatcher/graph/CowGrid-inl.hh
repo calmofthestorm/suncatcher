@@ -38,19 +38,19 @@ inline CowGrid<T>::CowGrid(
     ),
   chunks(size_in_chunks, std::shared_ptr<util::Grid<T>>(nullptr)) {
 
-  for (auto& it : chunks.backing) {
-    it = std::make_shared<util::Grid<T>>(chunk_size, fill_value);
+  for (size_t i = 0; i < chunks.length; ++i) {
+    chunks.backing[i] = std::make_shared<util::Grid<T>>(chunk_size, fill_value);
   }
 }
 
 
 template <typename T>
 inline void CowGrid<T>::fill(const T& val) {
-  for (auto& chunk : chunks.backing) {
-    if (!chunk.unique()) {
-      chunk = std::make_shared<util::Grid<T>>(chunk_size, val);
+  for (size_t i = 0; i < chunks.length; ++i) {
+    if (!chunks.backing[i].unique()) {
+      chunks.backing[i] = std::make_shared<util::Grid<T>>(chunk_size, val);
     } else {
-      chunk->fill(val);
+      chunks.backing[i]->fill(val);
     }
   }
 }
@@ -66,10 +66,10 @@ inline T& CowGrid<T>::at(const Coord cell) {
               (uint16_t)(cell.layer % chunk_size.layer)};
   check_bounds(cell);
   chunks.check_bounds(chunk_index);
-  chunks.at(chunk_index)->check_bounds(inner);
   if (!chunks.at(chunk_index).unique()) {
     chunks.at(chunk_index)= std::make_shared<util::Grid<T>>(*chunks.at(chunk_index));
   }
+  chunks.at(chunk_index)->check_bounds(inner);
   assert(chunks.at(chunk_index).unique());
   return chunks.at(chunk_index)->at(inner);
 }
@@ -131,7 +131,7 @@ inline bool CowGrid<T>::operator==(const CowGrid<T>& other) const {
     return false;
   }
   assert(chunk_size == other.chunk_size);
-  for (size_t i = 0; i < chunks.backing.size(); ++i) {
+  for (size_t i = 0; i < chunks.length; ++i) {
     if (chunks.backing[i] != other.chunks.backing[i] &&
         !(*chunks.backing[i] == *other.chunks.backing[i])) {
       return false;

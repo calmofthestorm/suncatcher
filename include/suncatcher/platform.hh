@@ -45,4 +45,16 @@
 // enable it at runtime with SLOWTEST=1.
 #define MICROPATHER_DELTA_TEST
 
-// If you need to customize the type used to hoold Coordinates, see Coord.hh
+// If you need to customize the type used to hold Coordinates, see Coord.hh
+
+// Comment out to disable copy on write for graphs. Typically not super
+// expensive, and saves memory, but does add a layer of indirection and
+// refcounting. Pathing is maybe 3% slower, but mutations are more like 25%
+// Benchmark with your workload to be sure.
+//
+// This setting only affects the Euclidean graph (polymorphic or not). If using
+// the polymorphic API with your own graph, you can choose to make lazy_clone
+// CoW (or not) regardless of this setting.
+//
+// (TODO: update benchmarks with legit bootstrap)
+#define EuclideanGridUseCOW

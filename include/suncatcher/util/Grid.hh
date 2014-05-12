@@ -50,6 +50,7 @@ class Grid {
     inline Grid& operator=(const Grid& other);
 
     inline Grid(const Coord size_in, const T& val);
+    inline Grid(const Coord chunks, const Coord chunk_size, const T& val);
 
     inline void fill(const T& val);
 

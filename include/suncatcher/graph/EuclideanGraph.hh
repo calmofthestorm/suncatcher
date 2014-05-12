@@ -19,6 +19,7 @@
 #define EUCLIDEANGRAPH_272b6e8aad5b4590a75bf12e43dc1adc
 
 #include "suncatcher.hh"
+#include "suncatcher/platform.hh"
 #include "suncatcher/graph/CowGrid.hh"
 #include "suncatcher/graph/EuclideanCoord.hh"
 #include "suncatcher/graph/EuclideanCoordRange.hh"
@@ -93,16 +94,22 @@ class EuclideanGraph {
 
   private:
     friend class test::DeltaMap;
-    // The map is divided into "colors" -- areas connected by purely transparent
-    // terrain along Manhattan directions. Colors are handles into static
-    // components (thus, we can union two colors in constant time at the price
-    // of a small indirect lookup table). Typically there will be anywhere from
-    // 1-5 colors per door on the map, plus one for each isolated walled off
-    // region.
-    CowGrid<int_least32_t> color;
+    #ifdef EuclideanGridUseCOW
+      // The map is divided into "colors" -- areas connected by purely transparent
+      // terrain along Manhattan directions. Colors are handles into static
+      // components (thus, we can union two colors in constant time at the price
+      // of a small indirect lookup table). Typically there will be anywhere from
+      // 1-5 colors per door on the map, plus one for each isolated walled off
+      // region.
+      CowGrid<int_least32_t> color;
 
-    // Cost to traverse terrain.
-    CowGrid<uint_least8_t> data;
+      // Cost to traverse terrain.
+      CowGrid<uint_least8_t> data;
+    #else
+      util::Grid<int_least32_t> color;
+      util::Grid<uint_least8_t> data;
+    #endif
+
 };
 
 

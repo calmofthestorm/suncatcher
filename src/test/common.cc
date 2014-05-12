@@ -34,6 +34,7 @@ extern const char MAP_CHECKERDOOR[] = "checkerdoor";
 extern const char MAP_CHECKERDOOR64[] = "checkerdoor64";
 extern const char MAP_HARDNINE[] = "hardnine";
 extern const char MAP_HARDERNINE[] = "hardernine";
+extern const char MAP_HUGE[] = "huge_map";
 
 }  // namespace test
 }  // namespace suncatcher

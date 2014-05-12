@@ -58,6 +58,7 @@ extern const char MAP_CHECKERDOOR[];
 extern const char MAP_CHECKERDOOR64[];
 extern const char MAP_HARDNINE[];
 extern const char MAP_HARDERNINE[];
+extern const char MAP_HUGE[];
 
 using suncatcher::util::manhattan;
 using suncatcher::pathfinder::Map;
