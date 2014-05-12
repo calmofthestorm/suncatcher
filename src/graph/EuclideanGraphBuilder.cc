@@ -63,6 +63,7 @@ EuclideanGraphBuilder::EuclideanGraphBuilder(std::istream& is) {
   auto it = line.begin();
   for (const Coord& cell : EuclideanCoordRange(data.size())) {
     while (it == line.end()) {
+      assert(is);
       std::getline(is, line);
       it = line.begin();
     }

@@ -35,6 +35,7 @@
 #include "suncatcher/MapMutator.hh"
 #include "suncatcher/util/util.hh"
 #include "suncatcher/platform.hh"
+#include "suncatcher/PathStateDelegate.hh"
 
 #ifdef MICROPATHER_DELTA_TEST
 #include "suncatcher/micropather/MicropatherGraph.hh"
@@ -92,6 +93,7 @@ int main(int argc, char** argv) {
   #endif
 
   Path my_path;
+  suncatcher::pathfinder::PatherStateDelegate pather(my_map.domain().euclidean_size());
 
   if (argc == 4) {
     Coord start{1, 1, 0};
@@ -99,8 +101,9 @@ int main(int argc, char** argv) {
     float co = 23;
 
     timer();
-    my_path = my_map.path(start, finish);
+    my_path = my_map.path(start, finish, pather);
     std::cout << "Alex: " << timer() << std::endl;
+    std::cout << "Length: " << my_path.get_length() << std::endl;
 
     #ifdef MICROPATHER_DELTA_TEST
     mp->Solve(mgraph.encode(start), mgraph.encode(finish), &pa, &co);
@@ -129,8 +132,9 @@ int main(int argc, char** argv) {
           Coord finish{c, d, 0};
 
           timer();
-          my_path = my_map.path(start, finish);
+          my_path = my_map.path(start, finish, pather);
           std::cout << "Alex: " << timer() << std::endl;
+          std::cout << "Length: " << my_path.get_length() << std::endl;
 
           #ifdef MICROPATHER_DELTA_TEST
           mp->Solve(mgraph.encode(start), mgraph.encode(finish), &pa, &co);

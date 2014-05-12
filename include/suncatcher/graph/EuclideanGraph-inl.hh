@@ -32,9 +32,8 @@ inline float EuclideanGraph::move_cost(
   assert(std::abs(start.row - finish.row) <= 1 &&
       std::abs(start.col - finish.col) <= 1 &&
       std::abs(start.layer - finish.layer) <= 1);
-  assert(is_passable(start));
 
-  if (!is_passable(finish)) {
+  if (!is_passable(finish) || !is_passable(start)) {
     return -1;
   }
 

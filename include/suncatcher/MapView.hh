@@ -31,6 +31,7 @@
 #include "platform.hh"
 #include "suncatcher/Path.hh"
 #include "suncatcher/Door.hh"
+#include "suncatcher/GraphDelegate.hh"
 
 namespace suncatcher {
 
@@ -43,6 +44,7 @@ namespace pathfinder {
 class MapImpl;
 class MapMutator;
 class MapBuilder;
+class PatherStateDelegate;
 
 class MapView {
   public:
@@ -53,6 +55,7 @@ class MapView {
     // Compute the shortest path between two points if one exists. Returns false
     // path on failure (out of bounds, no path, impassable src/dest, etc).
     Path path(Coord src, Coord dst) const;
+    Path path(Coord src, Coord dst, PatherStateDelegate& state) const;
 
     // Returns true if it is possible to path from src to dst. Unlike path,
     // this will always run in constant time. Invalid inputs result in false.
@@ -80,6 +83,8 @@ class MapView {
     inline bool is_door(Coord cell) const;
     inline bool is_door(int_least32_t cell_color) const;
 
+    inline Domain domain() const;
+
     // Useful debugging features -- dump a simple representation of aspects
     // of the map to a stream.
     inline void print_colors(std::ostream& os) const;
@@ -101,6 +106,8 @@ class MapView {
     friend class test::DeltaMap;
 
     std::shared_ptr<MapImpl> map;
+
+    bool path_helper(Coord src, Coord dst, Path& out_path) const;
 };
 
 }  // namespace pathfinder

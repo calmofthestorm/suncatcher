@@ -94,7 +94,7 @@ class EuclideanGraph {
 
   private:
     friend class test::DeltaMap;
-    #ifdef EuclideanGridUseCOW
+    #ifdef EUCLIDEAN_GRID_USE_COW
       // The map is divided into "colors" -- areas connected by purely transparent
       // terrain along Manhattan directions. Colors are handles into static
       // components (thus, we can union two colors in constant time at the price

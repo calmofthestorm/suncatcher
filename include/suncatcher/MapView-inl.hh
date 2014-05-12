@@ -62,6 +62,11 @@ inline void MapView::print_colors(std::ostream& os) const {
 }
 
 
+inline Domain MapView::domain() const {
+  return map->domain();
+}
+
+
 inline void MapView::print_static_components(std::ostream& os) const {
   return map->print_static_components(os);
 }

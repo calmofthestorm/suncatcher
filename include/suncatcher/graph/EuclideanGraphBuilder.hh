@@ -67,7 +67,7 @@ class EuclideanGraphBuilder {
     friend class pathfinder::MapBuilder;
     friend class EuclideanGraph;
 
-    #ifdef EuclideanGridUseCOW
+    #ifdef EUCLIDEAN_GRID_USE_COW
       CowGrid<uint_least8_t> data;
       CowGrid<int_least32_t> color;
     #else

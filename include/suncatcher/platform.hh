@@ -32,9 +32,13 @@
 // a map, etc).
 //
 // If you choose to use the polymorphic API, I strongly suggest using your own
-// pathing algorithm that operates directly on your abstraction, mine is 
+// pathing algorithm that operates directly on your abstraction, mine is
 // very general at substantial cost of speed, and improving its polymorphic
 // performance is not a priority for me.
+//
+// If you wish, you can use the second form of path and implement a PatherState
+// to make more efficient the maintenance of open and closed sets. The default
+// is hash tables.
 //
 // If you can, strongly consider avoiding the polymorphic API if your model
 // can be construed as a grid of up to 3 dimensions.
@@ -49,12 +53,13 @@
 
 // Comment out to disable copy on write for graphs. Typically not super
 // expensive, and saves memory, but does add a layer of indirection and
-// refcounting. Pathing is maybe 3% slower, but mutations are more like 25%
-// Benchmark with your workload to be sure.
+// refcounting. The larger the maps, and the more frequent mutatons are, the
+// better this is. I see roughly 20% slower pathfinding, 5x slower map loads
+// (IE, from disk/your program), but really fast mutations.
 //
 // This setting only affects the Euclidean graph (polymorphic or not). If using
 // the polymorphic API with your own graph, you can choose to make lazy_clone
 // CoW (or not) regardless of this setting.
 //
 // (TODO: update benchmarks with legit bootstrap)
-#define EuclideanGridUseCOW
+#define EUCLIDEAN_GRID_USE_COW
