@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "suncatcher/Coord.hh"
+#include "suncatcher/graph/PatherStateInterface.hh"
 #include "suncatcher/graph/EuclideanPatherState.hh"
 
 namespace suncatcher {
@@ -30,8 +31,11 @@ namespace pathfinder {
 
 class PatherStateDelegate {
   public:
-    #ifndef POLYMORPHIC_API
+    #ifdef POLYMORPHIC_API
+      inline PatherStateDelegate(std::unique_ptr<graph::PatherStateInterface> impl);
+    #else
       inline PatherStateDelegate(Coord size);
+      inline PatherStateDelegate(graph::EuclideanPatherState&& impl);
     #endif
 
     inline bool get_expanded(Coord cell) const;
@@ -47,7 +51,7 @@ class PatherStateDelegate {
 
   private:
     #ifdef POLYMORPHIC_API
-      std::unique_ptr<PatherStateInterface> impl;
+      std::unique_ptr<graph::PatherStateInterface> impl;
     #else
       graph::EuclideanPatherState impl;
     #endif

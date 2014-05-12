@@ -36,6 +36,7 @@
 #include "suncatcher/util/util.hh"
 #include "suncatcher/platform.hh"
 #include "suncatcher/PathStateDelegate.hh"
+#include "suncatcher/graph/PolymorphicEuclideanStateInterface.hh"
 
 #ifdef MICROPATHER_DELTA_TEST
 #include "suncatcher/micropather/MicropatherGraph.hh"
@@ -75,9 +76,11 @@ int main(int argc, char** argv) {
     std::cerr << "Unable to open map " << argv[1] << std::endl;
     exit(-1);
   }
-  auto builder = MapBuilder(EuclideanGraphBuilder(is));
+  auto egb = EuclideanGraphBuilder(is);
+  auto builder = MapBuilder(std::move(egb));
 
   timer();
+  auto map_size = egb.size();
   MapView my_map(std::move(builder));
   std::cout << "Flood fill time: " << timer() << std::endl;
 
@@ -93,7 +96,13 @@ int main(int argc, char** argv) {
   #endif
 
   Path my_path;
-  suncatcher::pathfinder::PatherStateDelegate pather(my_map.domain().euclidean_size());
+  #ifdef POLYMORPHIC_API
+  std::unique_ptr<suncatcher::graph::PatherStateInterface> psi(
+      new suncatcher::graph::PolymorphicEuclideanStateInterface(map_size));
+  #else
+  auto psi = suncatcher::graph::EuclideanPatherState(map_size);
+  #endif
+  suncatcher::pathfinder::PatherStateDelegate pather(std::move(psi));
 
   if (argc == 4) {
     Coord start{1, 1, 0};

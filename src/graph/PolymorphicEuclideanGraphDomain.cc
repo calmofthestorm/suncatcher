@@ -55,7 +55,6 @@ size_t PolymorphicEuclideanGraphDomain::get_index_by_coord(Coord cell) {
 }
 
 
-
 }  // namespace graph
 }  // namespace suncatcher
 

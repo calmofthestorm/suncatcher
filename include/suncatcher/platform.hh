@@ -26,10 +26,10 @@
 
 // Uncomment this line to build with the polymorphic graph API. You may then
 // implement GraphInterface and GraphDomainInterface to specify graph
-// connectivity. Current benchmarks show this as about 12x slower in
-// MapView::path, and roughly 3x slower in the expensive update operations
-// that involve virtual calls in tight loops (eg, building a wall), loading
-// a map, etc).
+// connectivity. Current benchmarks show this as about 10-30% slower in
+// MapView::path (when using a PatherStateInterface), as well as
+// when loading a map and mutating a map. The slowdown (as a percentage) is
+// more pronounced in small maps.
 //
 // If you choose to use the polymorphic API, I strongly suggest using your own
 // pathing algorithm that operates directly on your abstraction, mine is
@@ -54,12 +54,13 @@
 // Comment out to disable copy on write for graphs. Typically not super
 // expensive, and saves memory, but does add a layer of indirection and
 // refcounting. The larger the maps, and the more frequent mutatons are, the
-// better this is. I see roughly 20% slower pathfinding, 5x slower map loads
-// (IE, from disk/your program), but really fast mutations.
+// better this is. I see roughly 10-30% slower pathfinding, 5x slower map loads
+// (IE, from disk/your program), but really fast mutations. The slowdown (as a
+// percentage) is more pronounced in small maps.
 //
 // This setting only affects the Euclidean graph (polymorphic or not). If using
 // the polymorphic API with your own graph, you can choose to make lazy_clone
 // CoW (or not) regardless of this setting.
 //
 // (TODO: update benchmarks with legit bootstrap)
-#define EUCLIDEAN_GRID_USE_COW
+// #define EUCLIDEAN_GRID_USE_COW

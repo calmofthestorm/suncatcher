@@ -62,6 +62,9 @@ class EuclideanGraphBuilder {
     void add_door(Coord cell, bool open, uint_least8_t cost_open,
                   uint_least8_t cost_closed);
 
+    EuclideanCoord size() const { return data.size(); }
+
+
   private:
     friend class pathfinder::MapImpl;
     friend class pathfinder::MapBuilder;

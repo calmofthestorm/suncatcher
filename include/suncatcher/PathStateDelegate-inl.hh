@@ -19,8 +19,27 @@ namespace suncatcher {
 namespace pathfinder {
 
 
+#ifdef POLYMORPHIC_API
+
+
+inline PatherStateDelegate::PatherStateDelegate(
+    std::unique_ptr<graph::PatherStateInterface> impl_i
+  )
+: impl(std::move(impl_i)) { }
+
+
+#else
+
+
+inline PatherStateDelegate::PatherStateDelegate(graph::EuclideanPatherState&& impl_i)
+: impl(std::move(impl_i)) { }
+
+
 inline PatherStateDelegate::PatherStateDelegate(Coord size)
 : impl(size) { }
+
+
+#endif
 
 
 inline bool PatherStateDelegate::get_expanded(Coord cell) const {
