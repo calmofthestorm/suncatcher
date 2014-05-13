@@ -48,7 +48,6 @@ class EuclideanCoord {
 
     inline bool operator!= (const EuclideanCoord& other) const {
       return to_number() != other.to_number();
-      return row != other.row || col != other.col || layer != other.layer;
     }
 
     inline bool operator== (const EuclideanCoord& other) const {
