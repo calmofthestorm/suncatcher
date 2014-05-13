@@ -59,7 +59,7 @@ TEST_F(OptOpenCloseDoor, SLOWSmartBruteForceTorture) {
     Coord{12, 8, 0}, Coord{14, 2, 0}, Coord{11, 8, 0}};
   std::vector<Coord> interesting{{1, 1, 0}, {3, 4, 0}, {7, 4, 0}};
 
-  size_t num_iterations = std::pow(2, doors.size());
+  size_t num_iterations = (size_t)std::pow(2, doors.size());
 
   map.mutate(std::move(map.get_mutator().create_door(doors.back(), false, 3)));
 

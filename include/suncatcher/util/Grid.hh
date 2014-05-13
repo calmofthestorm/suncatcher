@@ -28,8 +28,9 @@
 #include <memory>
 #include <cassert>
 #include <cstdint>
+#include <vector>
 
-#include "suncatcher/Coord.hh"
+#include "suncatcher/graph/EuclideanCoord.hh"
 
 namespace suncatcher {
 
@@ -49,32 +50,32 @@ class Grid {
     inline Grid(const Grid& other);
     inline Grid& operator=(const Grid& other);
 
-    inline Grid(const Coord size_in, const T& val);
-    inline Grid(const Coord chunks, const Coord chunk_size, const T& val);
+    inline Grid(const graph::EuclideanCoord size_in, const T& val);
+    inline Grid(const graph::EuclideanCoord chunks, const graph::EuclideanCoord chunk_size, const T& val);
 
     inline void fill(const T& val);
 
-    inline T& at(const Coord cell);
-    inline const T& at(const Coord cell) const;
+    inline T& at(const graph::EuclideanCoord cell);
+    inline const T& at(const graph::EuclideanCoord cell) const;
 
-    inline T& operator[](const Coord cell);
-    inline const T& operator[](const Coord cell) const;
+    inline T& operator[](const graph::EuclideanCoord cell);
+    inline const T& operator[](const graph::EuclideanCoord cell) const;
 
     inline void get_adjacent(
-        const Coord cell,
+        const graph::EuclideanCoord cell,
         bool include_diagonals,
-        std::vector<Coord>& adj
+        std::vector<graph::EuclideanCoord>& adj
       ) const;
 
-    inline bool check_bounds(const Coord cell) const;
+    inline bool check_bounds(const graph::EuclideanCoord cell) const;
 
-    inline const Coord& size() const;
+    inline const graph::EuclideanCoord& size() const;
 
     inline bool operator==(const Grid<T>& other) const;
 
   // private:
     friend class graph::CowGrid<T>;
-    Coord my_size;
+    graph::EuclideanCoord my_size;
     size_t length;
     std::unique_ptr<T[]> backing;
 };

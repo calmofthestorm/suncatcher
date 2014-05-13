@@ -45,9 +45,10 @@
 // #define POLYMORPHIC_API
 
 // Some tests (and the repl) are able to delta against micropather for sanity.
-// This will make tests run a bit slower, but is recommended. You must also
-// enable it at runtime with SLOWTEST=1.
-#define MICROPATHER_DELTA_TEST
+// This will make tests run a bit slower, but is recommended when running tests.
+// You must also enable it at runtime with SLOWTEST=1. Only implemented for 64 bit
+// builds. (would be easy enough to adapt it to 32 bit, but no point really).
+// #define MICROPATHER_DELTA_TEST
 
 // If you need to customize the type used to hold Coordinates, see Coord.hh
 

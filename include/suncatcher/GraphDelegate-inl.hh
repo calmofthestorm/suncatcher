@@ -36,6 +36,16 @@ inline float GraphDelegate::move_cost(Coord start, Coord finish) const {
   #endif
 }
 
+#ifdef POLYMORPHIC_API
+inline GraphDelegate::GraphDelegate(const GraphDelegate& other)
+: graph(other.graph->lazy_clone()) { }
+
+inline const GraphDelegate& GraphDelegate::operator=(const GraphDelegate& other) const {
+  graph = other.graph->lazy_clone();
+  return *this;
+}
+#endif
+
 inline uint_least8_t GraphDelegate::get_cost(Coord cell) const {
   #ifdef POLYMORPHIC_API
   return graph->get_cost(cell);

@@ -65,7 +65,7 @@ class MicropatherGraph : public micropather::Graph {
 
     void* encode(const Coord& c) const {
       static_assert(sizeof(c.row) + sizeof(c.col) + sizeof(c.layer) <=
-                    sizeof(void*), "");
+                    sizeof(void*), "Micropather interface only supported on 64 bit build.");
       static const uint16_t dim = std::numeric_limits<uint16_t>::max();
       uintptr_t encoded = c.col + dim * (c.row + dim * c.layer);
       return (void*)encoded;

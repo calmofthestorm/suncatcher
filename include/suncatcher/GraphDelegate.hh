@@ -64,6 +64,11 @@ class GraphDelegate {
     inline GraphDelegate(graph::EuclideanGraph&& graph_i);
     #endif
 
+    #ifdef POLYMORPHIC_API
+    inline GraphDelegate(const GraphDelegate&);
+    inline const GraphDelegate& operator=(const GraphDelegate&) const;
+    #endif
+
     inline float move_cost(Coord start, Coord finish) const;
 
     inline uint_least8_t get_cost(Coord cell) const;

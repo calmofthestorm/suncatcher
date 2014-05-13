@@ -64,7 +64,7 @@ void scrambler(
 
   auto m = map.get_mutator();
   for (const Coord& c : doors) {
-    m.set_door_open(c, rand() % 2);
+    m.set_door_open(c, rand() % 2 == 0);
   }
   map.mutate(m);
 }
@@ -91,7 +91,7 @@ void choose_one_legal_mutation(DeltaMap& map, Coord cell) {
   uint8_t cost = rand() % 250;
   if (map.is_door(cell)) {
     legal.push_back(std::move(map.get_mutator().toggle_door_open(cell)));
-    legal.push_back(std::move(map.get_mutator().set_door_open(cell, cost)));
+    legal.push_back(std::move(map.get_mutator().set_door_open(cell, cost % 2 == 0)));
     legal.push_back(std::move(map.get_mutator().remove_door(cell, cost)));
     legal.push_back(std::move(map.get_mutator().remove_door(cell, PATH_COST_INFINITE)));
   } else {

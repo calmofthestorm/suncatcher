@@ -42,6 +42,8 @@ class PolymorphicEuclideanGraphDomain : public GraphDomainInterface {
     virtual EuclideanCoord get_coord_by_index(size_t index) override;
     virtual size_t get_index_by_coord(EuclideanCoord cell) override;
 
+    virtual std::unique_ptr<GraphDomainInterface> clone() override;
+
 
   private:
     EuclideanCoordRange domain;

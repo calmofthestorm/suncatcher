@@ -22,6 +22,8 @@
 #include <cmath>
 #include <vector>
 
+#include "suncatcher/graph/EuclideanCoord.hh"
+
 namespace suncatcher {
 namespace util {
 
@@ -35,38 +37,38 @@ inline int_least32_t find_representative(
   return elem;
 }
 
-inline float manhattan(const Coord& a, const Coord& b) {
+inline float manhattan(const graph::EuclideanCoord& a, const graph::EuclideanCoord& b) {
   return (float)pow(pow(std::abs((float)a.row - (float)b.row), 2) + pow(std::abs((float)a.col - (float)b.col), 2), 0.5);
 }
 
 
-inline bool check_bounds(const Coord cell, const Coord size)  {
+inline bool check_bounds(const graph::EuclideanCoord cell, const graph::EuclideanCoord size)  {
   return (cell.row < size.row && cell.col < size.col && cell.layer < size.layer);
 }
 
 
 inline void get_adjacent(
-    const Coord cell,
+    const graph::EuclideanCoord cell,
     bool include_diagonals,
-    std::vector<Coord>& neighbors,
-    const Coord size
+    std::vector<graph::EuclideanCoord>& neighbors,
+    const graph::EuclideanCoord size
     ) {
 
   neighbors.clear();
   neighbors.reserve(10);
 
   static_assert(
-      std::is_same<decltype(Coord::row), decltype(Coord::col)>::value,
+      std::is_same<decltype(graph::EuclideanCoord::row), decltype(graph::EuclideanCoord::col)>::value,
       ""
     );
   static_assert(
-      std::is_same<decltype(Coord::row), decltype(Coord::layer)>::value,
+      std::is_same<decltype(graph::EuclideanCoord::row), decltype(graph::EuclideanCoord::layer)>::value,
       ""
     );
 
-  const static decltype(Coord::row) n1(-1);
+  const static decltype(graph::EuclideanCoord::row) n1(-1);
 
-  const static std::vector<Coord> ADJ_DELTA{
+  const static std::vector<graph::EuclideanCoord> ADJ_DELTA{
     // Manhattan adjacent same layer.
     {0, n1, 0}, {n1, 0, 0}, {0, 1, 0}, {1, 0, 0},
 

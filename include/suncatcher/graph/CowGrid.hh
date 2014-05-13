@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "suncatcher/util/Grid.hh"
+#include "suncatcher/graph/EuclideanCoord.hh"
 
 namespace suncatcher {
 namespace graph {
@@ -31,33 +32,33 @@ class CowGrid {
     inline CowGrid() = default;
 
     inline CowGrid(
-        const Coord size_in_chunks,
-        const Coord chunk_size,
+        const EuclideanCoord size_in_chunks,
+        const EuclideanCoord chunk_size,
         const T& fill_value
       );
 
     inline void fill(const T& val);
 
-    inline T& at(const Coord cell);
-    inline const T& at(const Coord cell) const;
+    inline T& at(const EuclideanCoord cell);
+    inline const T& at(const EuclideanCoord cell) const;
 
-    inline T& operator[](const Coord cell);
-    inline const T& operator[](const Coord cell) const;
+    inline T& operator[](const EuclideanCoord cell);
+    inline const T& operator[](const EuclideanCoord cell) const;
 
     inline void get_adjacent(
-        const Coord cell,
+        const EuclideanCoord cell,
         bool include_diagonals,
-        std::vector<Coord>& adj
+        std::vector<EuclideanCoord>& adj
       ) const;
 
-    inline bool check_bounds(const Coord cell) const;
+    inline bool check_bounds(const EuclideanCoord cell) const;
 
-    inline const Coord& size() const;
+    inline const EuclideanCoord& size() const;
 
     inline bool operator==(const CowGrid<T>& other) const;
 
   private:
-    inline void dirty_chunk(const Coord chunk);
+    inline void dirty_chunk(const EuclideanCoord chunk);
     EuclideanCoord chunk_size, full_size;
     util::Grid<std::shared_ptr<util::Grid<T>>> chunks;
   

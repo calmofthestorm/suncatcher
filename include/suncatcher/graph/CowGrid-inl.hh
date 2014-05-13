@@ -23,11 +23,10 @@ namespace suncatcher {
 namespace graph {
 
 
-
 template <typename T>
 inline CowGrid<T>::CowGrid(
-    const Coord size_in_chunks,
-    const Coord chunk_size_i,
+    const EuclideanCoord size_in_chunks,
+    const EuclideanCoord chunk_size_i,
     const T& fill_value
   )
 : chunk_size(chunk_size_i),
@@ -57,11 +56,11 @@ inline void CowGrid<T>::fill(const T& val) {
 
 
 template <typename T>
-inline T& CowGrid<T>::at(const Coord cell) {
-  Coord chunk_index{(uint16_t)(cell.row / chunk_size.row),
+inline T& CowGrid<T>::at(const EuclideanCoord cell) {
+  EuclideanCoord chunk_index{(uint16_t)(cell.row / chunk_size.row),
                     (uint16_t)(cell.col / chunk_size.col),
                     (uint16_t)(cell.layer / chunk_size.layer)};
-  Coord inner{(uint16_t)(cell.row % chunk_size.row),
+  EuclideanCoord inner{(uint16_t)(cell.row % chunk_size.row),
               (uint16_t)(cell.col % chunk_size.col),
               (uint16_t)(cell.layer % chunk_size.layer)};
   check_bounds(cell);
@@ -76,11 +75,11 @@ inline T& CowGrid<T>::at(const Coord cell) {
 
 
 template <typename T>
-inline const T& CowGrid<T>::at(const Coord cell) const {
-  Coord chunk_index{(uint16_t)(cell.row / chunk_size.row),
+inline const T& CowGrid<T>::at(const EuclideanCoord cell) const {
+  EuclideanCoord chunk_index{(uint16_t)(cell.row / chunk_size.row),
                     (uint16_t)(cell.col / chunk_size.col),
                     (uint16_t)(cell.layer / chunk_size.layer)};
-  Coord inner{(uint16_t)(cell.row % chunk_size.row),
+  EuclideanCoord inner{(uint16_t)(cell.row % chunk_size.row),
               (uint16_t)(cell.col % chunk_size.col),
               (uint16_t)(cell.layer % chunk_size.layer)};
   check_bounds(cell);
@@ -92,9 +91,9 @@ inline const T& CowGrid<T>::at(const Coord cell) const {
 
 template <typename T>
 inline void CowGrid<T>::get_adjacent(
-    const Coord cell,
+    const EuclideanCoord cell,
     bool include_diagonals,
-    std::vector<Coord>& neighbors
+    std::vector<EuclideanCoord>& neighbors
     ) const {
 
   util::get_adjacent(cell, include_diagonals, neighbors, full_size);
@@ -102,25 +101,25 @@ inline void CowGrid<T>::get_adjacent(
 
 
 template <typename T>
-inline bool CowGrid<T>::check_bounds(const Coord cell) const {
+inline bool CowGrid<T>::check_bounds(const EuclideanCoord cell) const {
   return util::check_bounds(cell, full_size);
 }
 
 
 template <typename T>
-inline const Coord& CowGrid<T>::size() const {
+inline const EuclideanCoord& CowGrid<T>::size() const {
   return full_size;
 }
 
 
 template <typename T>
-inline const T& CowGrid<T>::operator[](const Coord cell) const {
+inline const T& CowGrid<T>::operator[](const EuclideanCoord cell) const {
   return at(cell);
 }
 
 
 template <typename T>
-inline T& CowGrid<T>::operator[](const Coord cell) {
+inline T& CowGrid<T>::operator[](const EuclideanCoord cell) {
   return at(cell);
 }
 

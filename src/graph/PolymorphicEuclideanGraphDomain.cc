@@ -17,6 +17,7 @@
 
 #include "suncatcher/graph/PolymorphicEuclideanGraphDomain.hh"
 #include "suncatcher/graph/EuclideanCoordRange.hh"
+#include "suncatcher/util/util.hh"
 
 namespace suncatcher {
 namespace graph {
@@ -52,6 +53,11 @@ Coord PolymorphicEuclideanGraphDomain::get_coord_by_index(size_t index) {
 
 size_t PolymorphicEuclideanGraphDomain::get_index_by_coord(Coord cell) {
   return domain.get_index_by_coord(cell);
+}
+
+
+std::unique_ptr<GraphDomainInterface> PolymorphicEuclideanGraphDomain::clone() {
+  return std::unique_ptr<GraphDomainInterface>(new PolymorphicEuclideanGraphDomain(domain));
 }
 
 

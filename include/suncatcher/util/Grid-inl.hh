@@ -31,7 +31,7 @@ inline Grid<T>::Grid()
 
 
 template <typename T>
-inline Grid<T>::Grid(const Coord size_in, const T& val)
+inline Grid<T>::Grid(const graph::EuclideanCoord size_in, const T& val)
 : my_size(size_in),
   length(size_in.row * size_in.col * size_in.layer),
   backing(new T[size_in.row * size_in.col * size_in.layer]) {
@@ -41,8 +41,8 @@ inline Grid<T>::Grid(const Coord size_in, const T& val)
 
 
 template <typename T>
-inline Grid<T>::Grid(const Coord chunks, const Coord chunk_size, const T& val)
-: Grid(Coord(chunks.row * chunk_size.row, chunks.col * chunk_size.col, chunks.layer * chunk_size.layer), val) { }
+inline Grid<T>::Grid(const graph::EuclideanCoord chunks, const graph::EuclideanCoord chunk_size, const T& val)
+: Grid(graph::EuclideanCoord(chunks.row * chunk_size.row, chunks.col * chunk_size.col, chunks.layer * chunk_size.layer), val) { }
 
 
 template <typename T>
@@ -81,7 +81,7 @@ inline void Grid<T>::fill(const T& val) {
 
 
 template <typename T>
-inline T& Grid<T>::at(const Coord cell) {
+inline T& Grid<T>::at(const graph::EuclideanCoord cell) {
   check_bounds(cell);
   size_t index = cell.col + my_size.col * (cell.row + my_size.row * cell.layer);
   return backing[index];
@@ -89,7 +89,7 @@ inline T& Grid<T>::at(const Coord cell) {
 
 
 template <typename T>
-inline const T& Grid<T>::at(const Coord cell) const {
+inline const T& Grid<T>::at(const graph::EuclideanCoord cell) const {
   check_bounds(cell);
   size_t index = cell.col + my_size.col * (cell.row + my_size.row * cell.layer);
   return backing[index];
@@ -99,26 +99,26 @@ inline const T& Grid<T>::at(const Coord cell) const {
 //TODO: evaluate cache performance of ordering.
 template <typename T>
 inline void Grid<T>::get_adjacent(
-    const Coord cell,
+    const graph::EuclideanCoord cell,
     bool include_diagonals,
-    std::vector<Coord>& neighbors
+    std::vector<graph::EuclideanCoord>& neighbors
     ) const {
 
   neighbors.clear();
   neighbors.reserve(10);
 
   static_assert(
-      std::is_same<decltype(Coord::row), decltype(Coord::col)>::value,
+      std::is_same<decltype(graph::EuclideanCoord::row), decltype(graph::EuclideanCoord::col)>::value,
       ""
     );
   static_assert(
-      std::is_same<decltype(Coord::row), decltype(Coord::layer)>::value,
+      std::is_same<decltype(graph::EuclideanCoord::row), decltype(graph::EuclideanCoord::layer)>::value,
       ""
     );
 
-  const static decltype(Coord::row) n1(-1);
+  const static decltype(graph::EuclideanCoord::row) n1(-1);
 
-  const static std::vector<Coord> ADJ_DELTA{
+  const static std::vector<graph::EuclideanCoord> ADJ_DELTA{
     // Manhattan adjacent same layer.
     {0, n1, 0}, {n1, 0, 0}, {0, 1, 0}, {1, 0, 0},
 
@@ -140,13 +140,13 @@ inline void Grid<T>::get_adjacent(
 
 
 template <typename T>
-inline bool Grid<T>::check_bounds(const Coord cell) const {
+inline bool Grid<T>::check_bounds(const graph::EuclideanCoord cell) const {
   return (cell.row < my_size.row && cell.col < my_size.col && cell.layer < my_size.layer);
 }
 
 
 template <typename T>
-inline const Coord& Grid<T>::size() const {
+inline const graph::EuclideanCoord& Grid<T>::size() const {
   return my_size;
 }
 
@@ -166,13 +166,13 @@ inline bool Grid<T>::operator==(const Grid<T>& other) const {
 
 
 template <typename T>
-inline const T& Grid<T>::operator[](const Coord cell) const {
+inline const T& Grid<T>::operator[](const graph::EuclideanCoord cell) const {
   return at(cell);
 }
 
 
 template <typename T>
-inline T& Grid<T>::operator[](const Coord cell) {
+inline T& Grid<T>::operator[](const graph::EuclideanCoord cell) {
   return at(cell);
 }
 

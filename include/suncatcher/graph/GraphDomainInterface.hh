@@ -41,6 +41,8 @@ class GraphDomainInterface {
 
     virtual Coord get_coord_by_index(size_t index) = 0;
     virtual size_t get_index_by_coord(Coord cell) = 0;
+
+    virtual std::unique_ptr<GraphDomainInterface> clone() = 0;
 };
 
 
@@ -48,6 +50,14 @@ class GraphDomain {
   public:
     GraphDomain(std::unique_ptr<GraphDomainInterface> gdi_in)
     : gdi(std::move(gdi_in)) { }
+
+    GraphDomain(const GraphDomain& other)
+    : gdi(other.gdi->clone()) { }
+
+    const GraphDomain& operator=(const GraphDomain& other) {
+      gdi = other.gdi->clone();
+      return *this;
+    }
 
     GraphDomainInterface::DomainIterator begin() const { return gdi->begin(); }
     GraphDomainInterface::DomainIterator end() const { return gdi->end(); }
