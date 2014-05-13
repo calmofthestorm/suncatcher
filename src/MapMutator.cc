@@ -15,8 +15,6 @@
 //
 // Copyright 2014 Alex Roper
 
-#ifndef MAPMUTATOR_4687638a8f5c4d2fb43b15d6274b78c7
-#define MAPMUTATOR_4687638a8f5c4d2fb43b15d6274b78c7
 
 #include "suncatcher/MapMutator.hh"
 #include "suncatcher/MapView.hh"
@@ -35,64 +33,20 @@ MapMutator::MapMutator(MapView view_in)
 : view(view_in) { }
 
 
-MapMutator& MapMutator::set_door_open(Coord door, bool state) {
-  auto door_it = view.get_doors().find(door);
-  assert(door_it != view.get_doors().cend());
-  assert(mutations.find(door) == mutations.end() ||
-         mutations.at(door).kind == Mutation::Kind::UPDATE_DOOR);
-  state ^= door_it->second.open;
-  mutations[door] = {Mutation::Kind::UPDATE_DOOR, state,
-                    (uint_least8_t)PATH_COST_INFINITE};
+MapMutator& MapMutator::make_normal(Coord cell, uint_least8_t cost) {
+  mutations.push_back({cell, false, false, cost});
   return *this;
 }
 
 
-MapMutator& MapMutator::toggle_door_open(Coord door) {
-  assert(view.get_doors().find(door) != view.get_doors().cend());
-  assert(mutations.find(door) == mutations.end() ||
-         mutations.at(door).kind == Mutation::Kind::UPDATE_DOOR);
-  mutations[door] = {Mutation::Kind::UPDATE_DOOR, true,
-                     (uint_least8_t)PATH_COST_INFINITE};
-  return *this;
-}
-
-
-MapMutator& MapMutator::set_door_open_cost(Coord door, uint_least8_t cost) {
-  assert(view.get_doors().find(door) != view.get_doors().cend());
-  assert(view.get_doors().find(door) != view.get_doors().cend());
-  assert(cost != PATH_COST_INFINITE);
-  assert(mutations.find(door) == mutations.end() ||
-         mutations.at(door).kind == Mutation::Kind::UPDATE_DOOR);
-  mutations[door] = {Mutation::Kind::UPDATE_DOOR, false, cost};
-  return *this;
-}
-
-
-MapMutator& MapMutator::set_cost(Coord cell, uint_least8_t cost) {
-  assert(view.get_doors().find(cell) == view.get_doors().cend());
-  mutations[cell] = {Mutation::Kind::SET_COST, false, cost};
-  return *this;
-}
-
-
-MapMutator& MapMutator::create_door(
+MapMutator& MapMutator::make_door(
     Coord cell,
     bool open,
     uint_least8_t open_cost
   ) {
 
   assert(open_cost != PATH_COST_INFINITE);
-  assert(view.get_doors().find(cell) == view.get_doors().cend());
-  mutations[cell] = {Mutation::Kind::CREATE_DOOR, open, open_cost};
-
-  return *this;
-}
-
-
-MapMutator& MapMutator::remove_door(Coord cell, uint_least8_t new_cost) {
-  assert(view.get_doors().find(cell) != view.get_doors().cend());
-  mutations[cell] = {Mutation::Kind::REMOVE_DOOR, false, new_cost};
-
+  mutations.push_back({cell, true, open, open_cost});
   return *this;
 }
 
@@ -105,6 +59,3 @@ MapView MapMutator::execute(bool incremental) const {
 
 }  // namespace pathfinder
 }  // namespace suncatcher
-
-
-#endif  /* MAPMUTATOR_4687638a8f5c4d2fb43b15d6274b78c7 */

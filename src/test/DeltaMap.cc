@@ -21,12 +21,12 @@
 
 #include "suncatcher/MapView.hh"
 #include "suncatcher/util/UnionFind.hh"
-#include "suncatcher/Coord.hh"
+#include "suncatcher/graph/EuclideanCoordRange.hh"
 
 namespace {
   using suncatcher::Coord;
   using suncatcher::pathfinder::Path;
-  using suncatcher::pathfinder::MapMutator;
+  using suncatcher::pathfinder::CheckedMutator;
   using suncatcher::pathfinder::MapBuilder;
   using suncatcher::pathfinder::MapView;
 }  // anonymous namespace
@@ -47,7 +47,7 @@ const T& union_find_lookup_no_compress(const util::UnionFind<T>& uf, const T& el
 }
 
 
-DeltaMutator::DeltaMutator(MapMutator&& m1_i, MapMutator&& m2_i, bool slow_i)
+DeltaMutator::DeltaMutator(CheckedMutator&& m1_i, CheckedMutator&& m2_i, bool slow_i)
 : m1(std::move(m1_i)),
   m2(std::move(m2_i)),
   enable_delta(slow_i){ }
@@ -204,8 +204,8 @@ Path DeltaMap::path(Coord start, Coord finish) const {
 
 DeltaMutator DeltaMap::get_mutator() {
   return DeltaMutator(
-      MapMutator(optimized_map),
-      MapMutator(simple_map),
+      CheckedMutator(optimized_map),
+      CheckedMutator(simple_map),
       enable_delta
     );
 }

@@ -32,7 +32,7 @@
 #include "suncatcher/MapView.hh"
 #include "suncatcher/MapBuilder.hh"
 #include "suncatcher/graph/EuclideanGraphBuilder.hh"
-#include "suncatcher/MapMutator.hh"
+#include "suncatcher/CheckedMutator.hh"
 #include "suncatcher/util/util.hh"
 #include "suncatcher/platform.hh"
 #include "suncatcher/PathStateDelegate.hh"
@@ -47,7 +47,7 @@ namespace {
 
 using suncatcher::util::manhattan;
 using suncatcher::pathfinder::MapView;
-using suncatcher::pathfinder::MapMutator;
+using suncatcher::pathfinder::CheckedMutator;
 using suncatcher::pathfinder::Path;
 using suncatcher::Coord;
 using suncatcher::pathfinder::MapBuilder;
@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
         } else {
           Coord door_coord = door_index_to_coords.at(door);
           timer();
-          my_map = MapMutator(my_map).toggle_door_open(door_coord).execute();
+          my_map = CheckedMutator(my_map).toggle_door_open(door_coord).execute();
           std::cout << timer() << " to open door." << std::endl;
         }
         break;
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
         uint16_t row, col;
         std::cin >> row >> col;
         timer();
-        my_map = MapMutator(my_map).set_cost({row, col, 0}, suncatcher::PATH_COST_INFINITE).execute();
+        my_map = CheckedMutator(my_map).set_cost({row, col, 0}, suncatcher::PATH_COST_INFINITE).execute();
         std::cout << "Mutation time: " << timer() << std::endl;
         break;
 

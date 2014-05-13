@@ -47,29 +47,18 @@ MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
 
 
   for (const auto& it : mutation.mutations) {
-    bool state = it.second.state;
-    uint_least8_t cost = it.second.cost;
-    Coord cell = it.first;
-    auto door_iter = doors.find(cell);
-    switch (it.second.kind) {
-      case MapMutator::Mutation::Kind::CREATE_DOOR:
-        incremental_create_door(cell, state, cost);
-        break;
-
-      case MapMutator::Mutation::Kind::REMOVE_DOOR:
-        incremental_remove_door(cell, state, cost);
-        break;
-
-      case MapMutator::Mutation::Kind::SET_COST:
-        incremental_set_cost(cell, state, cost);
-        break;
-
-      case MapMutator::Mutation::Kind::UPDATE_DOOR:
-        incremental_update_door(cell, state, cost);
-        break;
-
-      default:
-        assert(0);
+    if (is_door(it.cell)) {
+      if (it.door) {
+        incremental_update_door(it.cell, it.open, it.cost);
+      } else {
+        incremental_remove_door(it.cell, it.open, it.cost);
+      }
+    } else {
+      if (it.door) {
+        incremental_create_door(it.cell, it.open, it.cost);
+      } else {
+        incremental_set_cost(it.cell, it.open, it.cost);
+      }
     }
   }
 
@@ -320,23 +309,20 @@ void MapImpl::incremental_set_cost(Coord cell, bool state, uint_least8_t cost) {
 void MapImpl::incremental_update_door(Coord cell, bool state, uint_least8_t cost) {
   auto door_iter = doors.find(cell);
   assert(door_iter != doors.end());
-  door_iter->second.open ^= state;
+  assert(cost != PATH_COST_INFINITE);
 
-  // Internally we use PATH_COST_INFINITE to represent the current value.
-  // Only MapMutator::*door* and Map::mutate need to know this.
-  if (cost != PATH_COST_INFINITE) {
-    door_iter->second.cost_open = cost;
-  }
+  door_iter->second.cost_open = cost;
 
   // Update map costs.
-  if (door_iter->second.open) {
+  if (state) {
     graph.set_cost(cell, door_iter->second.cost_open);
   } else {
     graph.set_cost(cell, PATH_COST_INFINITE);
   }
 
   // Maintain links if door changed state.
-  if (state) {
+  if (door_iter->second.open != state) {
+    door_iter->second.open = state;
     if (door_iter->second.open) {
       incremental_closed_door_to_open_door(cell, door_iter);
     } else {

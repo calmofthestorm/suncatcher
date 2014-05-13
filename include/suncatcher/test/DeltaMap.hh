@@ -27,7 +27,7 @@
 
 #include "suncatcher/util/Grid.hh"
 
-#include "suncatcher/MapMutator.hh"
+#include "suncatcher/CheckedMutator.hh"
 #include "suncatcher/MapView.hh"
 #include "suncatcher/Path.hh"
 #include "suncatcher/Coord.hh"
@@ -63,8 +63,8 @@ class DeltaMap;
 class DeltaMutator {
   public:
     DeltaMutator(
-        pathfinder::MapMutator&& m1_i,
-        pathfinder::MapMutator&& m2_i,
+        pathfinder::CheckedMutator&& m1_i,
+        pathfinder::CheckedMutator&& m2_i,
         bool enable_delta_i
       );
 
@@ -89,7 +89,7 @@ class DeltaMutator {
 
   private:
     friend class DeltaMap;
-    pathfinder::MapMutator m1, m2;
+    pathfinder::CheckedMutator m1, m2;
     bool enable_delta;
 };
 
