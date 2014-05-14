@@ -42,10 +42,7 @@ using suncatcher::util::find_representative;
 using suncatcher::util::manhattan;
 
 
-MapImpl::MapImpl(const MapMutator& mutation, bool incremental)
-: MapImpl(*mutation.view.map) {
-
-
+void MapImpl::update(const MapMutator& mutation, bool incremental) {
   for (const auto& it : mutation.mutations) {
     if (is_door(it.cell)) {
       if (it.door) {

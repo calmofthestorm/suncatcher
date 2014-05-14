@@ -25,12 +25,8 @@
 
 #include "suncatcher/Coord.hh"
 
-#include "suncatcher/MapView.hh"
-
 namespace suncatcher {
 namespace pathfinder {
-
-class CheckedMutator;
 
 class MapImpl;
 
@@ -38,11 +34,14 @@ class MapImpl;
 // like checking the bounds of the cell. Coord must always be in bounds.
 // If you make more than one call affecting the same cell, the result will be
 // the same as if only the last per cell were executed, but is less efficient.
+//
+// MapMutator only specifies the final state of cells, which means it is simply
+// a collection of batched changes. It is not tied to any particular map.
+//
+// It is suggested to use CheckedMutator instead for actual programs, but may
+// be useful for building intermediate layers (such as predictive caches)
 class MapMutator {
   public:
-    MapMutator();
-    explicit MapMutator(MapView view);
-
     // Sets the specified coordinate to be a door, with the specified open
     // state and cost to traverse (when open). Cost must not be
     // PATH_COST_INFINITE.
@@ -53,15 +52,9 @@ class MapMutator {
     // wall.
     MapMutator& make_normal(Coord cell, uint_least8_t cost);
 
-    // Creates a new MapView with the changes applied.
-    MapView execute(bool incremental = true) const;
-
 
   private:
     friend class MapImpl;
-
-    // TODO: hack
-    friend class CheckedMutator;
 
     struct Mutation {
       Coord cell;
@@ -69,7 +62,6 @@ class MapMutator {
       uint_least8_t cost;
     };
 
-    MapView view;
     std::vector<Mutation> mutations;
 };
 

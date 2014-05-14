@@ -86,6 +86,7 @@ inline void MapView::print_map(
   return map->print_map(os, number_doors, path_to_print);
 }
 
+
 inline void MapView::get_adjacent(
     const Coord cell,
     bool include_diagonals,
@@ -95,11 +96,10 @@ inline void MapView::get_adjacent(
   return map->get_adjacent(cell, include_diagonals, adj);
 }
 
+
 inline bool MapView::check_bounds(Coord cell) const {
   return map->check_bounds(cell);
 }
-
-
 
 
 }  // namespace pathfinder

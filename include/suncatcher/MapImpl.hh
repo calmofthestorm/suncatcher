@@ -63,7 +63,7 @@ class MapMutator;
 
 class MapImpl {
   public:
-    explicit MapImpl(const MapMutator& mutator, bool incremental = true);
+    void update(const MapMutator& mutator, bool incremental = true);
     explicit MapImpl(MapBuilder&& builder);
 
     // Irritating bug in VS2013 requires hand coding of otherwise defaultable

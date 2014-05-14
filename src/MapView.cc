@@ -34,6 +34,7 @@
 #include "suncatcher/MapImpl.hh"
 #include "suncatcher/MapBuilder.hh"
 #include "suncatcher/PathStateDelegate.hh"
+#include "suncatcher/CheckedMutator.hh"
 
 namespace suncatcher {
 namespace pathfinder {
@@ -202,6 +203,18 @@ Path MapView::path(Coord src, Coord dst) const {
   }
   assert(0);
   return Path(std::vector<Coord>(), -1);
+}
+
+
+MapView MapView::apply(const CheckedMutator& mutator, bool incremental) const {
+  return apply(mutator.to_map_mutator(), incremental);
+}
+
+
+MapView MapView::apply(const MapMutator& mutator, bool incremental) const {
+  std::shared_ptr<MapImpl> next(std::make_shared<MapImpl>(*map));
+  next->update(mutator, incremental);
+  return MapView(next);
 }
 
 

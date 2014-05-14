@@ -41,11 +41,17 @@ namespace test {
 
 namespace pathfinder {
 
+
 class MapImpl;
 class MapMutator;
 class MapBuilder;
 class PatherStateDelegate;
+class CheckedMutator;
 
+
+// Thread safety: All methods are thread safe and lock free because the class
+// is immutable.
+// (TODO: not actually true; union find)
 class MapView {
   public:
     MapView();
@@ -84,6 +90,11 @@ class MapView {
     inline bool is_door(int_least32_t cell_color) const;
 
     inline Domain domain() const;
+
+    // Applies a [checked] mutator, returning a new MapView with the changes
+    // applied.
+    MapView apply(const CheckedMutator& mutator, bool incremental) const;
+    MapView apply(const MapMutator& mutator, bool incremental) const;
 
     // Useful debugging features -- dump a simple representation of aspects
     // of the map to a stream.

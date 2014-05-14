@@ -16,21 +16,14 @@
 // Copyright 2014 Alex Roper
 
 
+#include <cassert>
+
+#include "suncatcher.hh"
 #include "suncatcher/MapMutator.hh"
-#include "suncatcher/MapView.hh"
-#include "suncatcher/MapBuilder.hh"
 
 namespace suncatcher {
 namespace pathfinder {
 
-
-
-MapMutator::MapMutator()
-: view(MapView()) { }
-
-
-MapMutator::MapMutator(MapView view_in)
-: view(view_in) { }
 
 
 MapMutator& MapMutator::make_normal(Coord cell, uint_least8_t cost) {
@@ -48,11 +41,6 @@ MapMutator& MapMutator::make_door(
   assert(open_cost != PATH_COST_INFINITE);
   mutations.push_back({cell, true, open, open_cost});
   return *this;
-}
-
-
-MapView MapMutator::execute(bool incremental) const {
-  return MapView(std::make_shared<MapImpl>(*this, incremental));
 }
 
 
