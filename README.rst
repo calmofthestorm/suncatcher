@@ -13,14 +13,14 @@ A library for efficiently computing shortest paths and reachability in predictab
 Summary
 -------
 
-Suncatcher is a library for efficiently computing reachability and shortest paths in dynamic statespaces, intended for use in modeling with many independent agents and large simulation video games. By operating on an abstraction of the world where a transition may be not only passible or impassible but also hinted as "frequently changing" (i.e., a "door"), we can take advantage of hints to improve performance in expected cases while always returning correct results.
+Suncatcher is a library for efficiently computing reachability and shortest paths in dynamic statespaces, intended for use in modeling with many independent agents and large simulation video games. By operating on an abstraction of the world where a transition may be not only passable or impassible but also hinted as "frequently changing" (i.e., a "door"), we can take advantage of hints to improve performance in expected cases while always returning correct results.
 
 Features:
 
 * Pay only for what you use design emphasizing both performance and flexibility as the user requires.
 * Fast API based on concrete classes for a cache-efficient abstraction of 3D Euclidean statespaces.
 * Flexible polymorphic API for defining arbitrary statespaces.
-* Optional, efficient copy-on-write semantics allow for predictivie mutation and pathing -- put spare cores to work!
+* Optional, efficient copy-on-write semantics allow for predictive mutation and pathing -- put spare cores to work!
 * Thread safe implementation to make predictive planning easy (not yet tested thoroughly).
 * Incremental update postpones expensive recomputations where possible, and avoids worst case behavior except in actual worst cases.
 * Emphasis on logical, rather than bitwise, constness to allow for higher level reasoning about behavior.
@@ -56,7 +56,7 @@ We do this by maintaining two levels of connected components -- a "static" label
 Example
 -------
 
-Consider as a simple example a 2D dungeon on a grid, made up of rooms, halls, etc. Each cell in the grid can be either a wall (*), an open door (d), a closed door (D), or open (walkable) space. For example::
+Consider as a simple example a 2D dungeon on a grid, made up of rooms, halls, etc. Each cell in the grid can be either a wall (*), an open door (d), a closed door (D), or open (walk-able) space. For example::
 
 **********
 *        *
@@ -100,9 +100,9 @@ Roadmap
 This is some basic notes on where this project is headed. No guarantees of course, neither on features nor timeline:-).
 
 - Rewrite Euclidean state space to operate in terms of states and transitions (as the polymorphic API does), rather than the current design where each cell on the grid is either passable or impassible, and adjacent cells are connected. In practice this means a similar design, but admits the possibility of a wall between two cells not taking up a cell itself. The advantage is more flexible world modeling, better compatibility with the polymorphic API, simpler code, and better handling of 3D worlds in the presence of gravity. This will require substantial changes to the code and most tests.
-- Consider removing path finding from the library's responsibility. Path finding is currently just straighforward A*, and our abstracted world provides no real advantage over what user code could do aside from (possibly) better cache performance depending on the user representation. By moving pathfinding into user code, we would also substantially improve the performance of the polymorphic API (which is currently about 30% slower because of the virtual get_adjacent calls in the A* and DFS tight loops.) Users could path on concrete data structures, and use Suncatcher only to maintain reachability. After doing so, it'd be worth re-running benchmarks to see if the concrete API is still justified.
+- Consider removing path finding from the library's responsibility. Path finding is currently just straightforward A*, and our abstracted world provides no real advantage over what user code could do aside from (possibly) better cache performance depending on the user representation. By moving pathfinding into user code, we would also substantially improve the performance of the polymorphic API (which is currently about 30% slower because of the virtual get_adjacent calls in the A* and DFS tight loops.) Users could path on concrete data structures, and use Suncatcher only to maintain reachability. After doing so, it'd be worth re-running benchmarks to see if the concrete API is still justified.
 - Currently enabling copy on write semantics reduces performance around 30% for both mutation and read-only queries. I suspect it may be possible to improve the performance for read-only queries. After doing so, re-evaluate if having a non-immutable API still makes sense.
-- Make all code threadsafe. This should be mostly the case, as it was designed with thread safety in mind from the start, with the exception of the union find which either needs eager transitive closure or a locking scheme. Multithreaded test cases are also needed.
+- Make all code thread-safe. This should be mostly the case, as it was designed with thread safety in mind from the start, with the exception of the union find which either needs eager transitive closure or a locking scheme. Multithreaded test cases are also needed.
 - Higher level API -- path invalidation observers, easy to use multithreaded speculative pathing/caching/mutation and invalidation, etc -- basically provide an API that looks like a single world, but is capable of taking hints and managing internal resources to speed up expected-case behavior. Currently all this complexity has to be handled by user level code, which may well make the difference between taking advantage of it and not.
 - Support for different factions (doors passable to some but not others) and movement classes (flying vs walking) using the same state space abstraction. Currently you'd need one abstraction per faction * class, and a lot of that will be duplicated data.
 - Support for "one-way" transitions based on a third abstraction layer using a directed acyclic graph over dynamic components (e.g., teleporter, jump off a roof, etc). This should be easy to do in linear time in the number of teleports, and add negligible cost for state spaces not using it.
@@ -112,4 +112,4 @@ This is some basic notes on where this project is headed. No guarantees of cours
 Can I use this?
 ---------------
 
-In its current state? I wouldn't if I were you:-) The code is available under GPLv3. I'm open to considering a less restrictive copyleft licence (e.g., LGPLv3) if licensing is an issue -- I care more about people doing awesome things than ideological purity, including commercial and closed-source awesome things, but want to wait until it's done to think about the implications, in particular ensuring improvements make it back to Suncatcher, not just to a closed-source shim layer.
+In its current state? I wouldn't if I were you:-) The code is available under GPLv3. I'm open to considering a less restrictive copyleft license (e.g., LGPLv3) if licensing is an issue -- I care more about people doing awesome things than ideological purity, including commercial and closed-source awesome things, but want to wait until it's done to think about the implications, in particular ensuring improvements make it back to Suncatcher, not just to a closed-source shim layer.
